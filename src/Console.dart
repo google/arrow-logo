@@ -82,6 +82,8 @@ class Console {
       }
       e.preventDefault();
     } else {
+      // Ensure that text gets inserted at the end, by placing caret at the end.
+      // Unfortunately, crashes Dartium http://code.google.com/p/dart/issues/detail?id=3364
       // consoleElem.setSelectionRange(consoleElem.textLength, consoleElem.textLength);
     }
   }
