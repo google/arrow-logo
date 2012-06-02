@@ -64,7 +64,7 @@ class Turtle {
   }
   
   void blankCtx(html.CanvasRenderingContext2D ctx) {
-    ctx.setFillColor(backgroundColor);
+    ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, xmax, ymax);
   }
   
@@ -92,8 +92,9 @@ class Turtle {
   
   void drawFillCircle(ctx, num x_, num y_, num radius, color) {
     ctx.beginPath();
-    ctx.setLineWidth(2);
-    ctx.setFillColor(color);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
     ctx.arc(x_, y_, radius, 0, TAU, false);
     ctx.fill();
   }
@@ -127,7 +128,7 @@ class Turtle {
   }
   
   void draw() {
-    num baseHeading = TAU * (heading / 360);
+    num baseHeading = getHeadingRad();
     num deltaX = Math.cos(baseHeading);
     num deltaY = Math.sin(baseHeading);
     num newX = x + delta * deltaX;
@@ -135,9 +136,9 @@ class Turtle {
     cleanCtx(turtleCtx);
     if (delta != 0 && penupdown == PENDOWN) {
       userCtx.beginPath();
-      userCtx.setLineWidth(2);
-      userCtx.setFillColor(BLACK);
-      userCtx.setStrokeColor(BLACK);
+      userCtx.lineWidth = 2;
+      userCtx.fillStyle = BLACK;
+      userCtx.strokeStyle  = BLACK;
       userCtx.moveTo(x, y);
       userCtx.lineTo(newX, newY);
       userCtx.stroke();
