@@ -48,8 +48,7 @@ class ArrowLogo {
   Console console;
   Interpreter interpreter;
   
-  MyLogo() 
-    : toplevel = makeTopLevel() {
+  ArrowLogo() : toplevel = makeTopLevel() {
     parser = new Parser(toplevel);
   }
       
