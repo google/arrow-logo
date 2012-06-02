@@ -37,7 +37,6 @@ class ArrowLogo {
     return new Scope(map);
   }
 
-  html.Element commandInput;
   html.Element userCanvas;
   html.Element turtleCanvas;
   html.Element commandListElem;
@@ -53,8 +52,6 @@ class ArrowLogo {
   }
       
   void run() {
-    //commandInput =  html.document.query('#command_input');
-    //commandInput.on.keyPress.add(handleKeyPress);
     userCanvas = html.document.query("#user_canvas");
     var userCtx = userCanvas.getContext("2d");
     turtleCanvas = html.document.query("#turtle_canvas");
@@ -70,32 +67,6 @@ class ArrowLogo {
     console = new Console(consoleElem, parser);
     interpreter = new Interpreter(turtle, console, toplevel.extend());
     console.init(interpreter);
-  }
-  
-  String removeLastCommand(String code) {
-    int len = code.length - 1;
-    if (len <= 0) {
-      return "";
-    }
-    code = code.substring(0, len);
-    return code.substring(0, code.lastIndexOf("\n"));
-  }
-
-  void handleKeyPress(html.KeyboardEvent e) {
-    if (NEWLINE == e.keyCode) {
-      String text = commandInput.value;
-      commandInput.value = "";
-      var code = commandListElem.value;
-      if (text == ":undo") {  // TODO: proper code editing UI? replay?
-        commandListElem.value = removeLastCommand(code);
-        // TODO: also undo the action!
-      } else if (text.length > 0) {
-        Node node = parser.parse(text);
-        print("nodes : ${node}");
-        interpreter.eval(node);
-        commandListElem.value = code + text + "\n";
-      }
-    }
   }
 }
 
