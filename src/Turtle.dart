@@ -106,24 +106,24 @@ class Turtle {
     num BODY_RADIUS = 12;
     
     drawFillCircle(turtleCtx, x, y, BODY_RADIUS, ORANGE);
-    num headX = x + BODY_RADIUS * Math.cos(getHeadingRad());
-    num headY = y + BODY_RADIUS * Math.sin(getHeadingRad());
+    num headX = x + BODY_RADIUS * Math.cos(baseHeading);
+    num headY = y + BODY_RADIUS * Math.sin(baseHeading);
     drawFillCircle(turtleCtx, headX, headY, 2, GREEN);
     
-    num footX = x + BODY_RADIUS * Math.cos(getHeadingRad() + TAU/8);
-    num footY = y + BODY_RADIUS * Math.sin(getHeadingRad() + TAU/8);
+    num footX = x + BODY_RADIUS * Math.cos(baseHeading + TAU/8);
+    num footY = y + BODY_RADIUS * Math.sin(baseHeading + TAU/8);
     drawFillCircle(turtleCtx, footX, footY, 1, BLACK);
     
-    footX = x + BODY_RADIUS * Math.cos(getHeadingRad() - TAU/8);
-    footY = y + BODY_RADIUS * Math.sin(getHeadingRad() - TAU/8);
+    footX = x + BODY_RADIUS * Math.cos(baseHeading - TAU/8);
+    footY = y + BODY_RADIUS * Math.sin(baseHeading - TAU/8);
     drawFillCircle(turtleCtx, footX, footY, 1, BLACK);
 
-    footX = x + BODY_RADIUS * Math.cos(getHeadingRad() + TAU * 3/8);
-    footY = y + BODY_RADIUS * Math.sin(getHeadingRad() + TAU * 3/8);
+    footX = x + BODY_RADIUS * Math.cos(baseHeading + TAU * 3/8);
+    footY = y + BODY_RADIUS * Math.sin(baseHeading + TAU * 3/8);
     drawFillCircle(turtleCtx, footX, footY, 1, BLACK);
     
-    footX = x + BODY_RADIUS * Math.cos(getHeadingRad() - TAU * 3/8);
-    footY = y + BODY_RADIUS * Math.sin(getHeadingRad() - TAU * 3/8);
+    footX = x + BODY_RADIUS * Math.cos(baseHeading - TAU * 3/8);
+    footY = y + BODY_RADIUS * Math.sin(baseHeading - TAU * 3/8);
     drawFillCircle(turtleCtx, footX, footY, 1, BLACK);
   }
   
