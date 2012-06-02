@@ -58,7 +58,6 @@ class Interpreter {
   
   // @return uninterpreted tail
   ListNode evalPrimCommand(Primitive p, ListNode nodes, Scope scope) {
-    print("evalPrimCommand $p ${nodes} $scope");
     switch (p) {
       case Primitive.BACK:
         WordNode wn = nodes.getHead();
@@ -149,7 +148,6 @@ class Interpreter {
   // interpret user-defined command.
   // @param defn definition
   ListNode evalUserCommand(WordNode defn, ListNode tail, Scope scope) {
-    print("eval user command $defn");
     int numParams = defn.getArity();
     ListNode body = defn.getDefnBody();
     Map<String, Node> env = new Map();
@@ -166,7 +164,6 @@ class Interpreter {
     if (!env.isEmpty()) {
       scope = new Scope(env, scope);
     }
-    print("ze body $body");
     return evalAllInScope(body, scope);
   }
   
@@ -196,23 +193,18 @@ class Interpreter {
   }
   
   ListNode evalInScope(ListNode nodes, Scope scope) {
-    print("evalInScope $nodes (scope)");
     if (nodes.isNil()) {
       return nodes;
     }
-    // print("interpret($nodes) in scope $scope");
     Node fn = nodes.getHead();
  
     if (fn.isList()) {  // evaluate elements
       ListNode list = fn;
       List result = [];
       while (!list.isNil()) {
-        print("list before $list");
         list = evalInScope(list, scope);
         result.add(list.getHead());
-        print("result now $list");
         list = list.getTail();
-        print("list now $list");
       }
       return ListNode.makeList(result);
     }
@@ -230,11 +222,9 @@ class Interpreter {
       // symTab[wn.getDefnName()] = fn;
       // current = new Scope(symTab, current);
       globalScope.bind(wn.getDefnName(), fn);
-      print("eval defn, nodes ${nodes.getTail()}");
       return nodes.getTail();
     }
     if (wn.isIdent()) {  // command reference
-      print("ref, scope $scope");
       Node defn = scope[wn.getIdentName()];
       if (defn == null) {
         throw new Exception("unknown command ${wn.getIdentName()}");
