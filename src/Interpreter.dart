@@ -59,6 +59,8 @@ class Interpreter {
   // @return uninterpreted tail
   ListNode evalPrimCommand(Primitive p, ListNode nodes, Scope scope) {
     switch (p) {
+      case Primitive.UNIT:
+        break;
       case Primitive.BACK:
         WordNode wn = nodes.getHead();
         nodes = nodes.getTail();
@@ -67,15 +69,21 @@ class Interpreter {
       case Primitive.CLEAN:
         turtle.clean();
         break;
-     case Primitive.CLEARSCREEN:
+      case Primitive.CLEARSCREEN:
         turtle.clean();
         turtle.home();
+        break;
+      case Primitive.CLEARTEXT:
+        console.clearText();
         break;
       case Primitive.FORWARD:
         nodes = evalInScope(nodes, scope);
         WordNode wn = nodes.getHead();
         nodes = nodes.getTail();
         turtle.forward(wn.getNumValue()); 
+        break;
+      case Primitive.HELP:
+        console.showHelp();
         break;
       case Primitive.HOME:
         turtle.home();
@@ -97,6 +105,7 @@ class Interpreter {
         nodes = evalInScope(nodes, scope);
         WordNode wn = nodes.getHead();
         nodes = nodes.getTail();
+        // TODO: pretty-print values
         console.writeln(wn.toString());
         break;
         
@@ -105,10 +114,14 @@ class Interpreter {
         WordNode wn = nodes.getHead();
         nodes = nodes.getTail();
         int times = wn.getNumValue();
-        for (int i = 0; i < times; ++i) {
-          evalInScope(nodes, scope);
+        Node body = nodes.getHead();
+        if (!body.isList()) {
+          body = ListNode.makeCons(body, ListNode.makeNil());
         }
         nodes = nodes.getTail();
+        for (int i = 0; i < times; ++i) {
+          evalAllInScope(body, scope);  // ignore result
+        }
         break;
       case Primitive.RIGHT:
         nodes = evalInScope(nodes, scope);
@@ -164,49 +177,41 @@ class Interpreter {
     if (!env.isEmpty()) {
       scope = new Scope(env, scope);
     }
-    return evalAllInScope(body, scope);
+    Node result = evalAllInScope(body, scope);
+    return ListNode.makeCons(result, tail);
   }
   
-  // entry point. evaluates all nodes.
-  void eval(ListNode nodes) {
-    if (nodes == null) {
-      return;
-    }
-    while (!nodes.isNil()) {
-      nodes = evalInScope(nodes, globalScope);
-      if (nodes.getHead() == Primitive.UNIT) {
-        nodes = nodes.getTail();
-      }
-    }
+  // entry point. Evaluates all commands in `nodes' and
+  // returns result of last command.
+  // @return result of last command, or UNIT if empty
+  Node eval(ListNode nodes) {
+    return evalAllInScope(nodes, globalScope);
   }
-   
-  // @return nodes that have not been consumed
-  ListNode evalAllInScope(ListNode nodes, Scope scope) {
+  
+  // Evaluates all commands in `nodes'.
+  // @return result of last command, or UNIT if `nodes' was empty
+  Node evalAllInScope(ListNode nodes, Scope scope) {
+    Node result;
     while (!nodes.isNil()) {
       nodes = evalInScope(nodes, scope);
-      if (nodes.getHead() == Primitive.UNIT) {
-        nodes = nodes.getTail();
-      } else {
-        return nodes;
-      }
+      result = nodes.getHead();
+      nodes = nodes.getTail();
     }
+    if (result == null) {
+      result = Primitive.UNIT;
+    }
+    return result;
   }
   
+  // @return [result] ++ suffix of unused nodes
   ListNode evalInScope(ListNode nodes, Scope scope) {
     if (nodes.isNil()) {
       return nodes;
     }
     Node fn = nodes.getHead();
  
-    if (fn.isList()) {  // evaluate elements
-      ListNode list = fn;
-      List result = [];
-      while (!list.isNil()) {
-        list = evalInScope(list, scope);
-        result.add(list.getHead());
-        list = list.getTail();
-      }
-      return ListNode.makeList(result);
+    if (fn.isList()) {
+      return nodes;
     }
     
     if (fn.isPrim()) {
@@ -214,15 +219,12 @@ class Interpreter {
       return evalPrimCommand(p, nodes.getTail(), scope);
     }
     WordNode wn = fn;
-    if (wn.isNum()) {  // new definition
+    if (wn.isNum()) {
       return nodes;
     }
     if (wn.isDefn()) {  // new definition
-      // Map<String, Node> symTab = new Map();
-      // symTab[wn.getDefnName()] = fn;
-      // current = new Scope(symTab, current);
-      globalScope.bind(wn.getDefnName(), fn);
-      return nodes.getTail();
+      globalScope.bind(wn.getDefnName(), wn);
+      return ListNode.makeCons(Primitive.UNIT, nodes.getTail());
     }
     if (wn.isIdent()) {  // command reference
       Node defn = scope[wn.getIdentName()];

@@ -59,24 +59,39 @@ class Console {
     return wn.isDefn();
   }
 
-  void handleKeyPress(html.KeyboardEvent e) {
+  void showHelp() {
+    writeln("  supported commands:");
+    for (Primitive p in Primitive.commandsList) {
+      writeln(p.name + (p.altName != null ? "  ${p.altName}" : ""));
+    }
+    writeln("  supported operators:");
+    for (Primitive p in Primitive.operatorList) {
+      writeln(p.name + (p.altName != null ? "  ${p.altName}" : ""));
+    }
+  }
+  
+  void clearText() {
+    consoleElem.value = "";
+  }
+  
+  void handleKeyPress(/* html.KeyboardEvent */ e) {
     if (NEWLINE == e.keyCode) {
       String text = consoleElem.value;
       var i = text.lastIndexOf(PROMPT);
       String code = text;
       code = code.substring(i+1);
       if (!code.isEmpty()) {
-        ListNode node = parser.parse(code);
+        ListNode nodes = parser.parse(code);
         writeln();
-        if (mode == MODE_EVAL && isIncompleteDef(node.getHead())) {
+        if (mode == MODE_EVAL && isIncompleteDef(nodes.getHead())) {
           mode = MODE_DEFN;
-        } else if (mode == MODE_DEFN && isCompleteDef(node.getHead())) {
+        } else if (mode == MODE_DEFN && isCompleteDef(nodes.getHead())) {
           mode = MODE_EVAL;
         }
         if (mode == MODE_DEFN) {
           write(DEFPROMPT);
         } else {
-          interpreter.eval(node);
+          interpreter.eval(nodes);
           write(PROMPT);
         }
       }

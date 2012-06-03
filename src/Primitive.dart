@@ -14,14 +14,16 @@
 
 class Primitive extends Node {
  
-  static final BACK = const Primitive(1, "back", "bk");
+  static final BACK = const Primitive(1, "bk", "back");
   static final CLEAN = const Primitive(0, "clean");
   static final CLEARSCREEN = const Primitive(0, "cs", "clearscreen");
+  static final CLEARTEXT = const Primitive(0, "ct", "cleartext");
   static final CONS = const Primitive(2, "_cons"); 
   static final FORWARD = const Primitive(1, "fd", "forward"); 
   static final GREATERTHAN = const Primitive(1, ">", "greaterthan"); 
   static final GREATEROREQUAL = const Primitive(1, ">=", "greaterorequal"); 
   static final HIDETURTLE = const Primitive(0, "ht", "hideturtle");
+  static final HELP = const Primitive(0, "help");
   static final HOME = const Primitive(0, "home");
   static final LEFT = const Primitive(1, "lt", "left"); 
   static final LESSTHAN = const Primitive(1, "<", "lessthan"); 
@@ -45,8 +47,11 @@ class Primitive extends Node {
   // static final INCOMPLETE = const Primitive(1, "_incomplete");
   
   static final List<Primitive> commandsList = const [ 
-    BACK, CLEAN, CLEARSCREEN, CONS, FORWARD, HIDETURTLE, HOME, LEFT, NIL, PENDOWN,
-    PENUP, PI, PRINT, REPEAT, RIGHT, SHOWTURTLE ];
+    BACK, CLEAN, CLEARSCREEN, CLEARTEXT, CONS, FORWARD, HELP, HIDETURTLE, HOME, LEFT, NIL, PENDOWN,
+    PENUP, PRINT, REPEAT, RIGHT, SHOWTURTLE ];
+
+  static final List<Primitive> operatorList = const [
+    DIFFERENCE, SUM, PRODUCT, QUOTIENT, POWER, PI ];
 
   static getPrecedence(Primitive p) {
     switch (p) {

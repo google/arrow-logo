@@ -101,6 +101,9 @@ class ListNode extends Node {
         ? this
         : getTail().getSuffix(length - 1);
   }
+  ListNode append(ListNode rest) {
+    return isNil() ? rest : makeCons(head, tail.append(rest));
+  }
   
   String toString() {
     if (isNil()) {

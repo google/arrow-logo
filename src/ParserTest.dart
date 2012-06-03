@@ -13,20 +13,7 @@
 // limitations under the License.
 
 // Unit tests for Parser.
-class ParserTest {
-  
-  // Unit testing essentials
-  static void assertEquals(Object expected, Object actual) {
-    if (expected != actual) {
-      throw new Exception("\nexpected $expected\nactual   $actual");
-    }
-  }
-
-  static void assertTrue(bool cond) {
-    if (!cond) {
-      throw new Exception("condition does not hold");
-    }
-  }
+class ParserTest extends UnitTests {
 
   final Parser parser;
   
