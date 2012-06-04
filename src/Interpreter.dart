@@ -166,13 +166,18 @@ class Interpreter {
     Map<String, Node> env = new Map();
     while (numParams != 0) {
       WordNode formalParam = body.getHead();
-      assert(formalParam.isIdent());
-      Node actualParam = tail.getHead();
-      String identName = formalParam.getIdentName();
       body = body.getTail();
-      env[formalParam.getIdentName()] = evalInScope(actualParam, scope);
+      assert(formalParam.isIdent());
+      
+      // Evaluate next arg, consuming a prefix.
+      tail = evalInScope(tail, scope);
+      Node actualParam = tail.getHead();
       tail = tail.getTail();
-      --numParams;
+
+      String identName = formalParam.getIdentName();
+      
+      env[formalParam.getIdentName()] = actualParam;
+      numParams = numParams - 1;
     }
     if (!env.isEmpty()) {
       scope = new Scope(env, scope);
@@ -226,19 +231,19 @@ class Interpreter {
       globalScope.bind(wn.getDefnName(), wn);
       return ListNode.makeCons(Primitive.UNIT, nodes.getTail());
     }
-    if (wn.isIdent()) {  // command reference
-      Node defn = scope[wn.getIdentName()];
-      if (defn == null) {
+    if (wn.isIdent()) {  // referencing a variable or defn
+      Node lookup = scope[wn.getIdentName()];
+      if (lookup == null) {
         throw new Exception("unknown command ${wn.getIdentName()}");
       }
-      if (defn.isPrim()) {
-        Primitive p = fn;
-        return evalPrimCommand(p, nodes.getTail(), scope);
+      if (lookup.isWord()) {
+        WordNode lookupWord = lookup;
+        if (lookupWord.isDefn()) {  // referencing a defn
+          return evalUserCommand(lookupWord, nodes.getTail(), scope);
+        }
       }
-      assert(defn.isWord());
-      WordNode dwn = defn;
-      assert(dwn.isDefn());
-      return evalUserCommand(defn, nodes.getTail(), scope);
+      // referencing something else, e.g. number, prim
+      return evalInScope(ListNode.makeCons(lookup, nodes.getTail()), scope);
     }
     throw new Exception("what's going on here? $wn");
   }
