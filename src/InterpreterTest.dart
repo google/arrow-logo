@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-class MockTurtle {
+class MockTurtle implements Turtle {
   
 }
 
-class MockConsole {
+class MockConsole implements Console {
   
 }
 
@@ -33,11 +33,11 @@ class InterpreterTest extends UnitTests {
     globalScope = new Scope(new Map());
     interpreter = new Interpreter(mockTurtle, mockConsole, globalScope);
   }
-  
+
   void testEvalValues() {
     assertEquals(
       Primitive.UNIT, 
-      interpreter.eval(ListNode.makeNil()));
+      interpreter.eval(ListNode.NIL));
     assertEquals(
       WordNode.makeInt(1),
       interpreter.eval(ListNode.makeList([WordNode.makeInt(1)])));
@@ -50,9 +50,34 @@ class InterpreterTest extends UnitTests {
       interpreter.eval(
         ListNode.makeList([ListNode.makeList([Primitive.FORWARD])])));    
   }
+
+  void testEvalIf() {
+    WordNode fortyTwo = WordNode.makeInt(42);
+    assertEquals(
+      fortyTwo,
+      interpreter.eval(
+        ListNode.makeList([
+          Primitive.IF, Primitive.TRUE, fortyTwo])));
+    assertEquals(
+      Primitive.UNIT,
+      interpreter.eval(
+        ListNode.makeList([
+          Primitive.IF, Primitive.FALSE, fortyTwo])));
+    assertEquals(
+      fortyTwo,
+      interpreter.eval(
+        ListNode.makeList([
+          Primitive.IFELSE, Primitive.TRUE, fortyTwo, Primitive.PI])));
+    assertEquals(
+      WordNode.makeFloat(math.PI),
+      interpreter.eval(
+        ListNode.makeList([
+          Primitive.IFELSE, Primitive.FALSE, fortyTwo, Primitive.PI])));
+  }
   
   void run() {
     testEvalValues();
+    testEvalIf();
     print("InterpreterTest ok");
   }
 }

@@ -14,44 +14,50 @@
 
 class Primitive extends Node {
  
-  static final BACK = const Primitive(1, "bk", "back");
-  static final CLEAN = const Primitive(0, "clean");
-  static final CLEARSCREEN = const Primitive(0, "cs", "clearscreen");
-  static final CLEARTEXT = const Primitive(0, "ct", "cleartext");
-  static final CONS = const Primitive(2, "_cons"); 
-  static final FORWARD = const Primitive(1, "fd", "forward"); 
-  static final GREATERTHAN = const Primitive(1, ">", "greaterthan"); 
-  static final GREATEROREQUAL = const Primitive(1, ">=", "greaterorequal"); 
-  static final HIDETURTLE = const Primitive(0, "ht", "hideturtle");
-  static final HELP = const Primitive(0, "help");
-  static final HOME = const Primitive(0, "home");
-  static final LEFT = const Primitive(1, "lt", "left"); 
-  static final LESSTHAN = const Primitive(1, "<", "lessthan"); 
-  static final LESSOREQUAL = const Primitive(1, "<=", "lessorequal"); 
-  static final DIFFERENCE = const Primitive(2, "-", "difference"); 
-  static final NIL = const Primitive(0, "_nil"); 
-  static final PENDOWN = const Primitive(0, "pd", "pendown"); 
-  static final PENUP = const Primitive(0, "pu", "penup"); 
-  static final PI = const Primitive(0, "pi");  
-  static final POWER = const Primitive(2, "^", "power"); 
-  static final PRINT = const Primitive(1, "pr", "print"); 
-  static final PRODUCT = const Primitive(2, "*", "product"); 
-  static final QUOTIENT = const Primitive(2, "/", "quotient"); 
-  static final REPEAT = const Primitive(2, "repeat"); 
-  static final RIGHT = const Primitive(1, "rt", "right"); 
-  static final SUM = const Primitive(2, "+", "sum"); 
-  static final SHOWTURTLE = const Primitive(0, "st", "showturtle");
+  static const BACK = const Primitive(1, "bk", "back");
+  static const CLEAN = const Primitive(0, "clean");
+  static const CLEARSCREEN = const Primitive(0, "cs", "clearscreen");
+  static const CLEARTEXT = const Primitive(0, "ct", "cleartext");
+  static const CONS = const Primitive(2, "_cons"); 
+  static const FALSE = const Primitive(0, "false"); 
+  static const FORWARD = const Primitive(1, "fd", "forward"); 
+  static const GREATERTHAN = const Primitive(1, ">", "greaterthan"); 
+  static const GREATEROREQUAL = const Primitive(1, ">=", "greaterorequal"); 
+  static const HIDETURTLE = const Primitive(0, "ht", "hideturtle");
+  static const HELP = const Primitive(0, "help");
+  static const HOME = const Primitive(0, "home");
+  static const IF = const Primitive(2, "if");
+  static const IFELSE = const Primitive(3, "ifelse");
+  static const LEFT = const Primitive(1, "lt", "left"); 
+  static const LESSTHAN = const Primitive(1, "<", "lessthan"); 
+  static const LESSOREQUAL = const Primitive(1, "<=", "lessorequal"); 
+  static const DIFFERENCE = const Primitive(2, "-", "difference"); 
+  static const NIL = const Primitive(0, "_nil"); 
+  static const PENDOWN = const Primitive(0, "pd", "pendown"); 
+  static const PENUP = const Primitive(0, "pu", "penup"); 
+  static const PI = const Primitive(0, "pi");  
+  static const POWER = const Primitive(2, "^", "power"); 
+  static const PRODUCT = const Primitive(2, "*", "product"); 
+  static const PRINT = const Primitive(1, "pr", "print"); 
+  static const QUOTIENT = const Primitive(2, "/", "quotient"); 
+  static const REPEAT = const Primitive(2, "repeat"); 
+  static const RIGHT = const Primitive(1, "rt", "right"); 
+  static const SUM = const Primitive(2, "+", "sum"); 
+  static const TRUE = const Primitive(0, "true"); 
+  static const SHOWTURTLE = const Primitive(0, "st", "showturtle");
   
-  static final UNIT = const Primitive(0, "unit");
+  static const UNIT = const Primitive(0, "unit");
   
-  // static final INCOMPLETE = const Primitive(1, "_incomplete");
+  // const INCOMPLETE = const Primitive(1, "_incomplete");
   
-  static final List<Primitive> commandsList = const [ 
-    BACK, CLEAN, CLEARSCREEN, CLEARTEXT, CONS, FORWARD, HELP, HIDETURTLE, HOME, LEFT, NIL, PENDOWN,
-    PENUP, PRINT, REPEAT, RIGHT, SHOWTURTLE ];
+  static const List<Primitive> commandsList = const [ 
+    BACK, CLEAN, CLEARSCREEN, CLEARTEXT, CONS, FORWARD, HELP, HIDETURTLE,
+    HOME, IF, IFELSE, LEFT, NIL, PENDOWN, PENUP, PRINT, REPEAT, RIGHT,
+    SHOWTURTLE ];
 
-  static final List<Primitive> operatorList = const [
-    DIFFERENCE, SUM, PRODUCT, QUOTIENT, POWER, PI ];
+  static const List<Primitive> operatorList = const [
+    DIFFERENCE, FALSE, LESSOREQUAL, LESSTHAN, GREATEROREQUAL, GREATERTHAN,
+    PRODUCT, QUOTIENT, POWER, PI, SUM, TRUE ];
 
   static getPrecedence(Primitive p) {
     switch (p) {
@@ -87,12 +93,18 @@ class Primitive extends Node {
   
   static Map<String, Primitive> commandsMap = null;
   
-  static Primitive lookup(String name) => getCommands()[name];
+  static Primitive lookup(String name) => getBuiltIns()[name];
 
-  static Map<String, Primitive> getCommands() {
+  static Map<String, Primitive> getBuiltIns() {
     if (commandsMap == null) {
       commandsMap = new Map();
       for (Primitive p in commandsList) {
+        commandsMap[p.name] = p;
+        if (p.altName != null) {
+          commandsMap[p.altName] = p;
+        }
+      }
+      for (Primitive p in operatorList) {
         commandsMap[p.name] = p;
         if (p.altName != null) {
           commandsMap[p.altName] = p;

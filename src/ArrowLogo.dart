@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #import('dart:html', prefix: "html");
+#import('dart:math', prefix: "math");
 
 #source("Console.dart");
 #source("Node.dart");
@@ -28,11 +29,8 @@ class ArrowLogo {
 
   static Scope makeTopLevel() {
     Map<String, Node> map = new Map();
-    for (Primitive p in Primitive.commandsList) {
-      map[p.name] = p;
-      if (p.altName != null) {
-        map[p.altName] = p;
-      }
+    for (String k in Primitive.getBuiltIns().getKeys()) {
+      map[k] = Primitive.getBuiltIns()[k];
     }
     return new Scope(map);
   }
@@ -58,8 +56,8 @@ class ArrowLogo {
     var turtleCtx = turtleCanvas.getContext("2d");
     commandListElem = html.document.query("#command_list");
 
-    num width = Math.parseInt(userCanvas.attributes["width"]);
-    num height = Math.parseInt(userCanvas.attributes["height"]);
+    num width = math.parseInt(userCanvas.attributes["width"]);
+    num height = math.parseInt(userCanvas.attributes["height"]);
     turtle = new Turtle(turtleCtx, userCtx, width, height);
     turtle.draw();
     var consoleElem = html.document.query('#console');

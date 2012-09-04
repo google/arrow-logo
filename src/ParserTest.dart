@@ -18,7 +18,7 @@ class ParserTest extends UnitTests {
   final Parser parser;
   
   ParserTest() 
-      : parser = new Parser(new Scope(Primitive.getCommands())) {}
+      : parser = new Parser(new Scope(Primitive.getBuiltIns())) {}
   
   void testAdvanceWhile() {
     assertEquals(2, Parser.advanceWhile("  a", Parser.isSpace));
@@ -65,7 +65,7 @@ class ParserTest extends UnitTests {
   
   void testParseSomeLists() {  
     assertEquals(
-      ListNode.makeList([ListNode.makeNil()]), 
+      ListNode.makeList([ListNode.NIL]), 
       parser.parse("[]"));
     assertEquals(
       ListNode.makeList([ListNode.makeList([WordNode.makeInt(1)])]), 
@@ -75,7 +75,7 @@ class ParserTest extends UnitTests {
         ListNode.makeList([
           WordNode.makeInt(1), 
           ListNode.makeList([WordNode.makeFloat(1.2)]), 
-          ListNode.makeNil(),
+          ListNode.NIL,
           Primitive.FORWARD,
           WordNode.makeInt(2)])]),
       parser.parse("pr [ 1 [ 1.2 ] [] fd 2 ]"));
@@ -89,7 +89,7 @@ class ParserTest extends UnitTests {
       parser.parse("to box"));
     assertEquals(
       ListNode.makeList(
-        [WordNode.makeDefn("box", 0, ListNode.makeNil())]), 
+        [WordNode.makeDefn("box", 0, ListNode.NIL)]), 
       parser.parse("to box end"));
     assertEquals(
       ListNode.makeList(
@@ -156,6 +156,16 @@ class ParserTest extends UnitTests {
       parser.parse("2^3.5^(7+1) / 3 - 2"));
   }
   
+  void testParseParen() {
+    print(parser.toplevel);
+    assertEquals(
+      ListNode.makeList(
+        [Primitive.GREATERTHAN,
+         WordNode.makeIdent(":g"),
+         WordNode.makeInt(2)]),
+      parser.parse("(:g > 2)"));
+  }
+  
   void run() {
     testAdvanceWhile();
     testTokenizeNum();
@@ -165,6 +175,7 @@ class ParserTest extends UnitTests {
     testParseSomeLists();
     testParseSomeDefs();
     testParseInfixExpr();
+    testParseParen();
     print("ParserTest ok");
   }
 }

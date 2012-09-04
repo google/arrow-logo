@@ -16,7 +16,7 @@
 // Hence, we cannot use any types html.* in source files we want to unit test.
 // Type `Dynamic' to the rescue. 
 
-// #import('dart:html', prefix: "html");
+#import('dart:math', prefix: "math");
 
 #source("Console.dart");
 #source("Interpreter.dart");
@@ -29,6 +29,8 @@
 #source("Turtle.dart");
 
 // Essential methods for unit testing.
+// TODO: replace with unittests package, when there is an acceptable way
+// of importing.
 class UnitTests {
   
   void assertEquals(Object expected, Object actual) {

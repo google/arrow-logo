@@ -17,10 +17,10 @@ class Console {
   static final int MODE_DEFN = 1;
   
   static final int NEWLINE = 0xD;
-  static final String PROMPT = ">";
-  static final String DEFPROMPT = "  ";
+  static final String PROMPT = ":>";
+  static final String DEFPROMPT = "   ";
 
-  final consoleElem;
+  final Dynamic /* html.TextAreaElement */ consoleElem;
   final Parser parser;
   Interpreter interpreter;
   int mode;
@@ -35,11 +35,11 @@ class Console {
   }
   
   void write(String message) {
-    consoleElem.value = consoleElem.value + message;    
+    consoleElem.value = consoleElem.value.concat(message);    
   }
 
   void writeln([String message = ""]) {
-    consoleElem.value = consoleElem.value + message + "\n";    
+    consoleElem.value = consoleElem.value.concat(message).concat("\n");    
   }
 
   bool isIncompleteDef(Node node) {
@@ -62,11 +62,11 @@ class Console {
   void showHelp() {
     writeln("  supported commands:");
     for (Primitive p in Primitive.commandsList) {
-      writeln(p.name + (p.altName != null ? "  ${p.altName}" : ""));
+      writeln(p.name.concat(p.altName != null ? "  ${p.altName}" : ""));
     }
     writeln("  supported operators:");
     for (Primitive p in Primitive.operatorList) {
-      writeln(p.name + (p.altName != null ? "  ${p.altName}" : ""));
+      writeln(p.name.concat(p.altName != null ? "  ${p.altName}" : ""));
     }
   }
   
@@ -79,9 +79,10 @@ class Console {
       String text = consoleElem.value;
       var i = text.lastIndexOf(PROMPT);
       String code = text;
-      code = code.substring(i+1);
+      code = code.substring(i + PROMPT.length);
       if (!code.isEmpty()) {
         ListNode nodes = parser.parse(code);
+        print("nodes $nodes");
         writeln();
         if (mode == MODE_EVAL && isIncompleteDef(nodes.getHead())) {
           mode = MODE_DEFN;
@@ -91,15 +92,22 @@ class Console {
         if (mode == MODE_DEFN) {
           write(DEFPROMPT);
         } else {
-          interpreter.eval(nodes);
-          write(PROMPT);
+          try {
+            interpreter.eval(nodes);
+            write(PROMPT);
+          } on InterpreterException catch (ex, st) {
+            writeln(ex.message);
+            write(PROMPT);
+          } on Exception catch (ex, st) {
+            writeln("oops: ${ex}");
+            write(PROMPT);
+          }
         }
       }
       e.preventDefault();
-    } else {
+    } else if (mode == MODE_EVAL) {
       // Ensure that text gets inserted at the end, by placing caret at the end.
-      // Unfortunately, crashes Dartium http://code.google.com/p/dart/issues/detail?id=3364
-      // consoleElem.setSelectionRange(consoleElem.textLength, consoleElem.textLength);
+      consoleElem.setSelectionRange(consoleElem.textLength, consoleElem.textLength, "");
     }
   }
 }

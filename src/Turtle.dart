@@ -16,7 +16,7 @@ class Turtle {
   static final String ORANGE = "orange";
   static final String GREEN = "green";
   static final String BLACK = "black";
-  static final TAU = Math.PI * 2;
+  static final double TAU = math.PI * 2;
   
   static final int SHOW = 0;
   static final int HIDE = 1;
@@ -106,31 +106,31 @@ class Turtle {
     num BODY_RADIUS = 12;
     
     drawFillCircle(turtleCtx, x, y, BODY_RADIUS, ORANGE);
-    num headX = x + BODY_RADIUS * Math.cos(baseHeading);
-    num headY = y + BODY_RADIUS * Math.sin(baseHeading);
+    num headX = x + BODY_RADIUS * math.cos(baseHeading);
+    num headY = y + BODY_RADIUS * math.sin(baseHeading);
     drawFillCircle(turtleCtx, headX, headY, 2, GREEN);
     
-    num footX = x + BODY_RADIUS * Math.cos(baseHeading + TAU/8);
-    num footY = y + BODY_RADIUS * Math.sin(baseHeading + TAU/8);
+    num footX = x + BODY_RADIUS * math.cos(baseHeading + TAU/8);
+    num footY = y + BODY_RADIUS * math.sin(baseHeading + TAU/8);
     drawFillCircle(turtleCtx, footX, footY, 1, BLACK);
     
-    footX = x + BODY_RADIUS * Math.cos(baseHeading - TAU/8);
-    footY = y + BODY_RADIUS * Math.sin(baseHeading - TAU/8);
+    footX = x + BODY_RADIUS * math.cos(baseHeading - TAU/8);
+    footY = y + BODY_RADIUS * math.sin(baseHeading - TAU/8);
     drawFillCircle(turtleCtx, footX, footY, 1, BLACK);
 
-    footX = x + BODY_RADIUS * Math.cos(baseHeading + TAU * 3/8);
-    footY = y + BODY_RADIUS * Math.sin(baseHeading + TAU * 3/8);
+    footX = x + BODY_RADIUS * math.cos(baseHeading + TAU * 3/8);
+    footY = y + BODY_RADIUS * math.sin(baseHeading + TAU * 3/8);
     drawFillCircle(turtleCtx, footX, footY, 1, BLACK);
     
-    footX = x + BODY_RADIUS * Math.cos(baseHeading - TAU * 3/8);
-    footY = y + BODY_RADIUS * Math.sin(baseHeading - TAU * 3/8);
+    footX = x + BODY_RADIUS * math.cos(baseHeading - TAU * 3/8);
+    footY = y + BODY_RADIUS * math.sin(baseHeading - TAU * 3/8);
     drawFillCircle(turtleCtx, footX, footY, 1, BLACK);
   }
   
   void draw() {
     num baseHeading = getHeadingRad();
-    num deltaX = Math.cos(baseHeading);
-    num deltaY = Math.sin(baseHeading);
+    num deltaX = math.cos(baseHeading);
+    num deltaY = math.sin(baseHeading);
     num newX = x + delta * deltaX;
     num newY = y + delta * deltaY;
     cleanCtx(turtleCtx);

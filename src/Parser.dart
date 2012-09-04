@@ -41,7 +41,7 @@ class Token {
   static final int TOKEN_GT = 58;  
   static final int TOKEN_LE = 59;  
   static final int TOKEN_GE = 60;  
-  static final int TOKEN_EQEQ = 61;  
+  static final int TOKEN_EQ = 61;  
 
   int kind;
   Node node;
@@ -86,6 +86,12 @@ class Token {
       case TOKEN_STAR: return "STAR";  
       case TOKEN_CARET: return "CARET";  
 
+      case TOKEN_LT: return "LT";  
+      case TOKEN_GT: return "GT";  
+      case TOKEN_LE: return "LE";  
+      case TOKEN_GE: return "GE";  
+      case TOKEN_EQ: return "EQ";  
+
       default: return "???";
     }
   }
@@ -97,6 +103,10 @@ class Token {
       case TOKEN_SLASH:
       case TOKEN_STAR:
       case TOKEN_CARET:
+      case TOKEN_LT:
+      case TOKEN_LE:
+      case TOKEN_GT:
+      case TOKEN_LE:
         return true;
       default:
         return false;
@@ -129,6 +139,14 @@ class Token {
         return Primitive.PRODUCT;
       case TOKEN_CARET:
         return Primitive.POWER;
+      case TOKEN_LT:
+        return Primitive.LESSTHAN;
+      case TOKEN_LE:
+        return Primitive.LESSOREQUAL;
+      case TOKEN_GT:
+        return Primitive.GREATERTHAN;
+      case TOKEN_GE:
+        return Primitive.GREATEROREQUAL;
       default:
         return null;
     }
@@ -218,8 +236,8 @@ class Parser {
     String rest = text.substring(i);
     text = text.substring(0, i);
     WordNode wn = text.contains(".")
-        ? WordNode.makeFloat(Math.parseDouble(text))
-        : WordNode.makeInt(Math.parseInt(text));
+        ? WordNode.makeFloat(math.parseDouble(text))
+        : WordNode.makeInt(math.parseInt(text));
     token.setNum(wn);
     return rest;
   }
@@ -256,6 +274,24 @@ class Parser {
       case '*': token.setKind(Token.TOKEN_STAR); break;
       case '/': token.setKind(Token.TOKEN_SLASH); break;
       case '^': token.setKind(Token.TOKEN_CARET); break;
+      case '<': 
+        if (text.length > 1 && text[1] == '=') {
+          token.setKind(Token.TOKEN_LE);
+          return text.substring(2);
+        }
+        token.setKind(Token.TOKEN_LT);
+        break;
+      case '>': 
+        if (text.length > 1 && text[1] == '=') {
+          token.setKind(Token.TOKEN_GE);
+          return text.substring(2);
+        }
+        token.setKind(Token.TOKEN_GT);
+        break;
+      case '=': 
+        token.setKind(Token.TOKEN_EQ);
+        break;
+    
       default: throw new Exception("unexpected char: ${text[0]}");
     }
     return text.substring(1);

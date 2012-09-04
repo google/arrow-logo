@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+class InterpreterException {
+  final String message;
+  const InterpreterException(this.message);
+}
+
 class Interpreter {
   
   final Turtle turtle;
@@ -44,7 +49,7 @@ class Interpreter {
     } else {
       res = WordNode.makeFloat(opFloat(op1.getFloatValue(), op2.getFloatValue()));
     }  
-    return ListNode.makeCons(res, nodes);
+    return new ListNode.cons(res, nodes);
   }
   
   static int primSumInt(int a, int b) => a + b;
@@ -58,6 +63,7 @@ class Interpreter {
   
   // @return uninterpreted tail
   ListNode evalPrimCommand(Primitive p, ListNode nodes, Scope scope) {
+    print("evalPrimCommand $p $nodes");
     switch (p) {
       case Primitive.UNIT:
         break;
@@ -76,6 +82,8 @@ class Interpreter {
       case Primitive.CLEARTEXT:
         console.clearText();
         break;
+      case Primitive.FALSE:
+        return new ListNode.cons(p, nodes);
       case Primitive.FORWARD:
         nodes = evalInScope(nodes, scope);
         WordNode wn = nodes.getHead();
@@ -88,6 +96,55 @@ class Interpreter {
       case Primitive.HOME:
         turtle.home();
         break;
+      case Primitive.IF:
+        nodes = evalInScope(nodes, scope);
+        Primitive cond = nodes.getHead();
+        nodes = nodes.getTail();
+        Node result;
+        if (cond == Primitive.TRUE) {
+          Node thenPart = nodes.getHead();
+          if (!thenPart.isList()) {
+            thenPart = new ListNode.cons(thenPart, ListNode.NIL);
+          }
+          result = evalAllInScope(thenPart, scope);
+        } else if (cond == Primitive.FALSE) {
+          result = Primitive.UNIT;
+        } else { 
+          throw new InterpreterException("expected boolean");
+        }
+        nodes = nodes.getTail();
+        return new ListNode.cons(result, nodes);
+        
+      case Primitive.IFELSE:
+        nodes = evalInScope(nodes, scope);
+        Primitive cond = nodes.getHead();
+        nodes = nodes.getTail();
+        Node result;
+        if (cond == Primitive.TRUE) {
+          Node thenPart = nodes.getHead();
+          nodes = nodes.getTail();
+          if (!thenPart.isList()) {
+            thenPart = new ListNode.cons(thenPart, ListNode.NIL);
+          }
+          result = evalAllInScope(thenPart, scope);
+          nodes = nodes.getTail();
+        } else if (cond == Primitive.FALSE) {
+          nodes = nodes.getTail();
+          Node elsePart = nodes.getHead();
+          nodes = nodes.getTail();
+          if (!elsePart.isList()) {
+            elsePart = new ListNode.cons(elsePart, ListNode.NIL);
+          }
+          result = evalAllInScope(elsePart, scope);
+        } else { 
+          throw new InterpreterException("expected boolean");
+        }
+        
+        return new ListNode.cons(result, nodes);
+        
+      case Primitive.TRUE:
+        return new ListNode.cons(p, nodes);
+        
       case Primitive.HIDETURTLE:
         turtle.hideTurtle();
         break;
@@ -99,7 +156,7 @@ class Interpreter {
         break;
         
       case Primitive.PI:
-        return ListNode.makeCons(WordNode.makeFloat(Math.PI), nodes);
+        return new ListNode.cons(WordNode.makeFloat(math.PI), nodes);
         
       case Primitive.PRINT:
         nodes = evalInScope(nodes, scope);
@@ -116,7 +173,7 @@ class Interpreter {
         int times = wn.getNumValue();
         Node body = nodes.getHead();
         if (!body.isList()) {
-          body = ListNode.makeCons(body, ListNode.makeNil());
+          body = new ListNode.cons(body, ListNode.NIL);
         }
         nodes = nodes.getTail();
         for (int i = 0; i < times; ++i) {
@@ -152,10 +209,10 @@ class Interpreter {
         return evalBinOp(nodes, scope, primQuotientInt, primQuotientFloat);
 
       default:
-        throw new Exception("not implemented: $p");
+        throw new InterpreterException("not implemented: $p");
     }
     turtle.draw();  
-    return ListNode.makeCons(Primitive.UNIT, nodes);
+    return new ListNode.cons(Primitive.UNIT, nodes);
   }
   
   // interpret user-defined command.
@@ -183,7 +240,7 @@ class Interpreter {
       scope = new Scope(env, scope);
     }
     Node result = evalAllInScope(body, scope);
-    return ListNode.makeCons(result, tail);
+    return new ListNode.cons(result, tail);
   }
   
   // entry point. Evaluates all commands in `nodes' and
@@ -229,12 +286,12 @@ class Interpreter {
     }
     if (wn.isDefn()) {  // new definition
       globalScope.bind(wn.getDefnName(), wn);
-      return ListNode.makeCons(Primitive.UNIT, nodes.getTail());
+      return new ListNode.cons(Primitive.UNIT, nodes.getTail());
     }
     if (wn.isIdent()) {  // referencing a variable or defn
       Node lookup = scope[wn.getIdentName()];
       if (lookup == null) {
-        throw new Exception("unknown command ${wn.getIdentName()}");
+        throw new InterpreterException("unknown command: ${wn.getIdentName()}");
       }
       if (lookup.isWord()) {
         WordNode lookupWord = lookup;
@@ -243,8 +300,8 @@ class Interpreter {
         }
       }
       // referencing something else, e.g. number, prim
-      return evalInScope(ListNode.makeCons(lookup, nodes.getTail()), scope);
+      return evalInScope(new ListNode.cons(lookup, nodes.getTail()), scope);
     }
-    throw new Exception("what's going on here? $wn");
+    throw new InterpreterException("don't know what to do with $wn");
   }
 }

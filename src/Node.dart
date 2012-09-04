@@ -58,51 +58,48 @@ class ListNode extends Node {
         || (getHead() == that.getHead() && getTail() == that.getTail());
   }
   
-  static Node NIL = null;
-  static ListNode makeNil() {
-    if (NIL == null) {
-      NIL = new ListNode(LIST_NIL);
-    }
-    return NIL;
-  }
+  final Node head;
+  final ListNode tail;
   
-  static Node makeCons(Node head, ListNode tail) {
-    return new ListNode(LIST_CONS, head, tail);
-  }
+  const ListNode.nil() : head = null, tail = null, super(LIST_NIL | Node.KIND_LIST);  
+  const ListNode.cons(this.head, this.tail) : super(LIST_CONS | Node.KIND_LIST);
+
+  static const Node NIL = const ListNode.nil();
   
   static Node makeList(List list) {
-    var n = makeNil();
+    var n = NIL;
     while (!list.isEmpty()) {
-      n = makeCons(list.removeLast(), n);
+      n = new ListNode.cons(list.removeLast(), n);
     }
     return n;
   }
   
-  Node head;
-  ListNode tail;
-  
-  ListNode(int tag, [this.head = null, this.tail = null]) : super(tag | Node.KIND_LIST) {}  
-  
   Node getHead() { return head; }
+  
   ListNode getTail() { return tail; }
+  
   int getLength() { 
     return getLengthIter(0); 
   }
+  
   int getLengthIter(int acc) { 
     return isNil() ? acc : tail.getLengthIter(1 + acc); 
   }
+  
   ListNode getPrefix(int length) {
     return (length <= 0) 
         ? this
-        : makeCons(getHead(), getTail().getPrefix(length - 1));
+        : new ListNode.cons(getHead(), getTail().getPrefix(length - 1));
   }
+  
   ListNode getSuffix(int length) {
     return (length <= 0)
         ? this
         : getTail().getSuffix(length - 1);
   }
+  
   ListNode append(ListNode rest) {
-    return isNil() ? rest : makeCons(head, tail.append(rest));
+    return isNil() ? rest : new ListNode.cons(head, tail.append(rest));
   }
   
   String toString() {
