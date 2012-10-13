@@ -160,10 +160,10 @@ class Interpreter {
         
       case Primitive.PRINT:
         nodes = evalInScope(nodes, scope);
-        WordNode wn = nodes.getHead();
+        Node n = nodes.getHead();
         nodes = nodes.getTail();
         // TODO: pretty-print values
-        console.writeln(wn.toString());
+        console.writeln(n.toString());
         break;
         
       case Primitive.REPEAT:
