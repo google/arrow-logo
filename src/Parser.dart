@@ -14,34 +14,34 @@
 
 class Token {
 
-  static final int TOKEN_EOF = -1;
-  static final int TOKEN_NUM = 0;
-  static final int TOKEN_IDENT = 1;
-  static final int TOKEN_PRIM = 2;
-  static final int TOKEN_LBRACE = 123;
-  static final int TOKEN_RBRACE = 125;
-  static final int TOKEN_LBRACKET = 91;
-  static final int TOKEN_RBRACKET = 93;
+  static const TOKEN_EOF = -1;
+  static const int TOKEN_NUM = 0;
+  static const int TOKEN_IDENT = 1;
+  static const int TOKEN_PRIM = 2;
+  static const int TOKEN_LBRACE = 123;
+  static const int TOKEN_RBRACE = 125;
+  static const int TOKEN_LBRACKET = 91;
+  static const int TOKEN_RBRACKET = 93;
   
-  static final int TOKEN_LPAREN = 40;
-  static final int TOKEN_RPAREN = 41;  
+  static const int TOKEN_LPAREN = 40;
+  static const int TOKEN_RPAREN = 41;  
 
-  static final int TOKEN_TO = 42;
-  static final int TOKEN_VAR = 44;
-  static final int TOKEN_OUTPUT = 45;
-  static final int TOKEN_END = 46;
+  static const int TOKEN_TO = 42;
+  static const int TOKEN_VAR = 44;
+  static const int TOKEN_OUTPUT = 45;
+  static const int TOKEN_END = 46;
 
-  static final int TOKEN_PLUS = 52;  
-  static final int TOKEN_MINUS = 53;  
-  static final int TOKEN_SLASH = 54;  
-  static final int TOKEN_STAR = 55;  
-  static final int TOKEN_CARET = 56; 
+  static const int TOKEN_PLUS = 52;  
+  static const int TOKEN_MINUS = 53;  
+  static const int TOKEN_SLASH = 54;  
+  static const int TOKEN_STAR = 55;  
+  static const int TOKEN_CARET = 56; 
   // todo
-  static final int TOKEN_LT = 57;  
-  static final int TOKEN_GT = 58;  
-  static final int TOKEN_LE = 59;  
-  static final int TOKEN_GE = 60;  
-  static final int TOKEN_EQ = 61;  
+  static const int TOKEN_LT = 57;  
+  static const int TOKEN_GT = 58;  
+  static const int TOKEN_LE = 59;  
+  static const int TOKEN_GE = 60;  
+  static const int TOKEN_EQ = 61;  
 
   int kind;
   Node node;
@@ -169,16 +169,16 @@ class OpInfo {
 // recursive descent combined with operator-precedence parsing.
 // TODO adding "apply" nodes, and of course, error reporting.
 class Parser {
-  static final int CHAR_0 = 48;  // "0".charCodeAt(0) is not a constant
-  static final int CHAR_9 = 57; 
-  static final int CHAR_a = 97; 
-  static final int CHAR_z = 122;  
-  static final int CHAR_A = 65;  
-  static final int CHAR_Z = 90;  
-  static final int CHAR_BLANK = 32; 
-  static final int CHAR_DOT = 46; 
-  static final int CHAR_TAB = 9; 
-  static final int CHAR_COLON = 58; 
+  static const int CHAR_0 = 48;  // "0".charCodeAt(0) is not a constant
+  static const int CHAR_9 = 57; 
+  static const int CHAR_a = 97; 
+  static const int CHAR_z = 122;  
+  static const int CHAR_A = 65;  
+  static const int CHAR_Z = 90;  
+  static const int CHAR_BLANK = 32; 
+  static const int CHAR_DOT = 46; 
+  static const int CHAR_TAB = 9; 
+  static const int CHAR_COLON = 58; 
   
   static bool isAlpha(int charCode) =>
       (CHAR_a <= charCode && charCode <= CHAR_z)

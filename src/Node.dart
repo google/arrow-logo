@@ -26,10 +26,10 @@
 //   Primitive  // see Primitive.dart
 class Node {
 
-  static final int KIND_WORD = 0;
-  static final int KIND_LIST = 1;
-  static final int KIND_PRIM = 2;
-  static final int KIND_MASK = 3;
+  static const int KIND_WORD = 0;
+  static const int KIND_LIST = 1;
+  static const int KIND_PRIM = 2;
+  static const int KIND_MASK = 3;
   
   final int tag;
 
@@ -42,9 +42,9 @@ class Node {
 
 class ListNode extends Node {
 
-  static final int LIST_NIL = 0 << 2;
-  static final int LIST_CONS = 1 << 2;
-  static final int LIST_MASK = 1 << 2;
+  static const int LIST_NIL = 0 << 2;
+  static const int LIST_CONS = 1 << 2;
+  static const int LIST_MASK = 1 << 2;
 
   bool isNil()  { return (tag & LIST_MASK) == LIST_NIL; }
   bool isCons() { return (tag & LIST_MASK) == LIST_CONS; }
