@@ -58,7 +58,7 @@ class Interpreter {
   static double primDifferenceFloat(double a, double b) => a - b;
   static int primProductInt(int a, int b) => a * b;
   static double primProductFloat(double a, double b) => a * b;
-  static int primQuotientInt(int a, int b) => (a / b).toInt();
+  static int primQuotientInt(int a, int b) => a ~/ b;
   static double primQuotientFloat(double a, double b) => a / b;
   
   // @return uninterpreted tail
