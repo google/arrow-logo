@@ -14,7 +14,7 @@
 
 class Token {
 
-  static const TOKEN_EOF = -1;
+  static const int TOKEN_EOF = -1;
   static const int TOKEN_NUM = 0;
   static const int TOKEN_IDENT = 1;
   static const int TOKEN_PRIM = 2;
