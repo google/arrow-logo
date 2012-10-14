@@ -12,18 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Node
-//   WordNode(s)
-//   NumberNode
-//     Int(i)
-//     Float(f)
-//   ListNode
-//     Cons(head, tail)
-//     Nil()
-//   Primitive  // see Primitive.dart
-//   Defn(name, arity, body)
-
+/** Represents an ArrowLogo object, primitive or definition.
+ *  
+ *     WordNode(sv)
+ *     NumberNode
+ *     - Int(iv)
+ *     - Float(fv)
+ *     ListNode
+ *     - Cons(hd, tl)
+ *     - Nil()
+ *     Primitive  // see Primitive.dart
+ *     Defn(name, arity, body)
+ */
 class Node {
+  
   static const int KIND_WORD = 0;
   static const int KIND_LIST = 1;
   static const int KIND_NUMBER = 2;
@@ -45,7 +47,7 @@ class Node {
 }
 
 class ListNode extends Node {
-
+  
   static const int LIST_NIL = 0 << Node.KIND_BITS;
   static const int LIST_CONS = 1 << Node.KIND_BITS;
   static const int LIST_MASK = 1 << Node.KIND_BITS;
@@ -135,6 +137,7 @@ class WordNode extends Node {
 }
 
 class NumberNode extends Node {
+  
   static const int NUMBER_INT    = 0 << Node.KIND_BITS;
   static const int NUMBER_FLOAT  = 1 << Node.KIND_BITS;
   static const int NUMBER_MASK   = 1 << Node.KIND_BITS;
@@ -143,10 +146,10 @@ class NumberNode extends Node {
   final double floatValue; // Float
   
   const NumberNode.int(this.intValue)
-      : super(NUMBER_INT | Node.KIND_NUMBER), floatValue = 0.0;
+      : floatValue = 0.0, super(NUMBER_INT | Node.KIND_NUMBER);
 
   const NumberNode.float(this.floatValue)
-      : super(NUMBER_FLOAT | Node.KIND_NUMBER), intValue = 0;
+      : intValue = 0, super(NUMBER_FLOAT | Node.KIND_NUMBER);
   
   bool operator ==(Object node) {
     if (!(node is NumberNode)) {
@@ -158,6 +161,7 @@ class NumberNode extends Node {
     } else if (isFloat()) {
       return that.isFloat() && getFloatValue() == that.getFloatValue();
     }
+    throw new Exception("neither int nor float");
   }
   
   bool isInt() { return (tag & NUMBER_MASK) == NUMBER_INT; }
@@ -190,6 +194,7 @@ class NumberNode extends Node {
 }
 
 class DefnNode extends Node {
+  
   final int arity;
   final String name;
   final ListNode body;
