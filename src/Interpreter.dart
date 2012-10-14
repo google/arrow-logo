@@ -44,18 +44,39 @@ class Interpreter {
     return deref(lookup, scope);
   }
   
+  Node evalBinCmp(ListNode nodes, Scope scope, cmpNum(num x, num y)) {
+    nodes = evalInScope(nodes, scope);
+    Node op1 = nodes.head;
+    if (!(op1.isNum())) {
+      throw new InterpreterException("expected num for op1 was ${op1}");
+    }
+    NumberNode op1node = op1;
+    num op1num = op1node.getNumValue();
+    nodes = nodes.tail;
+    nodes = evalInScope(nodes, scope);
+    Node op2 = nodes.head;
+    if (!(op2.isNum())) {
+      throw new InterpreterException("expected num for op2 was ${op2}");
+    }
+    NumberNode op2node = op2;
+    num op2num = op2node.getNumValue();
+    nodes = nodes.tail;
+    Node res = cmpNum(op1num, op2num) ? Primitive.TRUE : Primitive.FALSE;
+    return new ListNode.cons(res, nodes);
+  }
+    
   Node evalBinOp(ListNode nodes, Scope scope, opInt(int x, int y), opFloat(double x, double y)) {   
     nodes = evalInScope(nodes, scope);
     Node op1 = nodes.head;
     if (!(op1.isNum())) {
-      throw new InterpreterException("expected num for op1");
+      throw new InterpreterException("expected num for op1 was ${op1}");
     }
     NumberNode op1num = op1;
     nodes = nodes.tail;
     nodes = evalInScope(nodes, scope);
     Node op2 = nodes.head;
     if (!(op2.isNum())) {
-      throw new InterpreterException("expected num for op1");
+      throw new InterpreterException("expected num for op2 was ${op2}");
     }
     NumberNode op2num = op2;
     nodes = nodes.tail;
@@ -76,7 +97,13 @@ class Interpreter {
   static double primProductFloat(double a, double b) => a * b;
   static int primQuotientInt(int a, int b) => a ~/ b;
   static double primQuotientFloat(double a, double b) => a / b;
-  
+
+  static bool primEqualsNum(num a, num b) => a == b;
+  static bool primLessThanNum(num a, num b) => a < b;
+  static bool primLessOrEqualNum(num a, num b) => a <= b;
+  static bool primGreaterThanNum(num a, num b) => a > b;
+  static bool primGreaterOrEqualNum(num a, num b) => a >= b;
+
   /**
    * Evaluates a primitive function (aka command/operator).
    * 
@@ -86,35 +113,48 @@ class Interpreter {
     switch (p) {
       case Primitive.UNIT:
         break;
+        
       case Primitive.BACK:
         NumberNode wn = nodes.head;
         nodes = nodes.tail;
         turtle.back(wn.getNumValue());
         break;
+        
       case Primitive.CLEAN:
         turtle.clean();
         break;
+        
       case Primitive.CLEARSCREEN:
         turtle.clean();
         turtle.home();
         break;
+        
       case Primitive.CLEARTEXT:
         console.clearText();
         break;
+        
+      case Primitive.EQUALS:
+        // TODO equality for words, lists
+        return evalBinCmp(nodes, scope, primEqualsNum);
+        
       case Primitive.FALSE:
         return new ListNode.cons(p, nodes);
+        
       case Primitive.FORWARD:
         nodes = evalInScope(nodes, scope);
         NumberNode wn = nodes.head;
         nodes = nodes.tail;
         turtle.forward(wn.getNumValue()); 
         break;
+        
       case Primitive.HELP:
         console.showHelp();
         break;
+        
       case Primitive.HOME:
         turtle.home();
         break;
+        
       case Primitive.IF:
         nodes = evalInScope(nodes, scope);
         Primitive cond = nodes.head;
@@ -160,13 +200,11 @@ class Interpreter {
         }
         
         return new ListNode.cons(result, nodes);
-        
-      case Primitive.TRUE:
-        return new ListNode.cons(p, nodes);
-        
+      
       case Primitive.HIDETURTLE:
         turtle.hideTurtle();
         break;
+        
       case Primitive.LEFT:
         nodes = evalInScope(nodes, scope);
         NumberNode wn = nodes.head;
@@ -199,30 +237,31 @@ class Interpreter {
           evalAllInScope(body, scope);  // ignore result
         }
         break;
+        
       case Primitive.RIGHT:
         nodes = evalInScope(nodes, scope);
         NumberNode nn = nodes.head;
         nodes = nodes.tail;
         turtle.right(nn.getNumValue());
         break;
+        
       case Primitive.PENDOWN:
         turtle.penDown();
         break;
+        
       case Primitive.PENUP:
         turtle.penUp();
         break;
+        
       case Primitive.SHOWTURTLE:
         turtle.showTurtle();
         break;
+      
+      case Primitive.TRUE:
+        return new ListNode.cons(p, nodes);
+      
+      // math
         
-      case Primitive.STOP:
-        throw new InterpreterOutputException(Primitive.UNIT);
-        
-      case Primitive.OUTPUT:
-        nodes = evalInScope(nodes, scope);
-        Node head = nodes.head;
-        throw new InterpreterOutputException(head);
-
       case Primitive.SUM:
         return evalBinOp(nodes, scope, primSumInt, primSumFloat);
  
@@ -234,6 +273,28 @@ class Interpreter {
 
       case Primitive.QUOTIENT:
         return evalBinOp(nodes, scope, primQuotientInt, primQuotientFloat);
+
+      case Primitive.GREATERTHAN:
+        return evalBinCmp(nodes, scope, primGreaterThanNum);
+
+      case Primitive.GREATEROREQUAL:
+        return evalBinCmp(nodes, scope, primGreaterOrEqualNum);
+
+      case Primitive.LESSTHAN:
+        return evalBinCmp(nodes, scope, primLessThanNum);
+      
+      case Primitive.LESSOREQUAL:
+        return evalBinCmp(nodes, scope, primLessOrEqualNum);  
+
+      // control
+        
+      case Primitive.STOP:
+        throw new InterpreterOutputException(Primitive.UNIT);
+     
+      case Primitive.OUTPUT:
+        nodes = evalInScope(nodes, scope);
+        Node head = nodes.head;
+        throw new InterpreterOutputException(head);
 
       default:
         throw new InterpreterException("not implemented: $p");

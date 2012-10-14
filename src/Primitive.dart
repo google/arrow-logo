@@ -19,6 +19,7 @@ class Primitive extends Node {
   static const CLEARSCREEN = const Primitive(0, "cs", "clearscreen");
   static const CLEARTEXT = const Primitive(0, "ct", "cleartext");
   static const CONS = const Primitive(2, "_cons"); 
+  static const EQUALS = const Primitive(2, "==", "equals"); 
   static const FALSE = const Primitive(0, "false"); 
   static const FORWARD = const Primitive(1, "fd", "forward"); 
   static const GREATERTHAN = const Primitive(1, ">", "greaterthan"); 
