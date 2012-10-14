@@ -47,8 +47,7 @@ class Console {
       return false;
     }
     WordNode wn = node;
-    return wn.isIdent() 
-        && wn.getIdentName() == "INCOMPLETE_DEFINITION";
+    return wn.stringValue == "INCOMPLETE_DEFINITION";
   }
 
   bool isCompleteDef(Node node) {
@@ -84,9 +83,9 @@ class Console {
         ListNode nodes = parser.parse(code);
         print("nodes $nodes");
         writeln();
-        if (mode == MODE_EVAL && isIncompleteDef(nodes.getHead())) {
+        if (mode == MODE_EVAL && isIncompleteDef(nodes.head)) {
           mode = MODE_DEFN;
-        } else if (mode == MODE_DEFN && isCompleteDef(nodes.getHead())) {
+        } else if (mode == MODE_DEFN && isCompleteDef(nodes.head)) {
           mode = MODE_EVAL;
         }
         if (mode == MODE_DEFN) {

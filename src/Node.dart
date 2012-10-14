@@ -13,25 +13,25 @@
 // limitations under the License.
 
 // Node
+//   WordNode(s)
+//   NumberNode
+//     Int(i)
+//     Float(f)
 //   ListNode
 //     Cons(head, tail)
 //     Nil()
-//   WordNode
-//     Int(i)
-//     Float(f)
-//     Prim(p, arity, name[, altName])
-//     String(s)
-//     Ident(n)
-//     Defn(name, arity, body)
 //   Primitive  // see Primitive.dart
-class Node {
+//   Defn(name, arity, body)
 
+class Node {
   static const int KIND_WORD = 0;
   static const int KIND_LIST = 1;
   static const int KIND_NUMBER = 2;
   static const int KIND_PRIM = 3;
+  static const int KIND_DEFN = 4;
 
-  static const int KIND_MASK = 3;
+  static const int KIND_MASK = 7;
+  static const int KIND_BITS = 3;
   
   final int tag;
 
@@ -41,13 +41,14 @@ class Node {
   bool isList() { return (tag & KIND_MASK) == KIND_LIST; }
   bool isNum() { return (tag & KIND_MASK) == KIND_NUMBER; }
   bool isPrim() { return (tag & KIND_MASK) == KIND_PRIM; }
+  bool isDefn() { return (tag & KIND_MASK) == KIND_DEFN; }
 }
 
 class ListNode extends Node {
 
-  static const int LIST_NIL = 0 << 2;
-  static const int LIST_CONS = 1 << 2;
-  static const int LIST_MASK = 1 << 2;
+  static const int LIST_NIL = 0 << Node.KIND_BITS;
+  static const int LIST_CONS = 1 << Node.KIND_BITS;
+  static const int LIST_MASK = 1 << Node.KIND_BITS;
 
   bool isNil()  { return (tag & LIST_MASK) == LIST_NIL; }
   bool isCons() { return (tag & LIST_MASK) == LIST_CONS; }
@@ -58,14 +59,16 @@ class ListNode extends Node {
     }
     ListNode that = node;
     return (isNil() && that.isNil())
-        || (getHead() == that.getHead() && getTail() == that.getTail());
+        || (head == that.head && tail == that.tail);
   }
   
   final Node head;
   final ListNode tail;
   
-  const ListNode.nil() : head = null, tail = null, super(LIST_NIL | Node.KIND_LIST);  
-  const ListNode.cons(this.head, this.tail) : super(LIST_CONS | Node.KIND_LIST);
+  const ListNode.nil()
+      : head = null, tail = null, super(LIST_NIL | Node.KIND_LIST);  
+  const ListNode.cons(this.head, this.tail)
+      : super(LIST_CONS | Node.KIND_LIST);
 
   static const Node NIL = const ListNode.nil();
   
@@ -76,11 +79,7 @@ class ListNode extends Node {
     }
     return n;
   }
-  
-  Node getHead() { return head; }
-  
-  ListNode getTail() { return tail; }
-  
+    
   int getLength() { 
     return getLengthIter(0); 
   }
@@ -92,13 +91,13 @@ class ListNode extends Node {
   ListNode getPrefix(int length) {
     return (length <= 0) 
         ? this
-        : new ListNode.cons(getHead(), getTail().getPrefix(length - 1));
+        : new ListNode.cons(head, tail.getPrefix(length - 1));
   }
   
   ListNode getSuffix(int length) {
     return (length <= 0)
         ? this
-        : getTail().getSuffix(length - 1);
+        : tail.getSuffix(length - 1);
   }
   
   ListNode append(ListNode rest) {
@@ -109,7 +108,7 @@ class ListNode extends Node {
     if (isNil()) {
       return "Nil()";
     } else if (isCons()) {
-      return "Cons(${getHead().toString()},${getTail().toString()})";
+      return "Cons(${head.toString()},${tail})";
     }
     return null;
   }
@@ -117,105 +116,37 @@ class ListNode extends Node {
 
 class WordNode extends Node {
   
-  static final int WORD_STRING = 1 << 2;
-  static final int WORD_IDENT  = 2 << 2;
-  static final int WORD_DEFN   = 3 << 2;
-  static final int WORD_MASK   = 3 << 2;
-
-  int arity;         // Defn
-  String strValue;   // String, Ident, Defn
+  final String stringValue;
   
-  ListNode body;     // Defn
-  
-  WordNode(int tag) : super(tag | Node.KIND_WORD);
+  const WordNode(this.stringValue) : super(Node.KIND_WORD);
   
   bool operator ==(Object node) {
     if (!(node is WordNode)) {
       return false;
     }
     WordNode that = node;
-    if (tag != that.tag) {
-      return false;
-    }
-    return (isIdent() && getIdentName() == that.getIdentName())
-        || (isString() && getStringValue() == that.getStringValue())
-        || (isDefn() && getDefnName() == that.getDefnName() 
-                     && getDefnBody() == that.getDefnBody());
+    return stringValue == that.stringValue;
   }
   
-  bool isIdent() { return (tag & WORD_MASK) == WORD_IDENT; }
-  bool isString() { return (tag & WORD_MASK) == WORD_STRING; }
-  bool isDefn() { return (tag & WORD_MASK) == WORD_DEFN; }
-
-  String getIdentName() {
-    return strValue;
-  }
-
-  String getStringValue() {
-    return strValue;
-  }
-
-  String getDefnName() {
-    return strValue;
-  }
-  
-  ListNode getDefnBody() {
-    return body;
-  }
-  
-  String getName() {
-    return strValue;
-  }
-    
-  int getArity() {
-    return arity;
-  }
-
   String toString() {
-    if (isIdent()) {
-      return "Ident(${getStringValue()})";
-    } else if (isString()) {
-      return "String(${getStringValue()})";
-    } else if (isDefn()) {
-      return "Defn(${getDefnName()},${getArity()},${getDefnBody()})";
-    }
-    return null;
-  }
-    
-
-  static Node makeIdent(String identName) {
-    WordNode wn = new WordNode(WORD_IDENT);
-    wn.strValue = identName;
-    return wn;
-  }
-  
-  static Node makeString(String strValue) {
-    WordNode wn = new WordNode(WORD_STRING);
-    wn.strValue = strValue;
-    return wn;
-  }
-  
-  static Node makeDefn(String name, int arity, ListNode body) {
-    WordNode wn = new WordNode(WORD_DEFN);
-    wn.strValue = name;
-    wn.arity = arity;
-    wn.body = body;
-    return wn;
+    return "Word(${stringValue})";
+        return null;
   }
 }
 
 class NumberNode extends Node {
-  static final int NUMBER_INT    = 1 << 2;
-  static final int NUMBER_FLOAT  = 2 << 2;
-  static final int NUMBER_MASK   = 3 << 2;
+  static const int NUMBER_INT    = 0 << Node.KIND_BITS;
+  static const int NUMBER_FLOAT  = 1 << Node.KIND_BITS;
+  static const int NUMBER_MASK   = 1 << Node.KIND_BITS;
 
-  int intValue;      // Int
-  double floatValue; // Float
+  final int intValue;      // Int
+  final double floatValue; // Float
   
-  NumberNode(int tag) : super(tag | Node.KIND_NUMBER);
+  const NumberNode.int(this.intValue)
+      : super(NUMBER_INT | Node.KIND_NUMBER), floatValue = 0.0;
 
-  NumberNode.int(this.intValue) : super(NUMBER_INT | Node.KIND_NUMBER);
-  NumberNode.float(this.floatValue) : super(NUMBER_FLOAT | Node.KIND_NUMBER);
+  const NumberNode.float(this.floatValue)
+      : super(NUMBER_FLOAT | Node.KIND_NUMBER), intValue = 0;
   
   bool operator ==(Object node) {
     if (!(node is NumberNode)) {
@@ -233,7 +164,7 @@ class NumberNode extends Node {
   bool isFloat() { return (tag & NUMBER_MASK) == NUMBER_FLOAT; }
   
   int getIntValue() {
-    return intValue;
+    return intValue;  // truncate float?
   }
 
   double getFloatValue() {
@@ -248,7 +179,6 @@ class NumberNode extends Node {
     throw new Exception("neither int nor float");
   }
 
-
   String toString() {
     if (isFloat()) {
       return "Float(${getFloatValue()})";
@@ -256,6 +186,26 @@ class NumberNode extends Node {
       return "Int(${getIntValue()})";
     }
     throw new Exception("neither int nor float");
+  }
+}
+
+class DefnNode extends Node {
+  final int arity;
+  final String name;
+  final ListNode body;
+  
+  DefnNode(this.name, this.arity, this.body) : super(Node.KIND_DEFN);
+
+  bool operator ==(node) {
+    if (!(node is DefnNode)) {
+      return false;
+    }
+    DefnNode that = node;
+    return arity == that.arity && name == that.name && body == that.body;
+  }
+  
+  String toString() {
+    return "Defn(${name},${arity},${body})";
   }
 }
 

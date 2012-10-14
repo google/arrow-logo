@@ -31,6 +31,7 @@ class ParserTest extends UnitTests {
   void testTokenizeNum() {
     assertEquals("", parser.tokenizeNum("1"));
     assertEquals(Token.TOKEN_NUM, parser.token.kind);
+    print(parser.token);
     assertTrue(parser.token.node.isNum());
     Node n = parser.token.node;
     assertTrue(n.isNum());
@@ -56,7 +57,7 @@ class ParserTest extends UnitTests {
     assertEquals("", parser.tokenizeIdent("x"));
     assertEquals(Token.TOKEN_IDENT, parser.token.kind);
     WordNode wn = parser.token.node;
-    assertEquals("x", wn.getIdentName());   
+    assertEquals("x", wn.stringValue);   
   }
   
   void testParseSomeWords() {
@@ -88,23 +89,23 @@ class ParserTest extends UnitTests {
   void testParseSomeDefs() {
     assertEquals(
       ListNode.makeList(
-        [WordNode.makeIdent("INCOMPLETE_DEFINITION"),
-         WordNode.makeIdent("box")]),
+        [new WordNode("INCOMPLETE_DEFINITION"),
+         new WordNode("box")]),
       parser.parse("to box"));
     assertEquals(
       ListNode.makeList(
-        [WordNode.makeDefn("box", 0, ListNode.NIL)]), 
+        [new DefnNode("box", 0, ListNode.NIL)]), 
       parser.parse("to box end"));
     assertEquals(
       ListNode.makeList(
-        [WordNode.makeDefn("box", 0, ListNode.makeList([                                                             
+        [new DefnNode("box", 0, ListNode.makeList([                                                             
           Primitive.FORWARD, new NumberNode.int(10)]))]), 
       parser.parse("to box fd 10 end"));
     assertEquals(
       ListNode.makeList(
-        [WordNode.makeDefn("box", 1, ListNode.makeList([                                                             
-          WordNode.makeIdent(":size"),
-          Primitive.FORWARD, WordNode.makeIdent(":size")]))]), 
+        [new DefnNode("box", 1, ListNode.makeList([                                                             
+          new WordNode(":size"),
+          Primitive.FORWARD, new WordNode(":size")]))]), 
       parser.parse("to box :size fd :size end"));
   }
 
@@ -165,7 +166,7 @@ class ParserTest extends UnitTests {
     assertEquals(
       ListNode.makeList(
         [Primitive.GREATERTHAN,
-         WordNode.makeIdent(":g"),
+         new WordNode(":g"),
          new NumberNode.int(2)]),
       parser.parse("(:g > 2)"));
   }

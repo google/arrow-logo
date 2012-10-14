@@ -29,28 +29,25 @@ class Interpreter {
     if (scope == null) {
       return word;
     }
-    if (!word.isIdent()) {
-      return word;
-    }
-    WordNode lookup = scope[word.getIdentName()];
+    WordNode lookup = scope[word.stringValue];
     return deref(lookup, scope);
   }
   
   Node evalBinOp(ListNode nodes, Scope scope, opInt(int x, int y), opFloat(double x, double y)) {   
     nodes = evalInScope(nodes, scope);
-    Node op1 = nodes.getHead();
+    Node op1 = nodes.head;
     if (!(op1.isNum())) {
       throw new InterpreterException("expected num for op1");
     }
     NumberNode op1num = op1;
-    nodes = nodes.getTail();
+    nodes = nodes.tail;
     nodes = evalInScope(nodes, scope);
-    Node op2 = nodes.getHead();
+    Node op2 = nodes.head;
     if (!(op2.isNum())) {
       throw new InterpreterException("expected num for op1");
     }
     NumberNode op2num = op2;
-    nodes = nodes.getTail();
+    nodes = nodes.tail;
     Node res;
     if (op1num.isInt() && op2num.isInt()) {
        res = new NumberNode.int(opInt(op1num.getIntValue(), op2num.getIntValue()));
@@ -76,8 +73,8 @@ class Interpreter {
       case Primitive.UNIT:
         break;
       case Primitive.BACK:
-        NumberNode wn = nodes.getHead();
-        nodes = nodes.getTail();
+        NumberNode wn = nodes.head;
+        nodes = nodes.tail;
         turtle.back(wn.getNumValue());
         break;
       case Primitive.CLEAN:
@@ -94,8 +91,8 @@ class Interpreter {
         return new ListNode.cons(p, nodes);
       case Primitive.FORWARD:
         nodes = evalInScope(nodes, scope);
-        NumberNode wn = nodes.getHead();
-        nodes = nodes.getTail();
+        NumberNode wn = nodes.head;
+        nodes = nodes.tail;
         turtle.forward(wn.getNumValue()); 
         break;
       case Primitive.HELP:
@@ -106,11 +103,11 @@ class Interpreter {
         break;
       case Primitive.IF:
         nodes = evalInScope(nodes, scope);
-        Primitive cond = nodes.getHead();
-        nodes = nodes.getTail();
+        Primitive cond = nodes.head;
+        nodes = nodes.tail;
         Node result;
         if (cond == Primitive.TRUE) {
-          Node thenPart = nodes.getHead();
+          Node thenPart = nodes.head;
           if (!thenPart.isList()) {
             thenPart = new ListNode.cons(thenPart, ListNode.NIL);
           }
@@ -120,26 +117,26 @@ class Interpreter {
         } else { 
           throw new InterpreterException("expected boolean");
         }
-        nodes = nodes.getTail();
+        nodes = nodes.tail;
         return new ListNode.cons(result, nodes);
         
       case Primitive.IFELSE:
         nodes = evalInScope(nodes, scope);
-        Primitive cond = nodes.getHead();
-        nodes = nodes.getTail();
+        Primitive cond = nodes.head;
+        nodes = nodes.tail;
         Node result;
         if (cond == Primitive.TRUE) {
-          Node thenPart = nodes.getHead();
-          nodes = nodes.getTail();
+          Node thenPart = nodes.head;
+          nodes = nodes.tail;
           if (!thenPart.isList()) {
             thenPart = new ListNode.cons(thenPart, ListNode.NIL);
           }
           result = evalAllInScope(thenPart, scope);
-          nodes = nodes.getTail();
+          nodes = nodes.tail;
         } else if (cond == Primitive.FALSE) {
-          nodes = nodes.getTail();
-          Node elsePart = nodes.getHead();
-          nodes = nodes.getTail();
+          nodes = nodes.tail;
+          Node elsePart = nodes.head;
+          nodes = nodes.tail;
           if (!elsePart.isList()) {
             elsePart = new ListNode.cons(elsePart, ListNode.NIL);
           }
@@ -158,8 +155,8 @@ class Interpreter {
         break;
       case Primitive.LEFT:
         nodes = evalInScope(nodes, scope);
-        NumberNode wn = nodes.getHead();
-        nodes = nodes.getTail();
+        NumberNode wn = nodes.head;
+        nodes = nodes.tail;
         turtle.left(wn.getNumValue()); 
         break;
         
@@ -168,30 +165,30 @@ class Interpreter {
         
       case Primitive.PRINT:
         nodes = evalInScope(nodes, scope);
-        Node n = nodes.getHead();
-        nodes = nodes.getTail();
+        Node n = nodes.head;
+        nodes = nodes.tail;
         // TODO: pretty-print values
         console.writeln(n.toString());
         break;
         
       case Primitive.REPEAT:
         nodes = evalInScope(nodes, scope);
-        NumberNode nn = nodes.getHead();
-        nodes = nodes.getTail();
+        NumberNode nn = nodes.head;
+        nodes = nodes.tail;
         int times = nn.getNumValue();
-        Node body = nodes.getHead();
+        Node body = nodes.head;
         if (!body.isList()) {
           body = new ListNode.cons(body, ListNode.NIL);
         }
-        nodes = nodes.getTail();
+        nodes = nodes.tail;
         for (int i = 0; i < times; ++i) {
           evalAllInScope(body, scope);  // ignore result
         }
         break;
       case Primitive.RIGHT:
         nodes = evalInScope(nodes, scope);
-        NumberNode nn = nodes.getHead();
-        nodes = nodes.getTail();
+        NumberNode nn = nodes.head;
+        nodes = nodes.tail;
         turtle.right(nn.getNumValue());
         break;
       case Primitive.PENDOWN:
@@ -225,23 +222,20 @@ class Interpreter {
   
   // interpret user-defined command.
   // @param defn definition
-  ListNode evalUserCommand(WordNode defn, ListNode tail, Scope scope) {
-    int numParams = defn.getArity();
-    ListNode body = defn.getDefnBody();
+  ListNode evalUserCommand(DefnNode defn, ListNode tail, Scope scope) {
+    int numParams = defn.arity;
+    ListNode body = defn.body;
     Map<String, Node> env = new Map();
     while (numParams != 0) {
-      WordNode formalParam = body.getHead();
-      body = body.getTail();
-      assert(formalParam.isIdent());
+      WordNode formalParam = body.head;
+      body = body.tail;
       
       // Evaluate next arg, consuming a prefix.
       tail = evalInScope(tail, scope);
-      Node actualParam = tail.getHead();
-      tail = tail.getTail();
+      Node actualParam = tail.head;
+      tail = tail.tail;
 
-      String identName = formalParam.getIdentName();
-      
-      env[formalParam.getIdentName()] = actualParam;
+      env[formalParam.stringValue] = actualParam;
       numParams = numParams - 1;
     }
     if (!env.isEmpty()) {
@@ -264,8 +258,8 @@ class Interpreter {
     Node result;
     while (!nodes.isNil()) {
       nodes = evalInScope(nodes, scope);
-      result = nodes.getHead();
-      nodes = nodes.getTail();
+      result = nodes.head;
+      nodes = nodes.tail;
     }
     if (result == null) {
       result = Primitive.UNIT;
@@ -278,7 +272,7 @@ class Interpreter {
     if (nodes.isNil()) {
       return nodes;
     }
-    Node fn = nodes.getHead();
+    Node fn = nodes.head;
  
     if (fn.isList()) {
       return nodes;
@@ -286,30 +280,29 @@ class Interpreter {
     
     if (fn.isPrim()) {
       Primitive p = fn;
-      return evalPrimCommand(p, nodes.getTail(), scope);
+      return evalPrimCommand(p, nodes.tail, scope);
     }
     if (fn.isNum()) {
       return nodes;
     }
+    if (fn.isDefn()) {  // new definition
+      DefnNode defn = fn;
+      globalScope.bind(defn.name, defn);
+      return new ListNode.cons(Primitive.UNIT, nodes.tail);
+    }
     WordNode wn = fn;
-    if (wn.isDefn()) {  // new definition
-      globalScope.bind(wn.getDefnName(), wn);
-      return new ListNode.cons(Primitive.UNIT, nodes.getTail());
+    // referencing a variable or defn
+    Node lookup = scope[wn.stringValue];
+    if (lookup == null) {
+      throw new InterpreterException("unknown command: ${wn.stringValue}");
     }
-    if (wn.isIdent()) {  // referencing a variable or defn
-      Node lookup = scope[wn.getIdentName()];
-      if (lookup == null) {
-        throw new InterpreterException("unknown command: ${wn.getIdentName()}");
+    if (lookup.isWord()) {
+      Node lookupWord = lookup;
+      if (lookupWord.isDefn()) {  // referencing a defn
+        return evalUserCommand(lookupWord, nodes.tail, scope);
       }
-      if (lookup.isWord()) {
-        WordNode lookupWord = lookup;
-        if (lookupWord.isDefn()) {  // referencing a defn
-          return evalUserCommand(lookupWord, nodes.getTail(), scope);
-        }
-      }
-      // referencing something else, e.g. number, prim
-      return evalInScope(new ListNode.cons(lookup, nodes.getTail()), scope);
     }
-    throw new InterpreterException("don't know what to do with $wn");
+    // referencing something else, e.g. number, prim
+    return evalInScope(new ListNode.cons(lookup, nodes.tail), scope);
   }
 }

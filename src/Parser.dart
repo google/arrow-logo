@@ -225,7 +225,7 @@ class Parser {
     int i = advanceWhile(rtext, isAlpha);
     String ident = text.substring(0, i + 1);
     rtext = rtext.substring(i);
-    token.setVar(WordNode.makeIdent(ident));
+    token.setVar(new WordNode(ident));
     return rtext;
   }
 
@@ -254,7 +254,7 @@ class Parser {
     } else {
       Primitive p = toplevel[text];
       if (p == null)
-        token.setIdent(WordNode.makeIdent(text));
+        token.setIdent(new WordNode(text));
       else
         token.setPrim(p);
     }
@@ -446,7 +446,7 @@ class Parser {
       throw new Exception("expected ident");
     }
     WordNode wn = token.node;
-    String name = wn.getIdentName();
+    String name = wn.stringValue;
     input = nextToken(input);
     var objList = new List<Node>();
     int numVars = 0;
@@ -462,13 +462,13 @@ class Parser {
     if (token.kind == Token.TOKEN_EOF) {
       // ignore incomplete definition, to be handled by UI
       // TODO: move this constant to a reasonable place.
-      nodeList.add(WordNode.makeIdent("INCOMPLETE_DEFINITION"));
-      nodeList.add(WordNode.makeIdent(name));
+      nodeList.add(new WordNode("INCOMPLETE_DEFINITION"));
+      nodeList.add(new WordNode(name));
       return input;
     }
     input = nextToken(input);
     nodeList.add(
-      WordNode.makeDefn(name, numVars, ListNode.makeList(objList)));
+      new DefnNode(name, numVars, ListNode.makeList(objList)));
     return input;
   }
      
