@@ -28,7 +28,9 @@ class Node {
 
   static const int KIND_WORD = 0;
   static const int KIND_LIST = 1;
-  static const int KIND_PRIM = 2;
+  static const int KIND_NUMBER = 2;
+  static const int KIND_PRIM = 3;
+
   static const int KIND_MASK = 3;
   
   final int tag;
@@ -37,6 +39,7 @@ class Node {
    
   bool isWord() { return (tag & KIND_MASK) == KIND_WORD; }
   bool isList() { return (tag & KIND_MASK) == KIND_LIST; }
+  bool isNum() { return (tag & KIND_MASK) == KIND_NUMBER; }
   bool isPrim() { return (tag & KIND_MASK) == KIND_PRIM; }
 }
 
@@ -114,17 +117,12 @@ class ListNode extends Node {
 
 class WordNode extends Node {
   
-  static final int WORD_INT    = 1 << 2;
-  static final int WORD_FLOAT  = 2 << 2;
-  static final int WORD_STRING = 3 << 2;
-  static final int WORD_IDENT  = 4 << 2;
-  static final int WORD_DEFN   = 5 << 2;
-  static final int WORD_MASK   = 7 << 2;
+  static final int WORD_STRING = 1 << 2;
+  static final int WORD_IDENT  = 2 << 2;
+  static final int WORD_DEFN   = 3 << 2;
+  static final int WORD_MASK   = 3 << 2;
 
   int arity;         // Defn
-  
-  int intValue;      // Int
-  double floatValue; // Float
   String strValue;   // String, Ident, Defn
   
   ListNode body;     // Defn
@@ -140,38 +138,17 @@ class WordNode extends Node {
       return false;
     }
     return (isIdent() && getIdentName() == that.getIdentName())
-        || (isInt() && getIntValue() == that.getIntValue())
-        || (isFloat() && getFloatValue() == that.getFloatValue())
         || (isString() && getStringValue() == that.getStringValue())
         || (isDefn() && getDefnName() == that.getDefnName() 
                      && getDefnBody() == that.getDefnBody());
   }
   
   bool isIdent() { return (tag & WORD_MASK) == WORD_IDENT; }
-  bool isInt() { return (tag & WORD_MASK) == WORD_INT; }
-  bool isFloat() { return (tag & WORD_MASK) == WORD_FLOAT; }
-  bool isNum() { return isInt() || isFloat(); }
   bool isString() { return (tag & WORD_MASK) == WORD_STRING; }
   bool isDefn() { return (tag & WORD_MASK) == WORD_DEFN; }
 
   String getIdentName() {
     return strValue;
-  }
-  
-  int getIntValue() {
-    return intValue;
-  }
-
-  double getFloatValue() {
-    return isInt() ? intValue.toDouble() : floatValue;
-  }
-  
-  num getNumValue() {
-    if (isInt())
-      return intValue;
-    if (isFloat())
-      return floatValue;
-    throw new Exception("neither int nor float");
   }
 
   String getStringValue() {
@@ -195,12 +172,8 @@ class WordNode extends Node {
   }
 
   String toString() {
-    if (isFloat()) {
-      return "Float(${getFloatValue()})";
-    } else if (isIdent()) {
+    if (isIdent()) {
       return "Ident(${getStringValue()})";
-    } else if (isInt()) {
-      return "Int(${getIntValue()})";
     } else if (isString()) {
       return "String(${getStringValue()})";
     } else if (isDefn()) {
@@ -213,18 +186,6 @@ class WordNode extends Node {
   static Node makeIdent(String identName) {
     WordNode wn = new WordNode(WORD_IDENT);
     wn.strValue = identName;
-    return wn;
-  }
-  
-  static Node makeInt(int intValue) {
-    WordNode wn = new WordNode(WORD_INT);
-    wn.intValue = intValue;
-    return wn;
-  }
-  
-  static Node makeFloat(double floatValue) {
-    WordNode wn = new WordNode(WORD_FLOAT);
-    wn.floatValue = floatValue;
     return wn;
   }
   
@@ -242,3 +203,59 @@ class WordNode extends Node {
     return wn;
   }
 }
+
+class NumberNode extends Node {
+  static final int NUMBER_INT    = 1 << 2;
+  static final int NUMBER_FLOAT  = 2 << 2;
+  static final int NUMBER_MASK   = 3 << 2;
+
+  int intValue;      // Int
+  double floatValue; // Float
+  
+  NumberNode(int tag) : super(tag | Node.KIND_NUMBER);
+
+  NumberNode.int(this.intValue) : super(NUMBER_INT | Node.KIND_NUMBER);
+  NumberNode.float(this.floatValue) : super(NUMBER_FLOAT | Node.KIND_NUMBER);
+  
+  bool operator ==(Object node) {
+    if (!(node is NumberNode)) {
+      return false;
+    }
+    NumberNode that = node;
+    if (isInt()) {
+      return that.isInt() && getIntValue() == that.getIntValue();
+    } else if (isFloat()) {
+      return that.isFloat() && getFloatValue() == that.getFloatValue();
+    }
+  }
+  
+  bool isInt() { return (tag & NUMBER_MASK) == NUMBER_INT; }
+  bool isFloat() { return (tag & NUMBER_MASK) == NUMBER_FLOAT; }
+  
+  int getIntValue() {
+    return intValue;
+  }
+
+  double getFloatValue() {
+    return isInt() ? intValue.toDouble() : floatValue;
+  }
+  
+  num getNumValue() {
+    if (isInt())
+      return intValue;
+    if (isFloat())
+      return floatValue;
+    throw new Exception("neither int nor float");
+  }
+
+
+  String toString() {
+    if (isFloat()) {
+      return "Float(${getFloatValue()})";
+    } else if (isInt()) {
+      return "Int(${getIntValue()})";
+    }
+    throw new Exception("neither int nor float");
+  }
+}
+

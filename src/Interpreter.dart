@@ -38,16 +38,24 @@ class Interpreter {
   
   Node evalBinOp(ListNode nodes, Scope scope, opInt(int x, int y), opFloat(double x, double y)) {   
     nodes = evalInScope(nodes, scope);
-    WordNode op1 = nodes.getHead();
+    Node op1 = nodes.getHead();
+    if (!(op1.isNum())) {
+      throw new InterpreterException("expected num for op1");
+    }
+    NumberNode op1num = op1;
     nodes = nodes.getTail();
     nodes = evalInScope(nodes, scope);
-    WordNode op2 = nodes.getHead();
+    Node op2 = nodes.getHead();
+    if (!(op2.isNum())) {
+      throw new InterpreterException("expected num for op1");
+    }
+    NumberNode op2num = op2;
     nodes = nodes.getTail();
-    WordNode res;
-    if (op1.isInt() && op2.isInt()) {
-       res = WordNode.makeInt(opInt(op1.getIntValue(), op2.getIntValue()));
+    Node res;
+    if (op1num.isInt() && op2num.isInt()) {
+       res = new NumberNode.int(opInt(op1num.getIntValue(), op2num.getIntValue()));
     } else {
-      res = WordNode.makeFloat(opFloat(op1.getFloatValue(), op2.getFloatValue()));
+      res = new NumberNode.float(opFloat(op1num.getFloatValue(), op2num.getFloatValue()));
     }  
     return new ListNode.cons(res, nodes);
   }
@@ -68,7 +76,7 @@ class Interpreter {
       case Primitive.UNIT:
         break;
       case Primitive.BACK:
-        WordNode wn = nodes.getHead();
+        NumberNode wn = nodes.getHead();
         nodes = nodes.getTail();
         turtle.back(wn.getNumValue());
         break;
@@ -86,7 +94,7 @@ class Interpreter {
         return new ListNode.cons(p, nodes);
       case Primitive.FORWARD:
         nodes = evalInScope(nodes, scope);
-        WordNode wn = nodes.getHead();
+        NumberNode wn = nodes.getHead();
         nodes = nodes.getTail();
         turtle.forward(wn.getNumValue()); 
         break;
@@ -150,13 +158,13 @@ class Interpreter {
         break;
       case Primitive.LEFT:
         nodes = evalInScope(nodes, scope);
-        WordNode wn = nodes.getHead();
+        NumberNode wn = nodes.getHead();
         nodes = nodes.getTail();
         turtle.left(wn.getNumValue()); 
         break;
         
       case Primitive.PI:
-        return new ListNode.cons(WordNode.makeFloat(math.PI), nodes);
+        return new ListNode.cons(new NumberNode.float(math.PI), nodes);
         
       case Primitive.PRINT:
         nodes = evalInScope(nodes, scope);
@@ -168,9 +176,9 @@ class Interpreter {
         
       case Primitive.REPEAT:
         nodes = evalInScope(nodes, scope);
-        WordNode wn = nodes.getHead();
+        NumberNode nn = nodes.getHead();
         nodes = nodes.getTail();
-        int times = wn.getNumValue();
+        int times = nn.getNumValue();
         Node body = nodes.getHead();
         if (!body.isList()) {
           body = new ListNode.cons(body, ListNode.NIL);
@@ -182,9 +190,9 @@ class Interpreter {
         break;
       case Primitive.RIGHT:
         nodes = evalInScope(nodes, scope);
-        WordNode wn = nodes.getHead();
+        NumberNode nn = nodes.getHead();
         nodes = nodes.getTail();
-        turtle.right(wn.getNumValue());
+        turtle.right(nn.getNumValue());
         break;
       case Primitive.PENDOWN:
         turtle.penDown();
@@ -280,10 +288,10 @@ class Interpreter {
       Primitive p = fn;
       return evalPrimCommand(p, nodes.getTail(), scope);
     }
-    WordNode wn = fn;
-    if (wn.isNum()) {
+    if (fn.isNum()) {
       return nodes;
     }
+    WordNode wn = fn;
     if (wn.isDefn()) {  // new definition
       globalScope.bind(wn.getDefnName(), wn);
       return new ListNode.cons(Primitive.UNIT, nodes.getTail());

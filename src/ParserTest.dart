@@ -31,17 +31,21 @@ class ParserTest extends UnitTests {
   void testTokenizeNum() {
     assertEquals("", parser.tokenizeNum("1"));
     assertEquals(Token.TOKEN_NUM, parser.token.kind);
-    assertTrue(parser.token.node.isWord());
-    WordNode wn = parser.token.node;
-    assertTrue(wn.isInt());
-    assertEquals(1, wn.getIntValue());
+    assertTrue(parser.token.node.isNum());
+    Node n = parser.token.node;
+    assertTrue(n.isNum());
+    NumberNode numInt = n;
+    assertTrue(numInt.isInt());
+    assertEquals(1, numInt.getIntValue());
     
     assertEquals("x", parser.tokenizeNum("1.2x"));
     assertEquals(Token.TOKEN_NUM, parser.token.kind);
-    assertTrue(parser.token.node.isWord());
-    wn = parser.token.node;
-    assertTrue(wn.isFloat());
-    assertEquals(1.2, wn.getFloatValue());
+    assertTrue(parser.token.node.isNum());
+    n = parser.token.node;
+    assertTrue(n.isNum());
+    NumberNode numFloat = n;
+    assertTrue(numFloat.isFloat());
+    assertEquals(1.2, numFloat.getFloatValue());
   }
   
   void testTokenizeIdentOrKeyword() {
@@ -56,10 +60,10 @@ class ParserTest extends UnitTests {
   }
   
   void testParseSomeWords() {
-    assertEquals(WordNode.makeInt(1), WordNode.makeInt(1));  // sanity
+    assertEquals(new NumberNode.int(1), new NumberNode.int(1));  // sanity
     assertEquals(ListNode.makeList([
-        Primitive.FORWARD, WordNode.makeInt(1),
-        Primitive.FORWARD, WordNode.makeFloat(1.2)]),
+        Primitive.FORWARD, new NumberNode.int(1),
+        Primitive.FORWARD, new NumberNode.float(1.2)]),
       parser.parse("fd 1 fd 1.2"));
   }
   
@@ -68,16 +72,16 @@ class ParserTest extends UnitTests {
       ListNode.makeList([ListNode.NIL]), 
       parser.parse("[]"));
     assertEquals(
-      ListNode.makeList([ListNode.makeList([WordNode.makeInt(1)])]), 
+      ListNode.makeList([ListNode.makeList([new NumberNode.int(1)])]), 
       parser.parse("[1]"));
     assertEquals(ListNode.makeList([
         Primitive.PRINT,
         ListNode.makeList([
-          WordNode.makeInt(1), 
-          ListNode.makeList([WordNode.makeFloat(1.2)]), 
+          new NumberNode.int(1), 
+          ListNode.makeList([new NumberNode.float(1.2)]), 
           ListNode.NIL,
           Primitive.FORWARD,
-          WordNode.makeInt(2)])]),
+          new NumberNode.int(2)])]),
       parser.parse("pr [ 1 [ 1.2 ] [] fd 2 ]"));
   }
   
@@ -94,7 +98,7 @@ class ParserTest extends UnitTests {
     assertEquals(
       ListNode.makeList(
         [WordNode.makeDefn("box", 0, ListNode.makeList([                                                             
-          Primitive.FORWARD, WordNode.makeInt(10)]))]), 
+          Primitive.FORWARD, new NumberNode.int(10)]))]), 
       parser.parse("to box fd 10 end"));
     assertEquals(
       ListNode.makeList(
@@ -107,52 +111,52 @@ class ParserTest extends UnitTests {
   void testParseInfixExpr() {
 
     assertEquals(
-      ListNode.makeList([WordNode.makeInt(2)]),
+      ListNode.makeList([new NumberNode.int(2)]),
       parser.parse("2"));
     
     assertEquals(
       ListNode.makeList([
         Primitive.SUM,
-          WordNode.makeInt(2), 
-          WordNode.makeInt(2)]),
+          new NumberNode.int(2), 
+          new NumberNode.int(2)]),
       parser.parse("2 + 2"));
     assertEquals(
       ListNode.makeList([
         Primitive.SUM, 
           Primitive.SUM, 
-            WordNode.makeInt(2), 
-            WordNode.makeInt(2), 
-          WordNode.makeInt(2)]),
+            new NumberNode.int(2), 
+            new NumberNode.int(2), 
+          new NumberNode.int(2)]),
       parser.parse("2 + 2 + 2"));
     assertEquals(
       ListNode.makeList([
         Primitive.SUM, 
-          WordNode.makeInt(2), 
+          new NumberNode.int(2), 
           Primitive.PRODUCT, 
-            WordNode.makeInt(3), 
-            WordNode.makeInt(4)]),
+            new NumberNode.int(3), 
+            new NumberNode.int(4)]),
       parser.parse("2 + 3 * 4"));
     assertEquals(
       ListNode.makeList([
         Primitive.SUM, 
         Primitive.PRODUCT, 
-          WordNode.makeInt(3), 
-          WordNode.makeInt(4),
-        WordNode.makeInt(2)]),
+          new NumberNode.int(3), 
+          new NumberNode.int(4),
+        new NumberNode.int(2)]),
       parser.parse("3 * 4 + 2"));
     assertEquals(
       ListNode.makeList([
         Primitive.DIFFERENCE, 
           Primitive.QUOTIENT, 
             Primitive.POWER, 
-               WordNode.makeInt(2),
+               new NumberNode.int(2),
                Primitive.POWER, 
-                 WordNode.makeFloat(3.5),
+                 new NumberNode.float(3.5),
                  Primitive.SUM, 
-                 WordNode.makeInt(7),
-                 WordNode.makeInt(1),
-            WordNode.makeInt(3),
-          WordNode.makeInt(2)]),
+                 new NumberNode.int(7),
+                 new NumberNode.int(1),
+            new NumberNode.int(3),
+          new NumberNode.int(2)]),
       parser.parse("2^3.5^(7+1) / 3 - 2"));
   }
   
@@ -162,7 +166,7 @@ class ParserTest extends UnitTests {
       ListNode.makeList(
         [Primitive.GREATERTHAN,
          WordNode.makeIdent(":g"),
-         WordNode.makeInt(2)]),
+         new NumberNode.int(2)]),
       parser.parse("(:g > 2)"));
   }
   

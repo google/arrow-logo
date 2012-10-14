@@ -59,7 +59,7 @@ class Token {
   Token setPrim(Primitive p)     => setKind(TOKEN_PRIM).setNode(p);
   Token setIdent(WordNode ident) => setKind(TOKEN_IDENT).setNode(ident);
   Token setVar(WordNode v)       => setKind(TOKEN_VAR).setNode(v);
-  Token setNum(WordNode n)       => setKind(TOKEN_NUM).setNode(n);
+  Token setNum(NumberNode n)     => setKind(TOKEN_NUM).setNode(n);
   Token setEof()                 => setKind(TOKEN_EOF).setNode(null);
   
   String toString() {
@@ -235,10 +235,10 @@ class Parser {
     int i = advanceWhile(text, isDigitOrDot);
     String rest = text.substring(i);
     text = text.substring(0, i);
-    WordNode wn = text.contains(".")
-        ? WordNode.makeFloat(math.parseDouble(text))
-        : WordNode.makeInt(math.parseInt(text));
-    token.setNum(wn);
+    NumberNode nn = text.contains(".")
+        ? new NumberNode.float(math.parseDouble(text))
+        : new NumberNode.int(math.parseInt(text));
+    token.setNum(nn);
     return rest;
   }
   

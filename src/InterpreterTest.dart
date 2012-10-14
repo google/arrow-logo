@@ -39,12 +39,12 @@ class InterpreterTest extends UnitTests {
       Primitive.UNIT, 
       interpreter.eval(ListNode.NIL));
     assertEquals(
-      WordNode.makeInt(1),
-      interpreter.eval(ListNode.makeList([WordNode.makeInt(1)])));
+      new NumberNode.int(1),
+      interpreter.eval(ListNode.makeList([new NumberNode.int(1)])));
     assertEquals(
-      ListNode.makeList([WordNode.makeInt(1)]), 
+      ListNode.makeList([new NumberNode.int(1)]), 
       interpreter.eval(    
-        ListNode.makeList([ListNode.makeList([WordNode.makeInt(1)])])));
+        ListNode.makeList([ListNode.makeList([new NumberNode.int(1)])])));
     assertEquals(
       ListNode.makeList([Primitive.FORWARD]), 
       interpreter.eval(
@@ -52,7 +52,7 @@ class InterpreterTest extends UnitTests {
   }
 
   void testEvalIf() {
-    WordNode fortyTwo = WordNode.makeInt(42);
+    Node fortyTwo = new NumberNode.int(42);
     assertEquals(
       fortyTwo,
       interpreter.eval(
@@ -69,7 +69,7 @@ class InterpreterTest extends UnitTests {
         ListNode.makeList([
           Primitive.IFELSE, Primitive.TRUE, fortyTwo, Primitive.PI])));
     assertEquals(
-      WordNode.makeFloat(math.PI),
+      new NumberNode.float(math.PI),
       interpreter.eval(
         ListNode.makeList([
           Primitive.IFELSE, Primitive.FALSE, fortyTwo, Primitive.PI])));
