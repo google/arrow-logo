@@ -33,6 +33,7 @@ class Primitive extends Node {
   static const LESSOREQUAL = const Primitive(1, "<=", "lessorequal"); 
   static const DIFFERENCE = const Primitive(2, "-", "difference"); 
   static const NIL = const Primitive(0, "_nil"); 
+  static const OUTPUT = const Primitive(1, "output");
   static const PENDOWN = const Primitive(0, "pd", "pendown"); 
   static const PENUP = const Primitive(0, "pu", "penup"); 
   static const PI = const Primitive(0, "pi");  
@@ -42,6 +43,7 @@ class Primitive extends Node {
   static const QUOTIENT = const Primitive(2, "/", "quotient"); 
   static const REPEAT = const Primitive(2, "repeat"); 
   static const RIGHT = const Primitive(1, "rt", "right"); 
+  static const STOP = const Primitive(0, "stop");
   static const SUM = const Primitive(2, "+", "sum"); 
   static const TRUE = const Primitive(0, "true"); 
   static const SHOWTURTLE = const Primitive(0, "st", "showturtle");
@@ -53,11 +55,11 @@ class Primitive extends Node {
   static const List<Primitive> commandsList = const [ 
     BACK, CLEAN, CLEARSCREEN, CLEARTEXT, CONS, FORWARD, HELP, HIDETURTLE,
     HOME, IF, IFELSE, LEFT, NIL, PENDOWN, PENUP, PRINT, REPEAT, RIGHT,
-    SHOWTURTLE ];
+    SHOWTURTLE, STOP ];
 
   static const List<Primitive> operatorList = const [
     DIFFERENCE, FALSE, LESSOREQUAL, LESSTHAN, GREATEROREQUAL, GREATERTHAN,
-    PRODUCT, QUOTIENT, POWER, PI, SUM, TRUE ];
+    OUTPUT, PRODUCT, QUOTIENT, POWER, PI, SUM, TRUE ];
 
   static getPrecedence(Primitive p) {
     switch (p) {

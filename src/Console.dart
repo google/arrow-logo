@@ -51,11 +51,7 @@ class Console {
   }
 
   bool isCompleteDef(Node node) {
-    if (!node.isWord()) {
-      return false;
-    }
-    WordNode wn = node;
-    return wn.isDefn();
+    return node.isDefn();
   }
 
   void showHelp() {

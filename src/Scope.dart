@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Simple hierarchical scope.
+/**
+ * Simple scope, with pointer to parent.
+ */
 class Scope {
   final Map<String, Node> symtab;
   final Scope parent;

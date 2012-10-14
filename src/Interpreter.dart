@@ -12,9 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/**
+ * Something went wrong. TODO: useful messaging
+ */
 class InterpreterException {
   final String message;
   const InterpreterException(this.message);
+}
+
+/**
+ * Used for OUTPUT and STOP.
+ */
+class InterpreterOutputException {
+  final Node result;
+  const InterpreterOutputException(this.result);
 }
 
 class Interpreter {
@@ -66,9 +77,12 @@ class Interpreter {
   static int primQuotientInt(int a, int b) => a ~/ b;
   static double primQuotientFloat(double a, double b) => a / b;
   
-  // @return uninterpreted tail
-  ListNode evalPrimCommand(Primitive p, ListNode nodes, Scope scope) {
-    print("evalPrimCommand $p $nodes");
+  /**
+   * Evaluates a primitive function (aka command/operator).
+   * 
+   * @return uninterpreted tail
+   */
+  ListNode evalPrimFun(Primitive p, ListNode nodes, Scope scope) {
     switch (p) {
       case Primitive.UNIT:
         break;
@@ -201,6 +215,14 @@ class Interpreter {
         turtle.showTurtle();
         break;
         
+      case Primitive.STOP:
+        throw new InterpreterOutputException(Primitive.UNIT);
+        
+      case Primitive.OUTPUT:
+        nodes = evalInScope(nodes, scope);
+        Node head = nodes.head;
+        throw new InterpreterOutputException(head);
+
       case Primitive.SUM:
         return evalBinOp(nodes, scope, primSumInt, primSumFloat);
  
@@ -220,9 +242,12 @@ class Interpreter {
     return new ListNode.cons(Primitive.UNIT, nodes);
   }
   
-  // interpret user-defined command.
-  // @param defn definition
-  ListNode evalUserCommand(DefnNode defn, ListNode tail, Scope scope) {
+  /**
+   * Interprets user-defined function (aka command/operator).
+   *
+   * @param defn definition
+   */ 
+  ListNode evalUserFun(DefnNode defn, ListNode tail, Scope scope) {
     int numParams = defn.arity;
     ListNode body = defn.body;
     Map<String, Node> env = new Map();
@@ -241,19 +266,30 @@ class Interpreter {
     if (!env.isEmpty()) {
       scope = new Scope(env, scope);
     }
-    Node result = evalAllInScope(body, scope);
+    Node result;
+    try {
+      result = evalAllInScope(body, scope);
+    } on InterpreterOutputException catch (e) {
+      print("stop");
+      return new ListNode.cons(e.result, tail);
+    }
     return new ListNode.cons(result, tail);
   }
   
-  // entry point. Evaluates all commands in `nodes' and
-  // returns result of last command.
-  // @return result of last command, or UNIT if empty
+  /**
+   * Entry point, evaluates [nodes] and returns result if any.
+   * 
+   * @return result of operator, or UNIT for command
+   */
   Node eval(ListNode nodes) {
     return evalAllInScope(nodes, globalScope);
   }
   
-  // Evaluates all commands in `nodes'.
-  // @return result of last command, or UNIT if `nodes' was empty
+  /**
+   * Evaluates all commands in [nodes].
+   *
+   * @return result of last command, or UNIT if `nodes' was empty
+   */
   Node evalAllInScope(ListNode nodes, Scope scope) {
     Node result;
     while (!nodes.isNil()) {
@@ -267,42 +303,41 @@ class Interpreter {
     return result;
   }
   
-  // @return [result] ++ suffix of unused nodes
+  /**
+   * Evaluates [nodes] in scope [scope].
+   * 
+   * @return [result] ++ suffix of unused nodes
+   */
   ListNode evalInScope(ListNode nodes, Scope scope) {
     if (nodes.isNil()) {
       return nodes;
     }
     Node fn = nodes.head;
  
-    if (fn.isList()) {
+    if (fn.isList() || fn.isNum()) {
       return nodes;
     }
     
     if (fn.isPrim()) {
       Primitive p = fn;
-      return evalPrimCommand(p, nodes.tail, scope);
+      return evalPrimFun(p, nodes.tail, scope);
     }
-    if (fn.isNum()) {
-      return nodes;
-    }
-    if (fn.isDefn()) {  // new definition
+
+    if (fn.isDefn()) {  // new definition. TODO(bqe): move elsewhere?
       DefnNode defn = fn;
       globalScope.bind(defn.name, defn);
       return new ListNode.cons(Primitive.UNIT, nodes.tail);
     }
     WordNode wn = fn;
-    // referencing a variable or defn
     Node lookup = scope[wn.stringValue];
     if (lookup == null) {
       throw new InterpreterException("unknown command: ${wn.stringValue}");
     }
-    if (lookup.isWord()) {
-      Node lookupWord = lookup;
-      if (lookupWord.isDefn()) {  // referencing a defn
-        return evalUserCommand(lookupWord, nodes.tail, scope);
-      }
+    if (lookup.isDefn()) {
+      DefnNode defn = lookup;
+      return evalUserFun(defn, nodes.tail, scope);
+    } else {
+      return evalInScope(new ListNode.cons(lookup, nodes.tail), scope);
     }
-    // referencing something else, e.g. number, prim
-    return evalInScope(new ListNode.cons(lookup, nodes.tail), scope);
   }
 }

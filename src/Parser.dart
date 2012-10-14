@@ -163,11 +163,13 @@ class OpInfo {
   String toString() => "$binop $operand $next";
 }
 
-// Reads input and builds up an abstract syntax tree in the form of lists and
-// Node instances.
-
-// recursive descent combined with operator-precedence parsing.
-// TODO adding "apply" nodes, and of course, error reporting.
+/**
+ * Reads input and builds up an abstract syntax tree in the form of lists and
+ * Node instances.
+ *
+ * recursive descent combined with operator-precedence parsing.
+ * TODO adding "apply" nodes, and of course, error reporting.
+ */
 class Parser {
   static const int CHAR_0 = 48;  // "0".charCodeAt(0) is not a constant
   static const int CHAR_9 = 57; 
@@ -193,7 +195,7 @@ class Parser {
   static bool isSpace(int charCode) => 
       CHAR_BLANK == charCode || CHAR_TAB == charCode;
   
-  // return first index i>0 where !f(text.charCodeAt(i)) holds
+  /** @return first index i>0 where !f(text.charCodeAt(i)) holds */
   static int advanceWhile(String text, bool f(int)) {
     int i = 0;
     int len = text.length;
@@ -214,9 +216,11 @@ class Parser {
   
   Parser(Scope this.toplevel) : token = new Token(), opstack = null;
   
-  // @pre  text.charCodeAt(0) == CHAR_COLON
-  // @post token.kind == Token.TOKEN_VAR
-  // @post token.node.isIdent()
+  /**
+   * @pre  text.charCodeAt(0) == CHAR_COLON
+   * @post token.kind == Token.TOKEN_VAR
+   * @post token.node.isIdent()
+   */
   String tokenizeVar(String text) {
     String rtext = text.substring(1);
     if (rtext.isEmpty() || !isAlpha(rtext.charCodeAt(0))) {
@@ -229,8 +233,10 @@ class Parser {
     return rtext;
   }
 
-  // @post token.kind == Token.TOKEN_NUM
-  // @post token.node.isNum()
+  /**
+   * @post token.kind == Token.TOKEN_NUM
+   * @post token.node.isNum()
+   */
   String tokenizeNum(String text) {
     int i = advanceWhile(text, isDigitOrDot);
     String rest = text.substring(i);
@@ -242,7 +248,7 @@ class Parser {
     return rest;
   }
   
-  // @post token.kind \in {TOKEN_TO, TOKEN_END, TOKEN_IDENT, TOKEN_PRIM}  
+  /** @post token.kind \in {TOKEN_TO, TOKEN_END, TOKEN_IDENT, TOKEN_PRIM} */
   String tokenizeIdent(String text) {
     int i = advanceWhile(text, isAlpha);
     String rest = text.substring(i);
@@ -297,10 +303,12 @@ class Parser {
     return text.substring(1);
   }
   
-  // Tokenizes a prefix of `text', returns rest.
-  //
-  // @pre text == text.trim()
-  // @post this.token is set to appropriate value
+  /**
+   * Tokenizes a prefix of `text', returns rest.
+   *
+   * @pre text == text.trim()
+   * @post this.token is set to appropriate value
+   */
   String tokenize(String text) {
     if (text.isEmpty()) {
       return text;
@@ -317,7 +325,7 @@ class Parser {
     }
   }
   
-  // Calls tokenize and trims whitespace
+  /** Calls tokenize and trims whitespace */
   String nextToken(String text) {
     if (text.isEmpty()) {
       token.setEof();
@@ -326,8 +334,10 @@ class Parser {
     return tokenize(text).trim();
   }
   
-  // @pre token.kind == TOKEN_LBRACKET
-  // @post nodeList' = nodeList ++ listNode
+  /**
+   * @pre token.kind == TOKEN_LBRACKET
+   * @post nodeList' = nodeList ++ listNode
+   */
   String parseList(List<Node> nodeList, String input) {
     var objList = new List<Node>();
     
@@ -340,9 +350,9 @@ class Parser {
     return nextToken(input);
   }
   
-  //
-  // word ::= int | float | var | ident
-  // 
+  /**
+   *     word ::= int | float | var | ident
+   */ 
   String parseWord(List<Node> nodeList, String input) {
     switch (token.kind) {
       case Token.TOKEN_PRIM:
@@ -356,9 +366,9 @@ class Parser {
     }
   }
   
-  //
-  // operator precedence
-  //
+  /**
+   * Operator precedence parsing.
+   */
   List<Node> reduceStack(OpInfo base, List<Node> top0, int prec,
                          bool isLeftAssoc) {
     List<Node> result = top0;
@@ -376,9 +386,9 @@ class Parser {
     return result;
   }
   
-  //
-  // part ::= word | list | '(' expr ')'
-  //
+  /**
+   *     part ::= word | list | '(' expr ')'
+   */
   String parsePart(List<Node> nodeList, String input) {
     switch (token.kind) {
       case Token.TOKEN_PRIM:
@@ -398,9 +408,9 @@ class Parser {
     }
   }
 
-  //
-  // op ::= part (infix part)*
-  //
+  /**
+   *      op ::= part (infix part)*
+   */
   String parseOp(List<Node> nodeList, String input) {
     List operand = [];
     OpInfo base = opstack;
@@ -425,9 +435,9 @@ class Parser {
     return input;
   }
 
-  //
-  // expr ::= op expr*
-  //
+  /**
+   *     expr ::= op expr*
+   */
   String parseExpr(List<Node> nodeList, String input) {
     input = parseOp(nodeList, input);
     while (token.kind != Token.TOKEN_EOF
@@ -437,9 +447,9 @@ class Parser {
     return input;
   }
   
-  //
-  // defn ::= 'to' ident var* expr* 'end' 
-  //
+  /**
+   *     defn ::= 'to' ident var* expr* 'end' 
+   */
   String parseDefn(List<Node> nodeList, String input) {
     input = nextToken(input);
     if (token.kind != Token.TOKEN_IDENT) {
@@ -472,7 +482,9 @@ class Parser {
     return input;
   }
      
-  // Parses `input' to list of nodes.
+  /**
+   * Parses [input] to list of nodes.
+   */
   ListNode parse(String input) {
     input = input.trim();
     var nodeList = new List<Node>();
