@@ -43,7 +43,8 @@ class Primitive extends Node {
   static const PRINT = const Primitive(1, "pr", "print"); 
   static const QUOTIENT = const Primitive(2, "/", "quotient"); 
   static const REPEAT = const Primitive(2, "repeat"); 
-  static const RIGHT = const Primitive(1, "rt", "right"); 
+  static const RIGHT = const Primitive(1, "rt", "right");
+  static const SETPENCOLOR = const Primitive(1, "setpc", "setpencolor");
   static const STOP = const Primitive(0, "stop");
   static const SUM = const Primitive(2, "+", "sum"); 
   static const TRUE = const Primitive(0, "true"); 
@@ -56,7 +57,7 @@ class Primitive extends Node {
   static const List<Primitive> commandsList = const [ 
     BACK, CLEAN, CLEARSCREEN, CLEARTEXT, CONS, FORWARD, HELP, HIDETURTLE,
     HOME, IF, IFELSE, LEFT, NIL, PENDOWN, PENUP, PRINT, REPEAT, RIGHT,
-    SHOWTURTLE, STOP ];
+    SETPENCOLOR, SHOWTURTLE, STOP ];
 
   static const List<Primitive> operatorList = const [
     DIFFERENCE, FALSE, LESSOREQUAL, LESSTHAN, GREATEROREQUAL, GREATERTHAN,

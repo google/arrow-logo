@@ -18,6 +18,12 @@ class Turtle {
   static final String BLACK = "black";
   static final double TAU = math.PI * 2;
   
+  static final List<String> colorTable = [
+    "black", "red", "green", "yellow", 
+    "blue", "fuchsia", "aqua", "white",
+    "darkgray", "lightgray", "darkred", "forestgreen",
+    "darkblue", "gold", "lightpink", "darkviolet",
+    "darkgoldenrod"];
   static final int SHOW = 0;
   static final int HIDE = 1;
   static final int PENUP = 0;
@@ -35,17 +41,19 @@ class Turtle {
   num heading;
   num delta;
   
-  int showhide;
-  int penupdown;
+  int showHide;
+  int penUpDown;
   
+  String penColor;
   String backgroundColor;
   
   Turtle(this.turtleCtx, this.userCtx, this.xmax, this.ymax) {
     xhome = xmax / 2;
     yhome = ymax / 2;
     delta = 0;
-    showhide = SHOW;
-    penupdown = PENDOWN;
+    showHide = SHOW;
+    penUpDown = PENDOWN;
+    penColor = colorTable[0];
     backgroundColor = "white";
     blankCtx(userCtx);
     home();
@@ -88,6 +96,14 @@ class Turtle {
   
   void right(num angle) {
     heading += angle;
+  }
+  
+  bool setPenColor(int colorCode) {
+    if (colorCode < 0 && colorCode >= colorTable.length) {
+      return false;
+    }
+    penColor = colorTable[colorCode];
+    return true;
   }
   
   void drawFillCircle(ctx, num x_, num y_, num radius, color) {
@@ -134,11 +150,11 @@ class Turtle {
     num newX = x + delta * deltaX;
     num newY = y + delta * deltaY;
     cleanCtx(turtleCtx);
-    if (delta != 0 && penupdown == PENDOWN) {
+    if (delta != 0 && penUpDown == PENDOWN) {
       userCtx.beginPath();
       userCtx.lineWidth = 2;
-      userCtx.fillStyle = BLACK;
-      userCtx.strokeStyle  = BLACK;
+      userCtx.fillStyle = penColor;
+      userCtx.strokeStyle = penColor;
       userCtx.moveTo(x, y);
       userCtx.lineTo(newX, newY);
       userCtx.stroke();
@@ -146,23 +162,23 @@ class Turtle {
     }
     x = newX;
     y = newY;
-    if (showhide == SHOW) {
+    if (showHide == SHOW) {
       drawTurtle();
     }
     delta = 0;
   }
   
   void hideTurtle() {
-    showhide = HIDE;
+    showHide = HIDE;
   }
   void showTurtle() {
-    showhide = SHOW;
+    showHide = SHOW;
   }
   void penUp() {
-    penupdown = PENUP;
+    penUpDown = PENUP;
   }
   void penDown() {
-    penupdown = PENDOWN;
+    penUpDown = PENDOWN;
   }
 }
 

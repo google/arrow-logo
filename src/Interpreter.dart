@@ -229,6 +229,7 @@ class Interpreter {
         nodes = nodes.tail;
         int times = nn.getNumValue();
         Node body = nodes.head;
+        // Coercing single argument into list. TODO(bqe): error prone, remove.
         if (!body.isList()) {
           body = new ListNode.cons(body, ListNode.NIL);
         }
@@ -245,6 +246,14 @@ class Interpreter {
         turtle.right(nn.getNumValue());
         break;
         
+      case Primitive.SETPENCOLOR:
+        nodes = evalInScope(nodes, scope);
+        NumberNode nn = nodes.head;
+        nodes = nodes.tail;
+        if (!nn.isInt() || !turtle.setPenColor(nn.getIntValue())) {
+          throw new InterpreterException("invalid color code ${nn.getNumValue()}");
+        }
+        break;
       case Primitive.PENDOWN:
         turtle.penDown();
         break;
