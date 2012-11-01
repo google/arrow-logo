@@ -23,8 +23,8 @@ class Turtle {
   static final int PENUP = 0;
   static final int PENDOWN = 1;
 
-  final Dynamic /* html.CanvasRenderingContext2D */ turtleCtx;
-  final Dynamic /* html.CanvasRenderingContext2D */ userCtx;
+  final /* html.CanvasRenderingContext2D */ turtleCtx;
+  final /* html.CanvasRenderingContext2D */ userCtx;
   final num xmax;
   final num ymax;
   num xhome;
@@ -59,11 +59,11 @@ class Turtle {
     blankCtx(userCtx);
   }
   
-  void cleanCtx(Dynamic /* html.CanvasRenderingContext2D */ ctx) {
+  void cleanCtx(/* html.CanvasRenderingContext2D */ ctx) {
     ctx.clearRect(0, 0, xmax, ymax);
   }
   
-  void blankCtx(Dynamic /* html.CanvasRenderingContext2D */ ctx) {
+  void blankCtx(/* html.CanvasRenderingContext2D */ ctx) {
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, xmax, ymax);
   }

@@ -223,7 +223,7 @@ class Parser {
    */
   String tokenizeVar(String text) {
     String rtext = text.substring(1);
-    if (rtext.isEmpty() || !isAlpha(rtext.charCodeAt(0))) {
+    if (rtext.isEmpty || !isAlpha(rtext.charCodeAt(0))) {
       throw new Exception("expected alphanumeric");
     }
     int i = advanceWhile(rtext, isAlpha);
@@ -310,7 +310,7 @@ class Parser {
    * @post this.token is set to appropriate value
    */
   String tokenize(String text) {
-    if (text.isEmpty()) {
+    if (text.isEmpty) {
       return text;
     }
     final int charCode = text.charCodeAt(0);
@@ -327,7 +327,7 @@ class Parser {
   
   /** Calls tokenize and trims whitespace */
   String nextToken(String text) {
-    if (text.isEmpty()) {
+    if (text.isEmpty) {
       token.setEof();
       return text;
     }

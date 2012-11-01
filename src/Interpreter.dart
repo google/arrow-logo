@@ -324,7 +324,7 @@ class Interpreter {
       env[formalParam.stringValue] = actualParam;
       numParams = numParams - 1;
     }
-    if (!env.isEmpty()) {
+    if (!env.isEmpty) {
       scope = new Scope(env, scope);
     }
     Node result;

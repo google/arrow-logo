@@ -16,35 +16,19 @@
 // Hence, we cannot use any types html.* in source files we want to unit test.
 // Type `Dynamic' to the rescue. 
 
-#import('dart:math', prefix: "math");
 
-#source("Console.dart");
-#source("Interpreter.dart");
-#source("InterpreterTest.dart");
-#source("Node.dart");
-#source("Primitive.dart");
-#source("Parser.dart");
-#source("ParserTest.dart");
-#source("Scope.dart");
-#source("Turtle.dart");
+import 'dart:math' as math;
+import 'package:unittest/unittest.dart';
 
-// Essential methods for unit testing.
-// TODO: replace with unittests package, when there is an acceptable way
-// of importing.
-class UnitTests {
-  
-  void assertEquals(Object expected, Object actual) {
-    if (expected != actual) {
-      throw new Exception("\nexpected $expected\nactual   $actual");
-    }
-  }
-
-  void assertTrue(bool cond) {
-    if (!cond) {
-      throw new Exception("condition does not hold");
-    } 
-  }
-}
+part "Console.dart";
+part "Interpreter.dart";
+part "InterpreterTest.dart";
+part "Node.dart";
+part "Primitive.dart";
+part "Parser.dart";
+part "ParserTest.dart";
+part "Scope.dart";
+part "Turtle.dart";
 
 void main() {
   new ParserTest().run();

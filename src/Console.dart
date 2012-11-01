@@ -20,7 +20,7 @@ class Console {
   static final String PROMPT = ":>";
   static final String DEFPROMPT = "   ";
 
-  final Dynamic /* html.TextAreaElement */ consoleElem;
+  final /* html.TextAreaElement */ consoleElem;
   final Parser parser;
   Interpreter interpreter;
   int mode;
@@ -75,7 +75,7 @@ class Console {
       var i = text.lastIndexOf(PROMPT);
       String code = text;
       code = code.substring(i + PROMPT.length);
-      if (!code.isEmpty()) {
+      if (!code.isEmpty) {
         ListNode nodes = parser.parse(code);
         print("nodes $nodes");
         writeln();

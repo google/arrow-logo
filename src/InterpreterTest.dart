@@ -20,7 +20,7 @@ class MockConsole implements Console {
   
 }
 
-class InterpreterTest extends UnitTests {
+class InterpreterTest {
 
   var mockTurtle;
   var mockConsole;
@@ -35,49 +35,50 @@ class InterpreterTest extends UnitTests {
   }
 
   void testEvalValues() {
-    assertEquals(
-      Primitive.UNIT, 
-      interpreter.eval(ListNode.NIL));
-    assertEquals(
-      new NumberNode.int(1),
-      interpreter.eval(ListNode.makeList([new NumberNode.int(1)])));
-    assertEquals(
-      ListNode.makeList([new NumberNode.int(1)]), 
+    expect(       
+      interpreter.eval(ListNode.NIL),
+      equals(Primitive.UNIT));
+    expect(
+      interpreter.eval(ListNode.makeList([new NumberNode.int(1)])),
+      equals(new NumberNode.int(1)));
+    expect(
       interpreter.eval(    
-        ListNode.makeList([ListNode.makeList([new NumberNode.int(1)])])));
-    assertEquals(
-      ListNode.makeList([Primitive.FORWARD]), 
+        ListNode.makeList([ListNode.makeList([new NumberNode.int(1)])])),
+      equals(ListNode.makeList([new NumberNode.int(1)])));
+    expect(
       interpreter.eval(
-        ListNode.makeList([ListNode.makeList([Primitive.FORWARD])])));    
+        ListNode.makeList([ListNode.makeList([Primitive.FORWARD])])),
+      equals(ListNode.makeList([Primitive.FORWARD])));    
   }
 
   void testEvalIf() {
     Node fortyTwo = new NumberNode.int(42);
-    assertEquals(
-      fortyTwo,
+    expect(
       interpreter.eval(
         ListNode.makeList([
-          Primitive.IF, Primitive.TRUE, fortyTwo])));
-    assertEquals(
-      Primitive.UNIT,
+          Primitive.IF, Primitive.TRUE, fortyTwo])),
+      equals(fortyTwo));
+    expect(
       interpreter.eval(
         ListNode.makeList([
-          Primitive.IF, Primitive.FALSE, fortyTwo])));
-    assertEquals(
-      fortyTwo,
+          Primitive.IF, Primitive.FALSE, fortyTwo])),
+      equals(Primitive.UNIT));
+    expect(
       interpreter.eval(
         ListNode.makeList([
-          Primitive.IFELSE, Primitive.TRUE, fortyTwo, Primitive.PI])));
-    assertEquals(
-      new NumberNode.float(math.PI),
+          Primitive.IFELSE, Primitive.TRUE, fortyTwo, Primitive.PI])),
+      equals(fortyTwo));
+    expect(
       interpreter.eval(
         ListNode.makeList([
-          Primitive.IFELSE, Primitive.FALSE, fortyTwo, Primitive.PI])));
+          Primitive.IFELSE, Primitive.FALSE, fortyTwo, Primitive.PI])),
+      equals(new NumberNode.float(math.PI)));
   }
   
   void run() {
-    testEvalValues();
-    testEvalIf();
-    print("InterpreterTest ok");
+    group("InterpreterTest", () {
+      test("eval values", testEvalValues);
+      test("eval if", testEvalIf);
+    });
   }
 }

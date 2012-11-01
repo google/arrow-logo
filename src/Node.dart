@@ -76,7 +76,7 @@ class ListNode extends Node {
   
   static Node makeList(List list) {
     var n = NIL;
-    while (!list.isEmpty()) {
+    while (!list.isEmpty) {
       n = new ListNode.cons(list.removeLast(), n);
     }
     return n;

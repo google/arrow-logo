@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#import('dart:html', prefix: "html");
-#import('dart:math', prefix: "math");
+import 'dart:html' as html;
+import 'dart:math' as math;
 
-#source("Console.dart");
-#source("Node.dart");
-#source("Parser.dart");
-#source("Primitive.dart");
-#source("Scope.dart");
-#source("Turtle.dart");
-#source("Interpreter.dart");
+part "Console.dart";
+part "Node.dart";
+part "Parser.dart";
+part "Primitive.dart";
+part "Scope.dart";
+part "Turtle.dart";
+part "Interpreter.dart";
 
 class ArrowLogo {
 
@@ -29,15 +29,15 @@ class ArrowLogo {
 
   static Scope makeTopLevel() {
     Map<String, Node> map = new Map();
-    for (String k in Primitive.getBuiltIns().getKeys()) {
+    for (String k in Primitive.getBuiltIns().keys) {
       map[k] = Primitive.getBuiltIns()[k];
     }
     return new Scope(map);
   }
 
-  html.Element userCanvas;
-  html.Element turtleCanvas;
-  html.Element commandListElem;
+  html.CanvasElement userCanvas;
+  html.CanvasElement turtleCanvas;
+  html.TextAreaElement commandListElem;
   
   final Scope toplevel;
   Parser parser;
