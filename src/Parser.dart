@@ -195,6 +195,9 @@ class Parser {
   static bool isSpace(int charCode) => 
       CHAR_BLANK == charCode || CHAR_TAB == charCode;
   
+  static bool isAlphaOrDigit(int charCode) =>
+      isAlpha(charCode) || isDigit(charCode);
+      
   /** @return first index i>0 where !f(text.charCodeAt(i)) holds */
   static int advanceWhile(String text, bool f(int)) {
     int i = 0;
@@ -226,7 +229,7 @@ class Parser {
     if (rtext.isEmpty || !isAlpha(rtext.charCodeAt(0))) {
       throw new Exception("expected alphanumeric");
     }
-    int i = advanceWhile(rtext, isAlpha);
+    int i = advanceWhile(rtext, isAlphaOrDigit);
     String ident = text.substring(0, i + 1);
     rtext = rtext.substring(i);
     token.setVar(new WordNode(ident));
@@ -250,7 +253,7 @@ class Parser {
   
   /** @post token.kind \in {TOKEN_TO, TOKEN_END, TOKEN_IDENT, TOKEN_PRIM} */
   String tokenizeIdent(String text) {
-    int i = advanceWhile(text, isAlpha);
+    int i = advanceWhile(text, isAlphaOrDigit);
     String rest = text.substring(i);
     text = text.substring(0, i);
     if (text == "to") {

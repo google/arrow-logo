@@ -91,10 +91,10 @@ class ParserTest {
   
   void testParseSomeDefs() {
     expect(
-      parser.parse("to box"),
+      parser.parse("to box1"),
       equals(ListNode.makeList(
         [new WordNode("INCOMPLETE_DEFINITION"),
-         new WordNode("box")])
+         new WordNode("box1")])
       ));
     expect(
       parser.parse("to box end"),
