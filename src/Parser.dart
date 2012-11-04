@@ -16,7 +16,7 @@ class Token {
 
   static const int TOKEN_EOF = -1;
   static const int TOKEN_NUM = 0;
-  static const int TOKEN_IDENT = 1;
+  static const int TOKEN_WORD = 1;
   static const int TOKEN_PRIM = 2;
   static const int TOKEN_LBRACE = 123;
   static const int TOKEN_RBRACE = 125;
@@ -36,7 +36,7 @@ class Token {
   static const int TOKEN_SLASH = 54;  
   static const int TOKEN_STAR = 55;  
   static const int TOKEN_CARET = 56; 
-  // todo
+
   static const int TOKEN_LT = 57;  
   static const int TOKEN_GT = 58;  
   static const int TOKEN_LE = 59;  
@@ -57,7 +57,7 @@ class Token {
   }
   
   Token setPrim(Primitive p)     => setKind(TOKEN_PRIM).setNode(p);
-  Token setIdent(WordNode ident) => setKind(TOKEN_IDENT).setNode(ident);
+  Token setWord(WordNode word)   => setKind(TOKEN_WORD).setNode(word);
   Token setVar(WordNode v)       => setKind(TOKEN_VAR).setNode(v);
   Token setNum(NumberNode n)     => setKind(TOKEN_NUM).setNode(n);
   Token setEof()                 => setKind(TOKEN_EOF).setNode(null);
@@ -67,7 +67,7 @@ class Token {
       case TOKEN_EOF: return "EOF";
       case TOKEN_PRIM: return "PRIM";
       case TOKEN_NUM: return "NUM";
-      case TOKEN_IDENT: return "IDENT";
+      case TOKEN_WORD: return "IDENT";
       case TOKEN_PRIM: return "PRIM";
       case TOKEN_LBRACE: return "LBRACE";
       case TOKEN_RBRACE: return "RBRACE";
@@ -117,7 +117,7 @@ class Token {
     switch (kind) {
       case Token.TOKEN_PRIM:
       case Token.TOKEN_NUM:
-      case Token.TOKEN_IDENT:
+      case Token.TOKEN_WORD:
       case Token.TOKEN_VAR:
       case Token.TOKEN_LPAREN:
       case Token.TOKEN_LBRACKET:
@@ -222,7 +222,7 @@ class Parser {
   /**
    * @pre  text.charCodeAt(0) == CHAR_COLON
    * @post token.kind == Token.TOKEN_VAR
-   * @post token.node.isIdent()
+   * @post token.node.isWord()
    */
   String tokenizeVar(String text) {
     String rtext = text.substring(1);
@@ -230,9 +230,9 @@ class Parser {
       throw new Exception("expected alphanumeric");
     }
     int i = advanceWhile(rtext, isAlphaOrDigit);
-    String ident = text.substring(0, i + 1);
+    String word = text.substring(0, i + 1);
     rtext = rtext.substring(i);
-    token.setVar(new WordNode(ident));
+    token.setVar(new WordNode(word));
     return rtext;
   }
 
@@ -251,8 +251,8 @@ class Parser {
     return rest;
   }
   
-  /** @post token.kind \in {TOKEN_TO, TOKEN_END, TOKEN_IDENT, TOKEN_PRIM} */
-  String tokenizeIdent(String text) {
+  /** @post token.kind \in {TOKEN_TO, TOKEN_END, TOKEN_WORD, TOKEN_PRIM} */
+  String tokenizeWord(String text) {
     int i = advanceWhile(text, isAlphaOrDigit);
     String rest = text.substring(i);
     text = text.substring(0, i);
@@ -263,7 +263,7 @@ class Parser {
     } else {
       Primitive p = toplevel[text];
       if (p == null)
-        token.setIdent(new WordNode(text));
+        token.setWord(new WordNode(text));
       else
         token.setPrim(p);
     }
@@ -322,7 +322,7 @@ class Parser {
     } else if (isDigit(charCode)) {
       return tokenizeNum(text);
     } else if (isAlpha(charCode)) {
-      return tokenizeIdent(text);
+      return tokenizeWord(text);
     } else {
       return tokenizeSpecial(text);
     }
@@ -354,13 +354,13 @@ class Parser {
   }
   
   /**
-   *     word ::= int | float | var | ident
+   *     atom ::= int | float | var | word
    */ 
-  String parseWord(List<Node> nodeList, String input) {
+  String parseAtom(List<Node> nodeList, String input) {
     switch (token.kind) {
       case Token.TOKEN_PRIM:
       case Token.TOKEN_NUM:
-      case Token.TOKEN_IDENT:
+      case Token.TOKEN_WORD:
       case Token.TOKEN_VAR:
         nodeList.add(token.node);
         return nextToken(input);
@@ -390,15 +390,15 @@ class Parser {
   }
   
   /**
-   *     part ::= word | list | '(' expr ')'
+   *     part ::= atom | list | '(' expr ')'
    */
   String parsePart(List<Node> nodeList, String input) {
     switch (token.kind) {
       case Token.TOKEN_PRIM:
       case Token.TOKEN_NUM:
-      case Token.TOKEN_IDENT:
+      case Token.TOKEN_WORD:
       case Token.TOKEN_VAR:
-        return parseWord(nodeList, input);
+        return parseAtom(nodeList, input);
       case Token.TOKEN_LBRACKET:
         return parseList(nodeList, input);
       case Token.TOKEN_LPAREN:
@@ -451,12 +451,12 @@ class Parser {
   }
   
   /**
-   *     defn ::= 'to' ident var* expr* 'end' 
+   *     defn ::= 'to' word var* expr* 'end' 
    */
   String parseDefn(List<Node> nodeList, String input) {
     input = nextToken(input);
-    if (token.kind != Token.TOKEN_IDENT) {
-      throw new Exception("expected ident");
+    if (token.kind != Token.TOKEN_WORD) {
+      throw new Exception("expected word");
     }
     WordNode wn = token.node;
     String name = wn.stringValue;
@@ -494,7 +494,7 @@ class Parser {
     input = nextToken(input);
     while (token.kind != Token.TOKEN_EOF) {
       switch (token.kind) {
-        case Token.TOKEN_IDENT:
+        case Token.TOKEN_WORD:
         case Token.TOKEN_PRIM:
         case Token.TOKEN_NUM:
         case Token.TOKEN_VAR:

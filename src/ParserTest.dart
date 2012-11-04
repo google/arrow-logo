@@ -48,13 +48,13 @@ class ParserTest {
     expect(1.2, numFloat.getFloatValue());
   }
   
-  void testTokenizeIdentOrKeyword() {
-    expect(parser.tokenizeIdent("fd"), equals(""));
+  void testTokenizeWordOrKeyword() {
+    expect(parser.tokenizeWord("fd"), equals(""));
     expect(parser.token.kind, equals(Token.TOKEN_PRIM));
     expect(parser.token.node, equals(Primitive.FORWARD));   
   
-    expect(parser.tokenizeIdent("x"), equals(""));
-    expect(Token.TOKEN_IDENT, parser.token.kind);
+    expect(parser.tokenizeWord("x"), equals(""));
+    expect(Token.TOKEN_WORD, parser.token.kind);
     WordNode wn = parser.token.node;
     expect(wn.stringValue, equals("x"));   
   }
@@ -185,7 +185,7 @@ class ParserTest {
     group("ParserTest", () {
       test("advance while", testAdvanceWhile);
       test("tokenize num", testTokenizeNum);
-      test("tokenize ident or keyword", testTokenizeIdentOrKeyword);
+      test("tokenize word or keyword", testTokenizeWordOrKeyword);
       test("parse some words and numbers", testParseSomeWords);
 
       test("parse some lists", testParseSomeLists);
