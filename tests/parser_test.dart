@@ -22,24 +22,34 @@ class ParserTest {
       : parser = new Parser(new Scope(Primitive.getBuiltIns())) {}
   
   void testAdvanceWhile() {
-    expect(Parser.advanceWhile("  a", Parser.isSpace), equals(2));
-    expect(Parser.advanceWhile("abc ", Parser.isSpace), equals(0));
-    expect(Parser.advanceWhile("abc ", Parser.isAlpha), equals(3));
-    expect(Parser.advanceWhile("12a", Parser.isDigit), equals(2));
-    expect(Parser.advanceWhile(".2a", Parser.isDigitOrDot), equals(2));
+    Scanner s = new Scanner(new Scope(new Map()));
+    s.initialize("  a");
+    expect(s.advanceWhile(Scanner.isSpace), equals(2));
+    s.initialize("a");
+    expect(s.advanceWhile(Scanner.isSpace), equals(0));
+    s.initialize("abc");
+    expect(s.advanceWhile(Scanner.isAlpha), equals(3));
+    s.initialize("12a");
+    expect(s.advanceWhile(Scanner.isDigit), equals(2));
+    s.initialize(".2a");
+    expect(s.advanceWhile(Scanner.isDigitOrDot), equals(2));
   }
   
   void testTokenizeNum() {
-    expect(parser.tokenizeNum("1"), "");
-    expect(parser.token.kind, Token.TOKEN_NUM);    
+    parser.initialize("1");
+    parser.tokenizeNum();
+    expect(parser.pos, equals("1".length));
+    expect(parser.token.kind, equals(Token.TOKEN_NUM));    
     expect(parser.token.node.isNum());
     Node n = parser.token.node;
     expect(n.isNum());
     NumberNode numInt = n;
     expect(numInt.isInt());
     expect(1, numInt.getIntValue());
-    
-    expect(parser.tokenizeNum("1.2x"), equals("x"));
+
+    parser.initialize("1.2x");
+    parser.tokenizeNum();
+    expect(parser.pos, equals("1.2".length));
     expect(parser.token.kind, equals(Token.TOKEN_NUM));
     expect(parser.token.node.isNum());
     n = parser.token.node;
@@ -49,13 +59,17 @@ class ParserTest {
     expect(1.2, numFloat.getFloatValue());
   }
   
-  void testTokenizeIdentOrKeyword() {
-    expect(parser.tokenizeIdent("fd"), equals(""));
+  void testTokenizeWordOrKeyword() {
+    parser.initialize("fd");
+    parser.tokenizeWord();
+    expect(parser.pos, equals("fd".length));
     expect(parser.token.kind, equals(Token.TOKEN_PRIM));
     expect(parser.token.node, equals(Primitive.FORWARD));   
-  
-    expect(parser.tokenizeIdent("x"), equals(""));
-    expect(Token.TOKEN_IDENT, parser.token.kind);
+
+    parser.initialize("x");
+    parser.tokenizeWord();
+    expect(parser.pos, equals("x".length));
+    expect(Token.TOKEN_WORD, parser.token.kind);
     WordNode wn = parser.token.node;
     expect(wn.stringValue, equals("x"));   
   }
@@ -92,10 +106,10 @@ class ParserTest {
   
   void testParseSomeDefs() {
     expect(
-      parser.parse("to box"),
+      parser.parse("to box1"),
       equals(ListNode.makeList(
         [new WordNode("INCOMPLETE_DEFINITION"),
-         new WordNode("box")])
+         new WordNode("box1")])
       ));
     expect(
       parser.parse("to box end"),
@@ -186,7 +200,7 @@ class ParserTest {
     group("ParserTest", () {
       test("advance while", testAdvanceWhile);
       test("tokenize num", testTokenizeNum);
-      test("tokenize ident or keyword", testTokenizeIdentOrKeyword);
+      test("tokenize word or keyword", testTokenizeWordOrKeyword);
       test("parse some words and numbers", testParseSomeWords);
 
       test("parse some lists", testParseSomeLists);

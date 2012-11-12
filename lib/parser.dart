@@ -17,7 +17,7 @@ class Token {
 
   static const int TOKEN_EOF = -1;
   static const int TOKEN_NUM = 0;
-  static const int TOKEN_IDENT = 1;
+  static const int TOKEN_WORD = 1;
   static const int TOKEN_PRIM = 2;
   static const int TOKEN_LBRACE = 123;
   static const int TOKEN_RBRACE = 125;
@@ -37,7 +37,7 @@ class Token {
   static const int TOKEN_SLASH = 54;  
   static const int TOKEN_STAR = 55;  
   static const int TOKEN_CARET = 56; 
-  // todo
+
   static const int TOKEN_LT = 57;  
   static const int TOKEN_GT = 58;  
   static const int TOKEN_LE = 59;  
@@ -58,7 +58,7 @@ class Token {
   }
   
   Token setPrim(Primitive p)     => setKind(TOKEN_PRIM).setNode(p);
-  Token setIdent(WordNode ident) => setKind(TOKEN_IDENT).setNode(ident);
+  Token setWord(WordNode word)   => setKind(TOKEN_WORD).setNode(word);
   Token setVar(WordNode v)       => setKind(TOKEN_VAR).setNode(v);
   Token setNum(NumberNode n)     => setKind(TOKEN_NUM).setNode(n);
   Token setEof()                 => setKind(TOKEN_EOF).setNode(null);
@@ -68,7 +68,7 @@ class Token {
       case TOKEN_EOF: return "EOF";
       case TOKEN_PRIM: return "PRIM";
       case TOKEN_NUM: return "NUM";
-      case TOKEN_IDENT: return "IDENT";
+      case TOKEN_WORD: return "IDENT";
       case TOKEN_PRIM: return "PRIM";
       case TOKEN_LBRACE: return "LBRACE";
       case TOKEN_RBRACE: return "RBRACE";
@@ -118,7 +118,7 @@ class Token {
     switch (kind) {
       case Token.TOKEN_PRIM:
       case Token.TOKEN_NUM:
-      case Token.TOKEN_IDENT:
+      case Token.TOKEN_WORD:
       case Token.TOKEN_VAR:
       case Token.TOKEN_LPAREN:
       case Token.TOKEN_LBRACKET:
@@ -154,6 +154,187 @@ class Token {
   }
 }
 
+class Scanner {
+  static const int CHAR_0 = 48;  // "0".charCodeAt(0) is not a constant
+  static const int CHAR_9 = 57; 
+  static const int CHAR_a = 97; 
+  static const int CHAR_z = 122;  
+  static const int CHAR_A = 65;  
+  static const int CHAR_Z = 90;  
+  static const int CHAR_BLANK = 32; 
+  static const int CHAR_DOT = 46; 
+  static const int CHAR_TAB = 9; 
+  static const int CHAR_NEWLINE = 10;
+  static const int CHAR_COLON = 58; 
+  
+  static bool isAlpha(int charCode) =>
+      (CHAR_a <= charCode && charCode <= CHAR_z)
+      || (CHAR_A <= charCode && charCode <= CHAR_Z);
+  
+  static bool isDigit(int charCode) => 
+      (CHAR_0 <= charCode && charCode <= CHAR_9);
+  
+  static bool isDigitOrDot(int charCode) => 
+      CHAR_DOT == charCode || isDigit(charCode);
+  
+  static bool isSpace(int charCode) => 
+      CHAR_BLANK == charCode;
+      
+  static bool isWhiteSpace(int charCode) =>
+      CHAR_BLANK == charCode || CHAR_TAB == charCode
+      || CHAR_NEWLINE == charCode;
+  
+  static bool isAlphaOrDigit(int charCode) =>
+      isAlpha(charCode) || isDigit(charCode);
+      
+  /** 
+   * Advances [pos] until the following holds:
+   * 
+   * !f(text.charCodeAt(pos)) || pos == text.length
+   * 
+   * */
+  int advanceWhile(bool f(int)) {
+    int len = text.length;
+    int ch = text.charCodeAt(pos);
+    while (f(ch)) { 
+      ++pos;
+      if (pos == len) {
+        return pos;
+      }
+      ch = text.charCodeAt(pos);
+    }
+    return pos;
+  }
+  
+  final Scope toplevel;
+  final Token token;
+  String text;
+  int pos;
+  
+  /** @param toplevel used for looking up keywords */
+  Scanner(Scope this.toplevel) : token = new Token();
+  
+  void initialize(String text) {
+    this.text = text;
+    this.pos = 0;
+  }
+  
+  /**
+   * @pre  text.charCodeAt(0) == CHAR_COLON
+   * @post token.kind == Token.TOKEN_VAR
+   * @post token.node.isWord()
+   */
+  void tokenizeVar() {
+    int i = pos;
+    ++pos;
+    if (!isAlpha(text.charCodeAt(pos))) {
+      throw new Exception("expected alphabetical");
+    }
+    advanceWhile(isAlphaOrDigit);
+    String word = text.substring(i, pos);
+    token.setVar(new WordNode(word));
+  }
+
+  /**
+   * @post token.kind == Token.TOKEN_NUM
+   * @post token.node.isNum()
+   */
+  void tokenizeNum() {
+    int i = pos;
+    advanceWhile(isDigitOrDot);
+    String numtext = text.substring(i, pos);
+    NumberNode nn = numtext.contains(".")
+        ? new NumberNode.float(math.parseDouble(numtext))
+        : new NumberNode.int(math.parseInt(numtext));
+    token.setNum(nn);
+  }
+  
+  /** @post token.kind \in {TOKEN_TO, TOKEN_END, TOKEN_WORD, TOKEN_PRIM} */
+  void tokenizeWord() {
+    int i = pos;
+    advanceWhile(isAlphaOrDigit);
+    String word = text.substring(i, pos);
+    if (word == "to") {
+      token.kind = Token.TOKEN_TO;
+    } else if (word == "end") {
+      token.kind = Token.TOKEN_END;
+    } else {
+      Primitive p = toplevel[word];
+      if (p == null)
+        token.setWord(new WordNode(word));
+      else
+        token.setPrim(p);
+    }
+  }
+  
+  void tokenizeSpecial() {
+    switch (text[pos]) {
+      case '(': token.setKind(Token.TOKEN_LPAREN); break;
+      case ')': token.setKind(Token.TOKEN_RPAREN); break;
+      case '{': token.setKind(Token.TOKEN_LBRACE); break;
+      case '}': token.setKind(Token.TOKEN_RBRACE); break;
+      case '[': token.setKind(Token.TOKEN_LBRACKET); break;
+      case ']': token.setKind(Token.TOKEN_RBRACKET); break;
+      case '+': token.setKind(Token.TOKEN_PLUS); break;
+      case '-': token.setKind(Token.TOKEN_MINUS); break;
+      case '*': token.setKind(Token.TOKEN_STAR); break;
+      case '/': token.setKind(Token.TOKEN_SLASH); break;
+      case '^': token.setKind(Token.TOKEN_CARET); break;
+      case '<': 
+        if (text.length > 1 && text[1] == '=') {
+          token.setKind(Token.TOKEN_LE);
+          pos += 2;
+          return;
+        }
+        token.setKind(Token.TOKEN_LT);
+        break;
+      case '>':
+        if (text.length > 1 && text[1] == '=') {
+          token.setKind(Token.TOKEN_GE);
+          pos += 2;
+          return;
+        }
+        token.setKind(Token.TOKEN_GT);
+        break;
+      case '=': 
+        token.setKind(Token.TOKEN_EQ);
+        break;
+    
+      default: throw new Exception("unexpected char: ${text[0]}");
+    }
+    ++pos;
+  }
+  
+  /**
+   * Tokenizes a prefix of `text', returns rest.
+   *
+   * @pre text == text.trim()
+   * @post this.token is set to appropriate value
+   */
+  void tokenize() {
+    final int charCode = text.charCodeAt(pos);
+    if (CHAR_COLON == charCode) {
+      tokenizeVar();
+    } else if (isDigit(charCode)) {
+      tokenizeNum();
+    } else if (isAlpha(charCode)) {
+      tokenizeWord();
+    } else {
+      tokenizeSpecial();
+    }
+  }
+  
+  /** Calls tokenize and trims whitespace */
+  void nextToken() {
+    if (pos == text.length) {
+      token.setEof();
+      return;
+    }
+    advanceWhile(isWhiteSpace);
+    tokenize();
+  }
+}
+
 class OpInfo {
   final Node binop;
   final List<Node> operand;
@@ -171,197 +352,40 @@ class OpInfo {
  * recursive descent combined with operator-precedence parsing.
  * TODO adding "apply" nodes, and of course, error reporting.
  */
-class Parser {
-  static const int CHAR_0 = 48;  // "0".charCodeAt(0) is not a constant
-  static const int CHAR_9 = 57; 
-  static const int CHAR_a = 97; 
-  static const int CHAR_z = 122;  
-  static const int CHAR_A = 65;  
-  static const int CHAR_Z = 90;  
-  static const int CHAR_BLANK = 32; 
-  static const int CHAR_DOT = 46; 
-  static const int CHAR_TAB = 9; 
-  static const int CHAR_COLON = 58; 
+class Parser extends Scanner {
   
-  static bool isAlpha(int charCode) =>
-      (CHAR_a <= charCode && charCode <= CHAR_z)
-      || (CHAR_A <= charCode && charCode <= CHAR_Z);
-  
-  static bool isDigit(int charCode) => 
-      (CHAR_0 <= charCode && charCode <= CHAR_9);
-  
-  static bool isDigitOrDot(int charCode) => 
-      CHAR_DOT == charCode || isDigit(charCode);
-  
-  static bool isSpace(int charCode) => 
-      CHAR_BLANK == charCode || CHAR_TAB == charCode;
-  
-  /** @return first index i>0 where !f(text.charCodeAt(i)) holds */
-  static int advanceWhile(String text, bool f(int)) {
-    int i = 0;
-    int len = text.length;
-    int ch = text.charCodeAt(0);
-    while (f(ch)) { 
-      ++i;
-      if (i == len) {
-        return len;
-      }
-      ch = text.charCodeAt(i);
-    }
-    return i;
-  }
-  
-  final Scope toplevel;
-  final Token token;
   OpInfo opstack;
   
-  Parser(Scope this.toplevel) : token = new Token(), opstack = null;
-  
-  /**
-   * @pre  text.charCodeAt(0) == CHAR_COLON
-   * @post token.kind == Token.TOKEN_VAR
-   * @post token.node.isIdent()
-   */
-  String tokenizeVar(String text) {
-    String rtext = text.substring(1);
-    if (rtext.isEmpty || !isAlpha(rtext.charCodeAt(0))) {
-      throw new Exception("expected alphanumeric");
-    }
-    int i = advanceWhile(rtext, isAlpha);
-    String ident = text.substring(0, i + 1);
-    rtext = rtext.substring(i);
-    token.setVar(new WordNode(ident));
-    return rtext;
-  }
-
-  /**
-   * @post token.kind == Token.TOKEN_NUM
-   * @post token.node.isNum()
-   */
-  String tokenizeNum(String text) {
-    int i = advanceWhile(text, isDigitOrDot);
-    String rest = text.substring(i);
-    text = text.substring(0, i);
-    NumberNode nn = text.contains(".")
-        ? new NumberNode.float(math.parseDouble(text))
-        : new NumberNode.int(math.parseInt(text));
-    token.setNum(nn);
-    return rest;
-  }
-  
-  /** @post token.kind \in {TOKEN_TO, TOKEN_END, TOKEN_IDENT, TOKEN_PRIM} */
-  String tokenizeIdent(String text) {
-    int i = advanceWhile(text, isAlpha);
-    String rest = text.substring(i);
-    text = text.substring(0, i);
-    if (text == "to") {
-      token.kind = Token.TOKEN_TO;
-    } else if (text == "end") {
-      token.kind = Token.TOKEN_END;
-    } else {
-      Primitive p = toplevel[text];
-      if (p == null)
-        token.setIdent(new WordNode(text));
-      else
-        token.setPrim(p);
-    }
-    return rest;
-  }
-  
-  String tokenizeSpecial(String text) {
-    switch (text[0]) {
-      case '(': token.setKind(Token.TOKEN_LPAREN); break;
-      case ')': token.setKind(Token.TOKEN_RPAREN); break;
-      case '{': token.setKind(Token.TOKEN_LBRACE); break;
-      case '}': token.setKind(Token.TOKEN_RBRACE); break;
-      case '[': token.setKind(Token.TOKEN_LBRACKET); break;
-      case ']': token.setKind(Token.TOKEN_RBRACKET); break;
-      case '+': token.setKind(Token.TOKEN_PLUS); break;
-      case '-': token.setKind(Token.TOKEN_MINUS); break;
-      case '*': token.setKind(Token.TOKEN_STAR); break;
-      case '/': token.setKind(Token.TOKEN_SLASH); break;
-      case '^': token.setKind(Token.TOKEN_CARET); break;
-      case '<': 
-        if (text.length > 1 && text[1] == '=') {
-          token.setKind(Token.TOKEN_LE);
-          return text.substring(2);
-        }
-        token.setKind(Token.TOKEN_LT);
-        break;
-      case '>': 
-        if (text.length > 1 && text[1] == '=') {
-          token.setKind(Token.TOKEN_GE);
-          return text.substring(2);
-        }
-        token.setKind(Token.TOKEN_GT);
-        break;
-      case '=': 
-        token.setKind(Token.TOKEN_EQ);
-        break;
-    
-      default: throw new Exception("unexpected char: ${text[0]}");
-    }
-    return text.substring(1);
-  }
-  
-  /**
-   * Tokenizes a prefix of `text', returns rest.
-   *
-   * @pre text == text.trim()
-   * @post this.token is set to appropriate value
-   */
-  String tokenize(String text) {
-    if (text.isEmpty) {
-      return text;
-    }
-    final int charCode = text.charCodeAt(0);
-    if (CHAR_COLON == charCode) {
-      return tokenizeVar(text);
-    } else if (isDigit(charCode)) {
-      return tokenizeNum(text);
-    } else if (isAlpha(charCode)) {
-      return tokenizeIdent(text);
-    } else {
-      return tokenizeSpecial(text);
-    }
-  }
-  
-  /** Calls tokenize and trims whitespace */
-  String nextToken(String text) {
-    if (text.isEmpty) {
-      token.setEof();
-      return text;
-    }
-    return tokenize(text).trim();
-  }
+  Parser(Scope toplevel) : opstack = null, super(toplevel);
   
   /**
    * @pre token.kind == TOKEN_LBRACKET
    * @post nodeList' = nodeList ++ listNode
    */
-  String parseList(List<Node> nodeList, String input) {
+  void parseList(List<Node> nodeList) {
     var objList = new List<Node>();
     
-    input = nextToken(input);
+    nextToken();
     while (token.kind != Token.TOKEN_EOF
         && token.kind != Token.TOKEN_RBRACKET) {
-      input = parseExpr(objList, input);
+      parseExpr(objList);
     }
     nodeList.add(ListNode.makeList(objList));
-    return nextToken(input);
+    nextToken();
   }
   
   /**
-   *     word ::= int | float | var | ident
+   *     atom ::= int | float | var | word
    */ 
-  String parseWord(List<Node> nodeList, String input) {
+  void parseAtom(List<Node> nodeList) {
     switch (token.kind) {
       case Token.TOKEN_PRIM:
       case Token.TOKEN_NUM:
-      case Token.TOKEN_IDENT:
+      case Token.TOKEN_WORD:
       case Token.TOKEN_VAR:
         nodeList.add(token.node);
-        return nextToken(input);
+        nextToken();
+        return;
       default:
         throw new Exception("unexpected token");
     }
@@ -388,122 +412,123 @@ class Parser {
   }
   
   /**
-   *     part ::= word | list | '(' expr ')'
+   *     part ::= atom | list | '(' expr ')'
    */
-  String parsePart(List<Node> nodeList, String input) {
+  String parsePart(List<Node> nodeList) {
     switch (token.kind) {
       case Token.TOKEN_PRIM:
       case Token.TOKEN_NUM:
-      case Token.TOKEN_IDENT:
+      case Token.TOKEN_WORD:
       case Token.TOKEN_VAR:
-        return parseWord(nodeList, input);
+        parseAtom(nodeList);
+        break;
       case Token.TOKEN_LBRACKET:
-        return parseList(nodeList, input);
+        parseList(nodeList);
+        break;
       case Token.TOKEN_LPAREN:
-        input = nextToken(input);
-        input = parseExpr(nodeList, input);
+        nextToken();
+        parseExpr(nodeList);
         if (token.kind != Token.TOKEN_RPAREN) {
           throw new Exception("expected ')'");
         }
-        return nextToken(input);
+        nextToken();
+        break;
     }
   }
 
   /**
    *      op ::= part (infix part)*
    */
-  String parseOp(List<Node> nodeList, String input) {
+  void parseOp(List<Node> nodeList) {
     List operand = [];
     OpInfo base = opstack;
     
-    input = parsePart(operand, input);
+    parsePart(operand);
     while (token.isInfixOp()) {
       Primitive binop = token.getInfixOp();
       operand = reduceStack(
           base, operand, Primitive.getPrecedence(binop), 
           Primitive.isLeftAssoc(binop));
       opstack = new OpInfo(binop, operand, opstack);
-      input = nextToken(input);
+      nextToken();
       operand = [];
       if (token.isExprStart()) {
-        input = parsePart(operand, input);
+        parsePart(operand);
       } else {
         throw new Exception("expected expr");
       }
     }
     operand = reduceStack(base, operand, 0, true);
     nodeList.addAll(operand);
-    return input;
   }
 
   /**
    *     expr ::= op expr*
    */
-  String parseExpr(List<Node> nodeList, String input) {
-    input = parseOp(nodeList, input);
+  void parseExpr(List<Node> nodeList) {
+    parseOp(nodeList);
     while (token.kind != Token.TOKEN_EOF
         && token.isExprStart()) {
-      input = parseOp(nodeList, input);
+      parseOp(nodeList);
     }
-    return input;
   }
   
   /**
-   *     defn ::= 'to' ident var* expr* 'end' 
+   *     defn ::= 'to' word var* expr* 'end' 
    */
-  String parseDefn(List<Node> nodeList, String input) {
-    input = nextToken(input);
-    if (token.kind != Token.TOKEN_IDENT) {
-      throw new Exception("expected ident");
+  void parseDefn(List<Node> nodeList) {
+    nextToken();
+    if (token.kind != Token.TOKEN_WORD) {
+      throw new Exception("expected word");
     }
     WordNode wn = token.node;
     String name = wn.stringValue;
-    input = nextToken(input);
+    nextToken();
     var objList = new List<Node>();
     int numVars = 0;
     while (token.kind == Token.TOKEN_VAR) {
       objList.add(token.node);
-      input = nextToken(input);
+      nextToken();
       numVars++;
     }    
     while (token.kind != Token.TOKEN_END
         && token.kind != Token.TOKEN_EOF) {
-      input = parseExpr(objList, input);
+      parseExpr(objList);
     }
     if (token.kind == Token.TOKEN_EOF) {
       // ignore incomplete definition, to be handled by UI
       // TODO: move this constant to a reasonable place.
       nodeList.add(new WordNode("INCOMPLETE_DEFINITION"));
       nodeList.add(new WordNode(name));
-      return input;
+      return;
     }
-    input = nextToken(input);
+    nextToken();
     nodeList.add(
       new DefnNode(name, numVars, ListNode.makeList(objList)));
-    return input;
   }
      
   /**
    * Parses [input] to list of nodes.
    */
   ListNode parse(String input) {
+    initialize(input);
     input = input.trim();
     var nodeList = new List<Node>();
-    input = nextToken(input);
+    nextToken();
     while (token.kind != Token.TOKEN_EOF) {
       switch (token.kind) {
-        case Token.TOKEN_IDENT:
+        case Token.TOKEN_WORD:
         case Token.TOKEN_PRIM:
         case Token.TOKEN_NUM:
         case Token.TOKEN_VAR:
         case Token.TOKEN_LPAREN:
-          input = parseExpr(nodeList, input);
+          parseExpr(nodeList);
           break;
         case Token.TOKEN_LBRACKET:
-          input = parseList(nodeList, input);
+          parseList(nodeList);
           break;
         case Token.TOKEN_TO:
-          input = parseDefn(nodeList, input);
+          parseDefn(nodeList);
           break;
         default:
           throw new Exception("unexpected token: $token");

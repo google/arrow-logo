@@ -116,6 +116,7 @@ class Interpreter {
         break;
         
       case Primitive.BACK:
+        nodes = evalInScope(nodes, scope);
         NumberNode wn = nodes.head;
         nodes = nodes.tail;
         turtle.back(wn.getNumValue());
