@@ -40,22 +40,22 @@ class ParserTest {
     parser.tokenizeNum();
     expect(parser.pos, equals("1".length));
     expect(parser.token.kind, equals(Token.TOKEN_NUM));    
-    expect(parser.token.node.isNum());
+    expect(parser.token.node.isNum(), true);
     Node n = parser.token.node;
-    expect(n.isNum());
+    expect(n.isNum(), true);
     NumberNode numInt = n;
-    expect(numInt.isInt());
+    expect(numInt.isInt(), true);
     expect(1, numInt.getIntValue());
 
     parser.initialize("1.2x");
     parser.tokenizeNum();
     expect(parser.pos, equals("1.2".length));
     expect(parser.token.kind, equals(Token.TOKEN_NUM));
-    expect(parser.token.node.isNum());
+    expect(parser.token.node.isNum(), true);
     n = parser.token.node;
-    expect(n.isNum());
+    expect(n.isNum(), true);
     NumberNode numFloat = n;
-    expect(numFloat.isFloat());
+    expect(numFloat.isFloat(), true);
     expect(1.2, numFloat.getFloatValue());
   }
   
