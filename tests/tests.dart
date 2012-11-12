@@ -14,7 +14,8 @@
 library arrowlogo;
 
 import 'dart:math' as math;
-import 'package:unittest/unittest.dart';
+// TODO: DartEditor does not like the URL below, but the VM does.
+import 'package:unittest/lib/unittest.dart';
 
 part "interpreter_test.dart";
 part "parser_test.dart";
