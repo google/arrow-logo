@@ -11,17 +11,18 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+library arrowlogo;
 
 import 'dart:html' as html;
 import 'dart:math' as math;
 
-part "Console.dart";
-part "Node.dart";
-part "Parser.dart";
-part "Primitive.dart";
-part "Scope.dart";
-part "Turtle.dart";
-part "Interpreter.dart";
+part "console.dart";
+part "interpreter.dart";
+part "node.dart";
+part "parser.dart";
+part "primitive.dart";
+part "scope.dart";
+part "turtle.dart";
 
 class ArrowLogo {
 

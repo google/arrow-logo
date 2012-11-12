@@ -11,24 +11,21 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-// TODO: For some reason, the following import fails.
-// Hence, we cannot use any types html.* in source files we want to unit test.
-// Type `Dynamic' to the rescue. 
-
+library arrowlogo;
 
 import 'dart:math' as math;
 import 'package:unittest/unittest.dart';
 
-part "Console.dart";
-part "Interpreter.dart";
-part "InterpreterTest.dart";
-part "Node.dart";
-part "Primitive.dart";
-part "Parser.dart";
-part "ParserTest.dart";
-part "Scope.dart";
-part "Turtle.dart";
+part "interpreter_test.dart";
+part "parser_test.dart";
+
+part "../lib/console.dart";
+part "../lib/interpreter.dart";
+part "../lib/node.dart";
+part "../lib/primitive.dart";
+part "../lib/parser.dart";
+part "../lib/scope.dart";
+part "../lib/turtle.dart";
 
 void main() {
   new ParserTest().run();
