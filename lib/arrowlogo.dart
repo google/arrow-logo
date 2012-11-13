@@ -13,6 +13,9 @@
 // limitations under the License.
 library arrowlogo;
 
+import 'package:dart_immutable/dart_immutable.dart';
+import 'package:pattern_matching/pattern_matching.dart';
+
 import 'dart:html' as html;
 import 'dart:math' as math;
 

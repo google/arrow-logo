@@ -76,10 +76,23 @@ class InterpreterTest {
       equals(new NumberNode.float(math.PI)));
   }
   
+  void testEvalDefn() {
+    Node fortyTwo = new NumberNode.int(42);
+    Node twentyOne = new NumberNode.int(21);
+    Node defn = new DefnNode("foo", 1,
+      ListNode.makeList([
+        new WordNode(":x"), 
+        Primitive.QUOTIENT, new WordNode(":x"), new NumberNode.int(2)]));
+    expect(interpreter.eval(
+        ListNode.makeList([defn, new WordNode("foo"), fortyTwo])),
+        equals(twentyOne));
+  }
+  
   void run() {
     group("InterpreterTest", () {
       test("eval values", testEvalValues);
       test("eval if", testEvalIf);
+      test("eval defn", testEvalDefn);
     });
   }
 }

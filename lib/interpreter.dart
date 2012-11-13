@@ -105,6 +105,12 @@ class Interpreter {
   static bool primGreaterThanNum(num a, num b) => a > b;
   static bool primGreaterOrEqualNum(num a, num b) => a >= b;
 
+  void ensureNum(Node node) {
+    if (!node.isNum()) {
+      throw new InterpreterException("expected number");
+    }
+  }
+
   /**
    * Evaluates a primitive function (aka command/operator).
    * 
@@ -117,6 +123,7 @@ class Interpreter {
         
       case Primitive.BACK:
         nodes = evalInScope(nodes, scope);
+        ensureNum(nodes.head);
         NumberNode wn = nodes.head;
         nodes = nodes.tail;
         turtle.back(wn.getNumValue());
@@ -144,6 +151,7 @@ class Interpreter {
         
       case Primitive.FORWARD:
         nodes = evalInScope(nodes, scope);
+        ensureNum(nodes.head);
         NumberNode wn = nodes.head;
         nodes = nodes.tail;
         turtle.forward(wn.getNumValue()); 
@@ -209,6 +217,7 @@ class Interpreter {
         
       case Primitive.LEFT:
         nodes = evalInScope(nodes, scope);
+        ensureNum(nodes.head);
         NumberNode wn = nodes.head;
         nodes = nodes.tail;
         turtle.left(wn.getNumValue()); 
@@ -227,6 +236,7 @@ class Interpreter {
         
       case Primitive.REPEAT:
         nodes = evalInScope(nodes, scope);
+        ensureNum(nodes.head);
         NumberNode nn = nodes.head;
         nodes = nodes.tail;
         int times = nn.getNumValue();
@@ -243,6 +253,7 @@ class Interpreter {
         
       case Primitive.RIGHT:
         nodes = evalInScope(nodes, scope);
+        ensureNum(nodes.head);
         NumberNode nn = nodes.head;
         nodes = nodes.tail;
         turtle.right(nn.getNumValue());
@@ -250,12 +261,14 @@ class Interpreter {
         
       case Primitive.SETPENCOLOR:
         nodes = evalInScope(nodes, scope);
+        ensureNum(nodes.head);
         NumberNode nn = nodes.head;
         nodes = nodes.tail;
         if (!nn.isInt() || !turtle.setPenColor(nn.getIntValue())) {
           throw new InterpreterException("invalid color code ${nn.getNumValue()}");
         }
         break;
+
       case Primitive.PENDOWN:
         turtle.penDown();
         break;
@@ -342,7 +355,6 @@ class Interpreter {
     try {
       result = evalAllInScope(body, scope);
     } on InterpreterOutputException catch (e) {
-      print("stop");
       return new ListNode.cons(e.result, tail);
     }
     return new ListNode.cons(result, tail);
@@ -375,41 +387,42 @@ class Interpreter {
     return result;
   }
   
+  bool isSelfEval(Node node) {
+    return node.isList() || node.isNum();  // TODO(bqe): quote
+  }
+  
   /**
    * Evaluates [nodes] in scope [scope].
    * 
    * @return [result] ++ suffix of unused nodes
    */
   ListNode evalInScope(ListNode nodes, Scope scope) {
-    if (nodes.isNil()) {
-      return nodes;
-    }
-    Node fn = nodes.head;
- 
-    if (fn.isList() || fn.isNum()) {
-      return nodes;
-    }
-    
-    if (fn.isPrim()) {
-      Primitive p = fn;
-      return evalPrimFun(p, nodes.tail, scope);
-    }
+    return match(nodes).with(
+        nil() 
+          >> (_) { return nodes; }
+            
+      | cons(v.fn, v.tail) & guard ((e) => isSelfEval(e.fn))
+          >> (e) { return nodes; }
+            
+      | cons(prim(v.fn), v.tail)
+          >> (e) { return evalPrimFun(e.fn, e.tail, scope); }
 
-    if (fn.isDefn()) {  // new definition. TODO(bqe): move elsewhere?
-      DefnNode defn = fn;
-      globalScope.bind(defn.name, defn);
-      return new ListNode.cons(Primitive.UNIT, nodes.tail);
-    }
-    WordNode wn = fn;
-    Node lookup = scope[wn.stringValue];
-    if (lookup == null) {
-      throw new InterpreterException("unknown command: ${wn.stringValue}");
-    }
-    if (lookup.isDefn()) {
-      DefnNode defn = lookup;
-      return evalUserFun(defn, nodes.tail, scope);
-    } else {
-      return evalInScope(new ListNode.cons(lookup, nodes.tail), scope);
-    }
+      | cons(v.defn % defn(v.name, v.arity, v.body), v.tail)
+          >> (e) {  // TODO(bqe): this does not belong here 
+            globalScope.bind(e.name, e.defn);
+            return new ListNode.cons(Primitive.UNIT, nodes.tail);
+          }
+            
+      | cons(word(v.str), v.tail)
+          >> (e) {    
+           Node lookup = scope[e.str];
+           if (lookup == null) {
+             throw new InterpreterException("unknown command: ${e.str}");
+           }
+           return lookup.isDefn()
+             ? evalUserFun(lookup, nodes.tail, scope)
+             : evalInScope(new ListNode.cons(lookup, nodes.tail), scope);
+         }
+    );  
   }
 }

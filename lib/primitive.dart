@@ -130,3 +130,7 @@ class Primitive extends Node {
   
   String toString() => "Prim($name)";
 }
+
+OPattern<Node> prim(OPattern<Primitive> p) =>
+    constructor([p],
+        (s) => s.isPrim() ? new Option.some([s]) : new Option.none());

@@ -117,6 +117,16 @@ class ListNode extends Node {
   }
 }
 
+OPattern<Node> nil() =>
+    constructor([],
+        (s) => (s is ListNode && s.isNil()) 
+            ? new Option.some([]) : new Option.none());
+
+OPattern<Node> cons(OPattern p1, OPattern<ListNode> p2) =>
+    constructor([p1, p2],
+        (s) => (s is ListNode && s.isCons())
+            ? new Option.some([s.head, s.tail]) : new Option.none());
+
 class WordNode extends Node {
   
   final String stringValue;
@@ -136,6 +146,13 @@ class WordNode extends Node {
         return null;
   }
 }
+
+OPattern<Node> word(OPattern<String> p) =>
+    constructor([p],
+        (s) => s.isWord()
+            ? new Option.some([s.stringValue])
+            : new Option.none());
+
 
 class NumberNode extends Node {
   
@@ -194,6 +211,12 @@ class NumberNode extends Node {
   }
 }
 
+OPattern<Node> number(OPattern<num> p) =>
+    constructor([p],
+        (s) => s.isNum()
+            ? new Option.some([s.getNumValue()])
+            : new Option.none());
+
 class DefnNode extends Node {
   
   final int arity;
@@ -214,4 +237,11 @@ class DefnNode extends Node {
     return "Defn(${name},${arity},${body})";
   }
 }
+
+OPattern<DefnNode> defn(OPattern<String> name, OPattern<int> arity, 
+    OPattern<ListNode> body) =>
+        constructor([name,arity,body],
+            (s) => s.isDefn()
+                ? new Option.some([s.name, s.arity, s.body])
+                : new Option.none());
 

@@ -11,13 +11,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Runs all unit tests. Use this command line:
+// dart --enable-checked-mode --package-root=`pwd`/packages/ tests/tests.dart
 library arrowlogo;
 
 import 'dart:math' as math;
-// TODO: DartEditor does not like the URL below, but the VM does.
-import 'package:unittest/lib/unittest.dart';
+
+import 'package:dart_immutable/dart_immutable.dart';
+import 'package:pattern_matching/pattern_matching.dart';
+import 'package:unittest/unittest.dart';
 
 part "interpreter_test.dart";
+part "node_test.dart";
 part "parser_test.dart";
 
 part "../lib/console.dart";
@@ -29,6 +35,7 @@ part "../lib/scope.dart";
 part "../lib/turtle.dart";
 
 void main() {
+  new NodeTest().run();
   new ParserTest().run();
   new InterpreterTest().run();
 }
