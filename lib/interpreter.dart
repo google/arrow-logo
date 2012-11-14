@@ -397,23 +397,24 @@ class Interpreter {
    * @return [result] ++ suffix of unused nodes
    */
   ListNode evalInScope(ListNode nodes, Scope scope) {
-    return match(nodes).with(
-        nil() 
-          >> (_) { return nodes; }
-            
-      | cons(v.fn, v.tail) & guard ((e) => isSelfEval(e.fn))
+    if (nodes.isNil()) {
+      return nodes;
+    }
+    
+    return match(nodes.head).with(
+        v.fn & guard ((e) => isSelfEval(e.fn))
           >> (e) { return nodes; }
             
-      | cons(prim(v.fn), v.tail)
-          >> (e) { return evalPrimFun(e.fn, e.tail, scope); }
+      | prim(v.fn)
+          >> (e) { return evalPrimFun(e.fn, nodes.tail, scope); }
 
-      | cons(v.defn % defn(v.name, v.arity, v.body), v.tail)
+      | v.defn % defn(v.name, v.arity, v.body)
           >> (e) {  // TODO(bqe): this does not belong here 
             globalScope.bind(e.name, e.defn);
             return new ListNode.cons(Primitive.UNIT, nodes.tail);
           }
             
-      | cons(word(v.str), v.tail)
+      | word(v.str)
           >> (e) {    
            Node lookup = scope[e.str];
            if (lookup == null) {
