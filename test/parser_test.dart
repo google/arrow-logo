@@ -77,10 +77,11 @@ class ParserTest {
   void testParseSomeWords() {
     expect(new NumberNode.int(1), equals(new NumberNode.int(1)));  // sanity
     expect(
-      parser.parse("fd 1 fd 1.2"),
+      parser.parse("fd 1 fd 1.2 \"baz"),
       equals(ListNode.makeList([
         Primitive.FORWARD, new NumberNode.int(1),
-        Primitive.FORWARD, new NumberNode.float(1.2)])
+        Primitive.FORWARD, new NumberNode.float(1.2),
+        Primitive.QUOTE, new WordNode("baz")])
       ));
   }
   
@@ -127,7 +128,8 @@ class ParserTest {
       equals(ListNode.makeList(
         [new DefnNode("box", 1, ListNode.makeList([                                                             
           new WordNode(":size"),
-          Primitive.FORWARD, new WordNode(":size")]))]) 
+          Primitive.FORWARD,
+          Primitive.THING, new WordNode(":size")]))]) 
       ));
   }
 
@@ -191,7 +193,7 @@ class ParserTest {
       parser.parse("(:g > 2)"),
       equals(ListNode.makeList(
         [Primitive.GREATERTHAN,
-         new WordNode(":g"),
+         Primitive.THING, new WordNode(":g"),
          new NumberNode.int(2)])
       ));
   }

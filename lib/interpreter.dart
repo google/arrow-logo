@@ -381,14 +381,10 @@ class Interpreter {
       result = nodes.head;
       nodes = nodes.tail;
     }
-    if (result == null) {
+    if (result == null) {  // empty input nodes
       result = Primitive.UNIT;
     }
     return result;
-  }
-  
-  bool isSelfEval(Node node) {
-    return node.isList() || node.isNum();  // TODO(bqe): quote
   }
   
   /**
@@ -400,29 +396,69 @@ class Interpreter {
     if (nodes.isNil()) {
       return nodes;
     }
-    
     return match(nodes.head).with(
-        v.fn & guard ((e) => isSelfEval(e.fn))
-          >> (e) { return nodes; }
-            
+
+        // self - evaluating
+        
+        cons(v.hd, v.tl)
+          >> (_) { return nodes; }
+
+      | nil()
+          >> (_) { return nodes; }
+
+      | number(v.n)
+          >> (_) { return nodes; }
+
+      | prim(eq(Primitive.QUOTE))
+          >> (_) { return nodes; }
+
+      | prim(eq(Primitive.THING))
+          >> (_) {
+            return match(nodes.tail).with(
+                
+              cons(word(v.str), v.tail)
+                >> (e) { 
+                  Node lookup = scope[e.str];
+                  
+                  if (lookup == null) {
+                    throw new InterpreterException("no value for: ${e.str}");
+                  }
+                  return new ListNode.cons(lookup, e.tail);
+                }
+                
+              | v.x >> (e) {
+                  throw new InterpreterException("thing cannot handle: ${e.x}");
+                }
+                
+            );
+          }
+          
+
+        // call built-in
+          
       | prim(v.fn)
           >> (e) { return evalPrimFun(e.fn, nodes.tail, scope); }
 
+        // add definition 
+          
       | v.defn % defn(v.name, v.arity, v.body)
           >> (e) {  // TODO(bqe): this does not belong here 
             globalScope.bind(e.name, e.defn);
             return new ListNode.cons(Primitive.UNIT, nodes.tail);
           }
-            
+       
+        // call user-defined
+          
       | word(v.str)
           >> (e) {    
            Node lookup = scope[e.str];
            if (lookup == null) {
-             throw new InterpreterException("unknown command: ${e.str}");
+             throw new InterpreterException("I don't know how to ${e.str}");
            }
-           return lookup.isDefn()
-             ? evalUserFun(lookup, nodes.tail, scope)
-             : evalInScope(new ListNode.cons(lookup, nodes.tail), scope);
+           if (!lookup.isDefn()) {
+             throw new InterpreterException("Puzzled by ${lookup}");
+           }
+           return evalUserFun(lookup, nodes.tail, scope);
          }
     );  
   }

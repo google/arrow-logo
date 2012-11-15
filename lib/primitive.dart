@@ -42,12 +42,14 @@ class Primitive extends Node {
   static const POWER = const Primitive(2, "^", "power"); 
   static const PRODUCT = const Primitive(2, "*", "product"); 
   static const PRINT = const Primitive(1, "pr", "print"); 
+  static const QUOTE = const Primitive(1, "quote"); 
   static const QUOTIENT = const Primitive(2, "/", "quotient"); 
   static const REPEAT = const Primitive(2, "repeat"); 
   static const RIGHT = const Primitive(1, "rt", "right");
   static const SETPENCOLOR = const Primitive(1, "setpc", "setpencolor");
   static const STOP = const Primitive(0, "stop");
   static const SUM = const Primitive(2, "+", "sum"); 
+  static const THING = const Primitive(1, "thing"); 
   static const TRUE = const Primitive(0, "true"); 
   static const SHOWTURTLE = const Primitive(0, "st", "showturtle");
   
@@ -62,7 +64,7 @@ class Primitive extends Node {
 
   static const List<Primitive> operatorList = const [
     DIFFERENCE, FALSE, LESSOREQUAL, LESSTHAN, GREATEROREQUAL, GREATERTHAN,
-    OUTPUT, PRODUCT, QUOTIENT, POWER, PI, SUM, TRUE ];
+    OUTPUT, PRODUCT, QUOTE, QUOTIENT, POWER, PI, SUM, THING, TRUE ];
 
   static getPrecedence(Primitive p) {
     switch (p) {

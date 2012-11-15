@@ -18,7 +18,7 @@ library arrowlogo;
 
 import 'dart:math' as math;
 
-import 'package:dart_immutable/dart_immutable.dart';
+import 'package:persistent/persistent.dart';
 import 'package:pattern_matching/pattern_matching.dart';
 import 'package:unittest/unittest.dart';
 

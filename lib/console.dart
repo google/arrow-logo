@@ -78,7 +78,7 @@ class Console {
       code = code.substring(i + PROMPT.length);
       if (!code.isEmpty) {
         ListNode nodes = parser.parse(code);
-        print("nodes $nodes");
+        // print("parsed nodes $nodes");
         writeln();
         if (mode == MODE_EVAL && isIncompleteDef(nodes.head)) {
           mode = MODE_DEFN;

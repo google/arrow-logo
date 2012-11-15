@@ -82,7 +82,9 @@ class InterpreterTest {
     Node defn = new DefnNode("foo", 1,
       ListNode.makeList([
         new WordNode(":x"), 
-        Primitive.QUOTIENT, new WordNode(":x"), new NumberNode.int(2)]));
+        Primitive.QUOTIENT,
+        Primitive.THING, new WordNode(":x"),
+        new NumberNode.int(2)]));
     expect(interpreter.eval(
         ListNode.makeList([defn, new WordNode("foo"), fortyTwo])),
         equals(twentyOne));
