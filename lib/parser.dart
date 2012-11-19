@@ -231,7 +231,8 @@ class Scanner {
    * @post token.node.isWord()
    */
   void tokenizeQuotedWord() {
-    int i = ++pos;
+    int i = pos;
+    ++pos;
     advanceWhile(isAlphaOrDigit);
     String word = text.substring(i, pos);
     token.setQuotedWord(new WordNode(word));
@@ -243,14 +244,13 @@ class Scanner {
    * @post token.node.isWord()
    */
   void tokenizeVar() {
-    int i = pos;
-    ++pos;
+    int i = ++pos;
     if (!isAlpha(text.charCodeAt(pos))) {
       throw new Exception("expected alphabetical");
     }
     advanceWhile(isAlphaOrDigit);
     String word = text.substring(i, pos);
-    token.setVar(new WordNode(word));
+    token.setVar(new WordNode("\"".concat(word)));
   }
 
   /**
@@ -402,16 +402,12 @@ class Parser extends Scanner {
       case Token.TOKEN_PRIM:
       case Token.TOKEN_NUM:
       case Token.TOKEN_WORD:
+      case Token.TOKEN_QUOTED_WORD:
         nodeList.add(token.node);
         nextToken();
         return;
       case Token.TOKEN_VAR:
         nodeList.add(Primitive.THING);
-        nodeList.add(token.node);
-        nextToken();
-        return;
-      case Token.TOKEN_QUOTED_WORD:
-        nodeList.add(Primitive.QUOTE);
         nodeList.add(token.node);
         nextToken();
         return;
@@ -514,13 +510,12 @@ class Parser extends Scanner {
     WordNode wn = token.node;
     String name = wn.stringValue;
     nextToken();
-    var objList = new List<Node>();
-    int numVars = 0;
+    var varList = new List<Node>();
     while (token.kind == Token.TOKEN_VAR) {
-      objList.add(token.node);
+      varList.add(token.node);
       nextToken();
-      numVars++;
     }    
+    var objList = new List<Node>();
     while (token.kind != Token.TOKEN_END
         && token.kind != Token.TOKEN_EOF) {
       parseExpr(objList);
@@ -534,7 +529,8 @@ class Parser extends Scanner {
     }
     nextToken();
     nodeList.add(
-      new DefnNode(name, numVars, ListNode.makeList(objList)));
+      new DefnNode(name,
+        ListNode.makeList(varList), ListNode.makeList(objList)));
   }
      
   /**

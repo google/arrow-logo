@@ -67,13 +67,13 @@ class Interpreter {
   }
     
   Node evalBinOp(ListNode nodes, Scope scope, opInt(int x, int y), opFloat(double x, double y)) {   
-    nodes = evalInScope(nodes, scope);
-    Node op1 = nodes.head;
+    ListNode nodes1 = evalInScope(nodes, scope);
+    Node op1 = nodes1.head;
     if (!(op1.isNum())) {
       throw new InterpreterException("expected num for op1 was ${op1}");
     }
     NumberNode op1num = op1;
-    nodes = nodes.tail;
+    nodes = nodes1.tail;
     nodes = evalInScope(nodes, scope);
     Node op2 = nodes.head;
     if (!(op2.isNum())) {
@@ -110,6 +110,18 @@ class Interpreter {
       throw new InterpreterException("expected number");
     }
   }
+  
+ void ensureWord(Node node) {
+   if (!node.isWord()) {
+     throw new InterpreterException("expected word"); 
+   }
+ }
+  
+  void ensureList(Node node) {
+    if (!node.isList()) {
+      throw new InterpreterException("expected list");
+    }  
+  }
 
   /**
    * Evaluates a primitive function (aka command/operator).
@@ -118,6 +130,20 @@ class Interpreter {
    */
   ListNode evalPrimFun(Primitive p, ListNode nodes, Scope scope) {
     switch (p) {
+      case Primitive.APPLY:
+        nodes = evalInScope(nodes, scope);
+        Node fn = nodes.head;
+        nodes = evalInScope(nodes.tail, scope);
+        Node args = nodes.head;
+        nodes = nodes.tail;
+        if (fn.isPrim()) {
+          return new ListNode.cons(evalPrimFun(fn, args, scope), nodes);
+        } else if (fn.isList()) {
+          Node result = applyTemplate(fn, args, scope);
+          return new ListNode.cons(result, nodes);
+        }
+        break;
+
       case Primitive.UNIT:
         break;
         
@@ -156,7 +182,16 @@ class Interpreter {
         nodes = nodes.tail;
         turtle.forward(wn.getNumValue()); 
         break;
-        
+
+      case Primitive.FPUT:
+        nodes = evalInScope(nodes, scope);
+        Node first = nodes.head;
+        nodes = evalInScope(nodes.tail, scope);
+        ensureList(nodes.head);
+        ListNode ln = nodes.head;
+        nodes = nodes.tail;
+        return new ListNode.cons(new ListNode.cons(first, ln), nodes);
+
       case Primitive.HELP:
         console.showHelp();
         break;
@@ -222,6 +257,36 @@ class Interpreter {
         nodes = nodes.tail;
         turtle.left(wn.getNumValue()); 
         break;
+     
+      case Primitive.LPUT:
+        nodes = evalInScope(nodes, scope);
+        Node last = nodes.head;
+        nodes = evalInScope(nodes.tail, scope);
+        ensureList(nodes.head);
+        ListNode ln = nodes.head;
+        nodes = nodes.tail;
+        ListNode result = ln.append(ListNode.makeList([last]));
+        return new ListNode.cons(result, nodes);
+           
+      case Primitive.LOCAL:
+        nodes = evalInScope(nodes, scope);
+        Node name = nodes.head;
+        ensureWord(name);
+        WordNode word = name;
+        nodes = nodes.tail;
+        scope.defineLocal(word.stringValue);
+        return new ListNode.cons(Primitive.UNIT, nodes);
+
+      case Primitive.MAKE:
+        nodes = evalInScope(nodes, scope);
+        Node varRef = nodes.head;        
+        nodes = nodes.tail;
+        ensureWord(varRef);
+        WordNode varRefWord = varRef;
+        nodes = evalInScope(nodes, scope);
+        Node value = nodes.head;
+        scope.assign(varRefWord.stringValue, value);
+        return new ListNode.cons(Primitive.UNIT, nodes.tail);
         
       case Primitive.PI:
         return new ListNode.cons(new NumberNode.float(math.PI), nodes);
@@ -230,7 +295,6 @@ class Interpreter {
         nodes = evalInScope(nodes, scope);
         Node n = nodes.head;
         nodes = nodes.tail;
-        // TODO: pretty-print values
         console.writeln(n.toString());
         break;
         
@@ -268,7 +332,17 @@ class Interpreter {
           throw new InterpreterException("invalid color code ${nn.getNumValue()}");
         }
         break;
-
+        
+      case Primitive.THING:
+        Node arg = nodes.head;
+        ensureWord(arg);
+        WordNode wordNode = arg;
+        Node lookup = scope[wordNode.stringValue];
+        if (lookup == null) {
+          throw new InterpreterException("no value for: ${arg}");
+        }
+        return new ListNode.cons(lookup, nodes.tail);
+        
       case Primitive.PENDOWN:
         turtle.penDown();
         break;
@@ -276,7 +350,7 @@ class Interpreter {
       case Primitive.PENUP:
         turtle.penUp();
         break;
-        
+                
       case Primitive.SHOWTURTLE:
         turtle.showTurtle();
         break;
@@ -328,17 +402,51 @@ class Interpreter {
   }
   
   /**
+   * Interprets template in lambda form 
+   *
+   * @param defn definition
+   */ 
+  Node applyTemplate(ListNode fn, ListNode args, Scope scope) {
+    ListNode formalParams = fn.head;
+    Node body = fn.tail;
+    int numFormals = formalParams.length;
+    Map<String, Node> env = new Map();
+    if (args.length != numFormals) {
+      throw new InterpreterException(
+          "expected arguments ${numFormals}".concat(
+          "actual arguments: ${args.length}"));
+    }
+    while (numFormals != 0) {
+      WordNode formalParam = formalParams.head;
+      formalParams = formalParams.tail;
+      Node actualParam = args.head;
+      args = args.tail;
+      env[formalParam.stringValue] = actualParam;
+      --numFormals;
+    }
+    // return body and environment;
+    scope = new Scope(env, scope);
+    Node result;
+    try {
+      result = evalAllInScope(body, scope);
+    } on InterpreterOutputException catch (e) {
+      return e.result;
+    }
+    return result;
+  }
+  
+  /**
    * Interprets user-defined function (aka command/operator).
    *
    * @param defn definition
    */ 
-  ListNode evalUserFun(DefnNode defn, ListNode tail, Scope scope) {
-    int numParams = defn.arity;
+  ListNode applyUserFun(DefnNode defn, ListNode tail, Scope scope) {
+    ListNode formalParams = defn.vars;
     ListNode body = defn.body;
     Map<String, Node> env = new Map();
-    while (numParams != 0) {
-      WordNode formalParam = body.head;
-      body = body.tail;
+    while (!formalParams.isNil()) {
+      WordNode formalParam = formalParams.head;
+      formalParams = formalParams.tail;
       
       // Evaluate next arg, consuming a prefix.
       tail = evalInScope(tail, scope);
@@ -346,11 +454,8 @@ class Interpreter {
       tail = tail.tail;
 
       env[formalParam.stringValue] = actualParam;
-      numParams = numParams - 1;
     }
-    if (!env.isEmpty) {
-      scope = new Scope(env, scope);
-    }
+    scope = new Scope(env, scope);
     Node result;
     try {
       result = evalAllInScope(body, scope);
@@ -409,32 +514,10 @@ class Interpreter {
       | number(v.n)
           >> (_) { return nodes; }
 
-      | prim(eq(Primitive.QUOTE))
+      | word(v.str) & guard((e) => e.str.startsWith("\""))
           >> (_) { return nodes; }
 
-      | prim(eq(Primitive.THING))
-          >> (_) {
-            return match(nodes.tail).with(
-                
-              cons(word(v.str), v.tail)
-                >> (e) { 
-                  Node lookup = scope[e.str];
-                  
-                  if (lookup == null) {
-                    throw new InterpreterException("no value for: ${e.str}");
-                  }
-                  return new ListNode.cons(lookup, e.tail);
-                }
-                
-              | v.x >> (e) {
-                  throw new InterpreterException("thing cannot handle: ${e.x}");
-                }
-                
-            );
-          }
-          
-
-        // call built-in
+      // call built-in
           
       | prim(v.fn)
           >> (e) { return evalPrimFun(e.fn, nodes.tail, scope); }
@@ -455,11 +538,16 @@ class Interpreter {
            if (lookup == null) {
              throw new InterpreterException("I don't know how to ${e.str}");
            }
-           if (!lookup.isDefn()) {
-             throw new InterpreterException("Puzzled by ${lookup}");
+           if (lookup.isDefn()) {
+             DefnNode defn = lookup;
+             return applyUserFun(defn, nodes.tail, scope);
            }
-           return evalUserFun(lookup, nodes.tail, scope);
-         }
+           return new ListNode.cons(lookup, nodes.tail);
+        }
+          
+      | v.x >> (e) {
+          throw new InterpreterException("I don't know how to ${e.x}");
+        }
     );  
   }
 }

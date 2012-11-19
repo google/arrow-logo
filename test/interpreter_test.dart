@@ -79,22 +79,91 @@ class InterpreterTest {
   void testEvalDefn() {
     Node fortyTwo = new NumberNode.int(42);
     Node twentyOne = new NumberNode.int(21);
-    Node defn = new DefnNode("foo", 1,
+    Node defn = new DefnNode("foo",
+      ListNode.makeList([ new WordNode("\"x") ]),
       ListNode.makeList([
-        new WordNode(":x"), 
         Primitive.QUOTIENT,
-        Primitive.THING, new WordNode(":x"),
+        Primitive.THING, new WordNode("\"x"),
         new NumberNode.int(2)]));
     expect(interpreter.eval(
         ListNode.makeList([defn, new WordNode("foo"), fortyTwo])),
         equals(twentyOne));
   }
   
+  void testEvalConcat() {
+    Node foo = new WordNode("\"foo");
+    Node bar = new WordNode("\"bar");
+    Node barlist = ListNode.makeList([bar]);
+    
+    expect(interpreter.eval(
+        ListNode.makeList([Primitive.FPUT, foo, barlist])),
+        equals(ListNode.makeList([foo, bar])));
+
+    expect(interpreter.eval(
+        ListNode.makeList([Primitive.LPUT, foo, barlist])),
+        equals(ListNode.makeList([bar, foo])));                               
+  }
+  
+  void testApplyTemplate() {
+    ListNode nodes = 
+        ListNode.makeList([
+            Primitive.APPLY, // new WordNode("optwo"),
+            ListNode.makeList([
+                ListNode.makeList([
+                    new WordNode("x"), new WordNode("y")
+                    ]),
+                Primitive.SUM, 
+                new WordNode("x"),
+                new WordNode("y")
+                ]),
+            ListNode.makeList([
+                new NumberNode.int(1),
+                new NumberNode.int(2)
+                ])
+            ]);  
+    expect(interpreter.eval(nodes),
+        equals(new NumberNode.int(3)));
+  }
+
+  void testMakeSimple() {
+    ListNode nodes = 
+        ListNode.makeList([
+            Primitive.MAKE, // new WordNode("optwo"),
+            new WordNode("\"x"),
+            new NumberNode.int(3)]);
+    expect(interpreter.eval(nodes),
+        equals(new NumberNode.int(3)));
+    expect(globalScope["\"x"], equals(new NumberNode.int(3)));  
+  }
+  
+
+  void testMakeLocal() {
+    Scope topLevel = Primitive.makeTopLevel();
+    ListNode nodes = new Parser(topLevel).parse("""
+        to setx make \"x :x + 1 end
+        to callx 
+          local \"x
+          make \"x 2
+          setx
+          make \"y :x
+        end
+        callx""");
+    expect(interpreter.eval(nodes),
+        equals(Primitive.UNIT));
+    expect(globalScope["\"x"], equals(null));  
+    expect(globalScope["\"y"], equals(new NumberNode.int(3)));  
+  }
+  
   void run() {
     group("InterpreterTest", () {
-      test("eval values", testEvalValues);
+      /*test("eval values", testEvalValues);
       test("eval if", testEvalIf);
       test("eval defn", testEvalDefn);
+      test("eval defn concat", testEvalConcat);
+      test("apply template", testApplyTemplate);
+
+      test("make simple", testMakeSimple);*/
+      test("make local", testMakeLocal);
     });
   }
 }

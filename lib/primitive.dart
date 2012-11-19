@@ -15,6 +15,7 @@ part of arrowlogo;
 
 class Primitive extends Node {
  
+  static const APPLY = const Primitive(1, "apply"); 
   static const BACK = const Primitive(1, "bk", "back");
   static const CLEAN = const Primitive(0, "clean");
   static const CLEARSCREEN = const Primitive(0, "cs", "clearscreen");
@@ -23,6 +24,7 @@ class Primitive extends Node {
   static const EQUALS = const Primitive(2, "==", "equals"); 
   static const FALSE = const Primitive(0, "false"); 
   static const FORWARD = const Primitive(1, "fd", "forward"); 
+  static const FPUT = const Primitive(1, "fput"); 
   static const GREATERTHAN = const Primitive(1, ">", "greaterthan"); 
   static const GREATEROREQUAL = const Primitive(1, ">=", "greaterorequal"); 
   static const HIDETURTLE = const Primitive(0, "ht", "hideturtle");
@@ -33,7 +35,10 @@ class Primitive extends Node {
   static const LEFT = const Primitive(1, "lt", "left"); 
   static const LESSTHAN = const Primitive(1, "<", "lessthan"); 
   static const LESSOREQUAL = const Primitive(1, "<=", "lessorequal"); 
+  static const LOCAL = const Primitive(1, "local"); 
+  static const LPUT = const Primitive(1, "lput"); 
   static const DIFFERENCE = const Primitive(2, "-", "difference"); 
+  static const MAKE = const Primitive(2, "make");
   static const NIL = const Primitive(0, "_nil"); 
   static const OUTPUT = const Primitive(1, "output");
   static const PENDOWN = const Primitive(0, "pd", "pendown"); 
@@ -41,8 +46,7 @@ class Primitive extends Node {
   static const PI = const Primitive(0, "pi");  
   static const POWER = const Primitive(2, "^", "power"); 
   static const PRODUCT = const Primitive(2, "*", "product"); 
-  static const PRINT = const Primitive(1, "pr", "print"); 
-  static const QUOTE = const Primitive(1, "quote"); 
+  static const PRINT = const Primitive(1, "pr", "print");   
   static const QUOTIENT = const Primitive(2, "/", "quotient"); 
   static const REPEAT = const Primitive(2, "repeat"); 
   static const RIGHT = const Primitive(1, "rt", "right");
@@ -55,16 +59,25 @@ class Primitive extends Node {
   
   static const UNIT = const Primitive(0, "unit");
   
+  static Scope makeTopLevel() {
+    Map<String, Node> map = new Map();
+    for (String k in getBuiltIns().keys) {
+      map[k] = getBuiltIns()[k];
+    }
+    return new Scope(map);
+  }
+
   // const INCOMPLETE = const Primitive(1, "_incomplete");
   
   static const List<Primitive> commandsList = const [ 
     BACK, CLEAN, CLEARSCREEN, CLEARTEXT, CONS, FORWARD, HELP, HIDETURTLE,
-    HOME, IF, IFELSE, LEFT, NIL, PENDOWN, PENUP, PRINT, REPEAT, RIGHT,
+    HOME, IF, IFELSE, LOCAL, LEFT, MAKE, NIL, PENDOWN, PENUP, PRINT, REPEAT, RIGHT,
     SETPENCOLOR, SHOWTURTLE, STOP ];
 
   static const List<Primitive> operatorList = const [
-    DIFFERENCE, FALSE, LESSOREQUAL, LESSTHAN, GREATEROREQUAL, GREATERTHAN,
-    OUTPUT, PRODUCT, QUOTE, QUOTIENT, POWER, PI, SUM, THING, TRUE ];
+    DIFFERENCE, FALSE, FPUT, LESSOREQUAL, LESSTHAN, GREATEROREQUAL,
+    GREATERTHAN, LPUT, OUTPUT, PRODUCT, QUOTIENT, POWER, PI, SUM, THING,
+    TRUE ];
 
   static getPrecedence(Primitive p) {
     switch (p) {

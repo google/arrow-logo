@@ -33,9 +33,17 @@ class NodeTest {
     expect(matchWord(new NumberNode.int(3)), equals("no"));
   }
   
+  void testListToString() {
+    Node foo = new WordNode("\"foo");
+    Node bar = new WordNode("\"bar");
+    Node barlist = ListNode.makeList([foo, bar]);
+    expect(barlist.toString(), equals("[ \"foo \"bar ]"));
+  }
+  
   void run() {
     group("NodeTest", () {
       test("basic match", testBasicMatch);
-    });
+      test("list construction and string", testListToString);
+      });
   }
 }

@@ -32,18 +32,39 @@ class Scope {
     return sb.toString();
   }
   
-  operator [](x) {
-    var t = symtab[x];
+  operator [](String name) {
+    var t = symtab[name];
     if (t != null || parent == null) {
       return t;
     }
-    return parent[x];
+    return parent[name];
   }
   
+  void defineLocal(String name) {
+    symtab[name] = Primitive.UNIT;
+  }
+  
+  void assign(String name, Node value) {
+    var t = symtab[name];
+    if (t != null || parent == null) {
+      symtab[name] = value;
+      return;
+    }
+    parent.assign(name, value);
+  }
+
   void bind(String name, Node defn) {
     symtab[name] = defn;
   }
-  
+
+  void bindGlobal(String name, Node defn) {
+    if (parent == null) {
+      symtab[name] = defn;
+    } else {
+      parent.bindGlobal(name, defn);
+    }
+  }
+
   Scope extend() {
     return new Scope(new Map<String, Node>(), this);
   }

@@ -31,14 +31,6 @@ class ArrowLogo {
 
   static final int NEWLINE = 0xD;
 
-  static Scope makeTopLevel() {
-    Map<String, Node> map = new Map();
-    for (String k in Primitive.getBuiltIns().keys) {
-      map[k] = Primitive.getBuiltIns()[k];
-    }
-    return new Scope(map);
-  }
-
   html.CanvasElement userCanvas;
   html.CanvasElement turtleCanvas;
   html.TextAreaElement commandListElem;
@@ -49,7 +41,7 @@ class ArrowLogo {
   Console console;
   Interpreter interpreter;
   
-  ArrowLogo() : toplevel = makeTopLevel() {
+  ArrowLogo() : toplevel = Primitive.makeTopLevel() {
     parser = new Parser(toplevel);
   }
       

@@ -83,12 +83,10 @@ class ListNode extends Node {
     return n;
   }
     
-  int getLength() { 
-    return getLengthIter(0); 
-  }
+  int get length => _getLengthIter(0); 
   
-  int getLengthIter(int acc) { 
-    return isNil() ? acc : tail.getLengthIter(1 + acc); 
+  int _getLengthIter(int acc) { 
+    return isNil() ? acc : tail._getLengthIter(1 + acc); 
   }
   
   ListNode getPrefix(int length) {
@@ -108,12 +106,13 @@ class ListNode extends Node {
   }
   
   String toString() {
-    if (isNil()) {
-      return "Nil()";
-    } else if (isCons()) {
-      return "Cons(${head.toString()},${tail})";
-    }
-    return null;
+    return isNil() ? "[]" : _toStringIter("[");
+  }
+  
+  String _toStringIter(String acc) {
+    return isNil()
+        ? acc.concat(" ]")
+        : tail._toStringIter(acc.concat(" ").concat(head.toString()));
   }
 }
 
@@ -142,8 +141,7 @@ class WordNode extends Node {
   }
   
   String toString() {
-    return "Word(${stringValue})";
-        return null;
+    return stringValue;
   }
 }
 
@@ -202,12 +200,7 @@ class NumberNode extends Node {
   }
 
   String toString() {
-    if (isFloat()) {
-      return "Float(${getFloatValue()})";
-    } else if (isInt()) {
-      return "Int(${getIntValue()})";
-    }
-    throw new Exception("neither int nor float");
+    return isFloat() ? getFloatValue().toString() : getIntValue().toString();
   }
 }
 
@@ -219,29 +212,32 @@ OPattern<Node> number(OPattern<num> p) =>
 
 class DefnNode extends Node {
   
-  final int arity;
   final String name;
+  final ListNode vars;
   final ListNode body;
   
-  DefnNode(this.name, this.arity, this.body) : super(Node.KIND_DEFN);
+  int get arity => vars.length;
+  
+  DefnNode(this.name, this.vars, this.body)
+      : super(Node.KIND_DEFN);
 
   bool operator ==(node) {
     if (!(node is DefnNode)) {
       return false;
     }
     DefnNode that = node;
-    return arity == that.arity && name == that.name && body == that.body;
+    return name == that.name && body == that.body;
   }
   
   String toString() {
-    return "Defn(${name},${arity},${body})";
+    return "Defn(${name},${vars},${body})";
   }
 }
 
-OPattern<DefnNode> defn(OPattern<String> name, OPattern<int> arity, 
+OPattern<DefnNode> defn(OPattern<String> name, OPattern<ListNode> vars, 
     OPattern<ListNode> body) =>
-        constructor([name,arity,body],
+        constructor([name, vars, body],
             (s) => s.isDefn()
-                ? new Option.some([s.name, s.arity, s.body])
+                ? new Option.some([s.name, s.vars, s.body])
                 : new Option.none());
 
