@@ -28,11 +28,16 @@ class InterpreterTest {
   Scope globalScope;
   Interpreter interpreter;
 
+  Scope makeGlobalScope() => new Scope(new Map());
+  
+  Interpreter makeInterpreter (scope) =>
+      new Interpreter(mockTurtle, mockConsole, scope);
+  
   InterpreterTest() {
     mockTurtle = new MockTurtle();
     mockConsole = new MockConsole();
-    globalScope = new Scope(new Map());
-    interpreter = new Interpreter(mockTurtle, mockConsole, globalScope);
+    globalScope = makeGlobalScope();
+    interpreter = makeInterpreter(globalScope);
   }
 
   void testEvalValues() {
@@ -121,7 +126,7 @@ class InterpreterTest {
                 new NumberNode.int(2)
                 ])
             ]);  
-    expect(interpreter.eval(nodes),
+    expect(makeInterpreter(makeGlobalScope()).eval(nodes),
         equals(new NumberNode.int(3)));
   }
 
@@ -131,12 +136,12 @@ class InterpreterTest {
             Primitive.MAKE, // new WordNode("optwo"),
             new WordNode("\"x"),
             new NumberNode.int(3)]);
-    expect(interpreter.eval(nodes),
-        equals(new NumberNode.int(3)));
+    Scope globalScope = makeGlobalScope();
+    expect(makeInterpreter(globalScope).eval(nodes),
+        equals(Primitive.UNIT));
     expect(globalScope["\"x"], equals(new NumberNode.int(3)));  
   }
   
-
   void testMakeLocal() {
     Scope topLevel = Primitive.makeTopLevel();
     ListNode nodes = new Parser(topLevel).parse("""
@@ -148,7 +153,8 @@ class InterpreterTest {
           make \"y :x
         end
         callx""");
-    expect(interpreter.eval(nodes),
+    Scope globalScope = makeGlobalScope();
+    expect(makeInterpreter(globalScope).eval(nodes),
         equals(Primitive.UNIT));
     expect(globalScope["\"x"], equals(null));  
     expect(globalScope["\"y"], equals(new NumberNode.int(3)));  
@@ -156,13 +162,12 @@ class InterpreterTest {
   
   void run() {
     group("InterpreterTest", () {
-      /*test("eval values", testEvalValues);
+      test("eval values", testEvalValues);
       test("eval if", testEvalIf);
       test("eval defn", testEvalDefn);
       test("eval defn concat", testEvalConcat);
       test("apply template", testApplyTemplate);
-
-      test("make simple", testMakeSimple);*/
+      test("make simple", testMakeSimple);
       test("make local", testMakeLocal);
     });
   }

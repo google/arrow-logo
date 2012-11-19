@@ -111,11 +111,11 @@ class Interpreter {
     }
   }
   
- void ensureWord(Node node) {
-   if (!node.isWord()) {
-     throw new InterpreterException("expected word"); 
-   }
- }
+  void ensureWord(Node node) {
+    if (!node.isWord()) {
+      throw new InterpreterException("expected word"); 
+    }
+  }
   
   void ensureList(Node node) {
     if (!node.isList()) {
