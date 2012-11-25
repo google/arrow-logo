@@ -521,45 +521,39 @@ class Interpreter {
     if (nodes.isNil()) {
       return nodes;
     }
-    return match(nodes.head).with(
-
-        // self - evaluating
-        
-        cons(v.hd, v.tl)
-          >> (_) { return nodes; }
-
-      | nil()
-          >> (_) { return nodes; }
-
-      | number(v.n)
-          >> (_) { return nodes; }
-
-      | word(v.str) & guard((e) => e.str.startsWith("\""))
-          >> (_) { return nodes; }
-
-      // call built-in
-          
-      | prim(v.fn)
-          >> (e) { return evalPrimFun(e.fn, nodes.tail, scope); }
-       
-        // call user-defined
-          
-      | word(v.str)
-          >> (e) {    
-           Node lookup = scope[e.str];
-           if (lookup == null) {
-             throw new InterpreterException("I don't know how to ${e.str}");
-           }
-           if (lookup.isDefn()) {
-             DefnNode defn = lookup;
-             return applyUserFun(defn, nodes.tail, scope);
-           }
-           return new ListNode.cons(lookup, nodes.tail);
-        }
-          
-      | v.x >> (e) {
-          throw new InterpreterException("I don't know how to ${e.x}");
-        }
-    );  
+    Node head = nodes.head;
+    ListNode tail = nodes.tail;
+    
+    if (head.isList()) {
+      return nodes;
+    }
+    
+    if (head.isNum()) {
+      return nodes;
+    }
+    
+    if (head.isWord() && head.stringValue.startsWith("\"")) {
+      return nodes;
+    }
+    
+    if (head.isPrim()) {
+      return evalPrimFun(head, tail, scope);
+    }
+    
+    if (head.isWord()) {
+      WordNode word = head;
+      Node lookup = scope[word.stringValue];
+      if (lookup == null) {
+        throw new InterpreterException(
+            "I don't know how to ${word.stringValue}");
+      }
+      if (lookup.isDefn()) {
+        DefnNode defn = lookup;
+        return applyUserFun(defn, tail, scope);
+      }
+      return new ListNode.cons(lookup, tail);
+    }
+    
+    throw new InterpreterException("I don't know how to ${head}");  
   }
 }
