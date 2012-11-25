@@ -19,23 +19,22 @@
 <html>
   <head>
     <title>ArrowLogo</title>
+    <link rel="stylesheet" href="ArrowLogo.css">
   </head>
-  <body style="background: lightgreen;">
-    <h1 style="text-align: right;">ArrowLogo</h1>
-    <p>Type "help" for help.</p>
+  <body>
+    <h1 class="title">ArrowLogo</h1>
+    <div class="main">
    
-    <div style="position: relative; height: 600px;">
-   
-      <div style="position: absolute; width: 600px; height: 540px;">
-        <canvas id="user_canvas" width="600" height="540"
-            style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
-        <canvas id="turtle_canvas" width="600" height="540" 
-            style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+      <div class="left_panel">
+        <canvas id="user" width="600px" height="540px"></canvas>
+        <canvas id="turtle" width="600px" height="540px"></canvas>
       </div>
 
-      <div style="position: absolute; left: 610px; right: 0px; height: 600px;">
-        <textarea id="console" rows="40" cols="40" 
-            style="background: rgb(230,230,230);"></textarea>
+      <div class="right_panel">
+        <textarea id="shell"></textarea>
+        <textarea id="history"></textarea>
+        <textarea id="editor" class="invisible"></textarea>
+        <input id="commit" type="button" value="ok" class="invisible"></input>
       </div>
     </div>
     

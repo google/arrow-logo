@@ -65,6 +65,8 @@ class ListNode extends Node {
         || (head == that.head && tail == that.tail);
   }
   
+  Iterator<Node> iterator() => new ListNodeIterator(this);
+  
   final Node head;
   final ListNode tail;
   
@@ -125,6 +127,25 @@ OPattern<Node> cons(OPattern p1, OPattern<ListNode> p2) =>
     constructor([p1, p2],
         (s) => (s is ListNode && s.isCons())
             ? new Option.some([s.head, s.tail]) : new Option.none());
+
+class ListNodeIterator implements Iterator<Node> {
+  
+  ListNode node;  
+  ListNodeIterator(ListNode this.node);
+  
+  Node next() {
+    if (node.isNil()) {
+      throw new Exception();
+    }
+    ListNode n = node;
+    node = node.tail;
+    return n.head;
+  }
+  
+  bool get hasNext {
+    return !node.isNil();
+  }
+}
 
 class WordNode extends Node {
   

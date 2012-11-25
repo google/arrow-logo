@@ -35,7 +35,8 @@ class Interpreter {
   final Console console;
   final Scope globalScope;
   
-  const Interpreter(this.turtle, this.console, this.globalScope);
+  Interpreter(this.turtle, this.console, Scope topLevel)
+      : globalScope = new Scope(topLevel.symtab);
   
   static WordNode deref(WordNode word, Scope scope) {
     if (scope == null) {
@@ -168,6 +169,10 @@ class Interpreter {
         console.clearText();
         break;
         
+      case Primitive.EDALL:
+        console.showEditor();
+        break;
+        
       case Primitive.EQUALS:
         // TODO equality for words, lists
         return evalBinCmp(nodes, scope, primEqualsNum);
@@ -210,7 +215,7 @@ class Interpreter {
           if (!thenPart.isList()) {
             thenPart = new ListNode.cons(thenPart, ListNode.NIL);
           }
-          result = evalAllInScope(thenPart, scope);
+          result = evalSequenceInScope(thenPart, scope);
         } else if (cond == Primitive.FALSE) {
           result = Primitive.UNIT;
         } else { 
@@ -230,7 +235,7 @@ class Interpreter {
           if (!thenPart.isList()) {
             thenPart = new ListNode.cons(thenPart, ListNode.NIL);
           }
-          result = evalAllInScope(thenPart, scope);
+          result = evalSequenceInScope(thenPart, scope);
           nodes = nodes.tail;
         } else if (cond == Primitive.FALSE) {
           nodes = nodes.tail;
@@ -239,7 +244,7 @@ class Interpreter {
           if (!elsePart.isList()) {
             elsePart = new ListNode.cons(elsePart, ListNode.NIL);
           }
-          result = evalAllInScope(elsePart, scope);
+          result = evalSequenceInScope(elsePart, scope);
         } else { 
           throw new InterpreterException("expected boolean");
         }
@@ -311,7 +316,7 @@ class Interpreter {
         }
         nodes = nodes.tail;
         for (int i = 0; i < times; ++i) {
-          evalAllInScope(body, scope);  // ignore result
+          evalSequenceInScope(body, scope);  // ignore result
         }
         break;
         
@@ -351,6 +356,12 @@ class Interpreter {
         turtle.penUp();
         break;
                 
+      case Primitive.RUN:
+        Node arg = nodes.head;
+        ensureList(arg);
+        ListNode list = arg;
+        return new ListNode.cons(evalSequenceInScope(list, scope), nodes.tail);
+        
       case Primitive.SHOWTURTLE:
         turtle.showTurtle();
         break;
@@ -428,7 +439,7 @@ class Interpreter {
     scope = new Scope(env, scope);
     Node result;
     try {
-      result = evalAllInScope(body, scope);
+      result = evalSequenceInScope(body, scope);
     } on InterpreterOutputException catch (e) {
       return e.result;
     }
@@ -458,7 +469,7 @@ class Interpreter {
     scope = new Scope(env, scope);
     Node result;
     try {
-      result = evalAllInScope(body, scope);
+      result = evalSequenceInScope(body, scope);
     } on InterpreterOutputException catch (e) {
       return new ListNode.cons(e.result, tail);
     }
@@ -470,8 +481,17 @@ class Interpreter {
    * 
    * @return result of operator, or UNIT for command
    */
-  Node eval(ListNode nodes) {
-    return evalAllInScope(nodes, globalScope);
+  Node evalSequence(ListNode nodes) {
+    return evalSequenceInScope(nodes, globalScope);
+  }
+  
+  /**
+   * Entry point, defines [node], which must be a DefnNode.
+   * 
+   * @return result of operator, or UNIT for command
+   */
+  void define(DefnNode defn) {
+    globalScope.bind(defn.name, defn);
   }
   
   /**
@@ -479,7 +499,7 @@ class Interpreter {
    *
    * @return result of last command, or UNIT if `nodes' was empty
    */
-  Node evalAllInScope(ListNode nodes, Scope scope) {
+  Node evalSequenceInScope(ListNode nodes, Scope scope) {
     Node result;
     while (!nodes.isNil()) {
       nodes = evalInScope(nodes, scope);
@@ -521,14 +541,6 @@ class Interpreter {
           
       | prim(v.fn)
           >> (e) { return evalPrimFun(e.fn, nodes.tail, scope); }
-
-        // add definition 
-          
-      | v.defn % defn(v.name, v.arity, v.body)
-          >> (e) {  // TODO(bqe): this does not belong here 
-            globalScope.bind(e.name, e.defn);
-            return new ListNode.cons(Primitive.UNIT, nodes.tail);
-          }
        
         // call user-defined
           

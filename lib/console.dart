@@ -18,29 +18,59 @@ class Console {
   static final int MODE_DEFN = 1;
   
   static final int NEWLINE = 0xD;
-  static final String PROMPT = ":>";
-  static final String DEFPROMPT = "   ";
+  static final int LEFT = 37;
+  static final String PROMPT = "?";
 
-  final /* html.TextAreaElement */ consoleElem;
+  final /* html.TextAreaElement */ shellElem;
+  final /* html.TextAreaElement */ historyElem;
+  final /* html.TextAreaElement */ editorElem;
+  final /* html.Element */ editorCommitButton;
+  
   final Parser parser;
   Interpreter interpreter;
-  int mode;
   
-  Console(this.consoleElem, this.parser);
+  String userText;
+
+  Console(this.shellElem, this.historyElem, this.editorElem,
+      this.editorCommitButton, this.parser);
   
   void init(Interpreter interp) {
-    consoleElem.on.keyPress.add(handleKeyPress);
-    write(PROMPT);
     this.interpreter = interp;
-    this.mode = MODE_EVAL;
+    shellElem.on.keyPress.add(handleKeyPress);
+    shellElem.on.keyDown.add(handleKeyDown);
+    editorCommitButton.on.click.add(handleCommitClick);
+    writeln("Welcome to ArrowLogo.");
+    writeln("Type 'help' for help.");
+    writeln("Type 'edall' to switch to the editor.");
+    prompt();
+  }
+  
+  void hideEditor() {
+    editorElem.classes.add('invisible'); 
+    editorCommitButton.classes.add('invisible');
+    shellElem.classes.remove('invisible');
+    historyElem.classes.remove('invisible');
+    shellElem.focus();
+  }
+  
+  void showEditor() {
+    editorElem.classes.remove('invisible'); 
+    editorCommitButton.classes.remove('invisible');
+    shellElem.classes.add('invisible');
+    historyElem.classes.add('invisible');
+    editorElem.focus();
+  }
+  
+  void prompt() {
+    shellElem.value = PROMPT;    
   }
   
   void write(String message) {
-    consoleElem.value = consoleElem.value.concat(message);    
+    historyElem.value = historyElem.value.concat(message);    
   }
 
   void writeln([String message = ""]) {
-    consoleElem.value = consoleElem.value.concat(message).concat("\n");    
+    historyElem.value = historyElem.value.concat(message).concat("\n");    
   }
 
   bool isIncompleteDef(Node node) {
@@ -67,43 +97,66 @@ class Console {
   }
   
   void clearText() {
-    consoleElem.value = "";
+    historyElem.value = "";
   }
   
   void handleKeyPress(/* html.KeyboardEvent */ e) {
     if (NEWLINE == e.keyCode) {
-      String text = consoleElem.value;
-      var i = text.lastIndexOf(PROMPT);
-      String code = text;
-      code = code.substring(i + PROMPT.length);
+      String text = shellElem.value;
+      String code = text.substring(PROMPT.length);
       if (!code.isEmpty) {
-        ListNode nodes = parser.parse(code);
-        // print("parsed nodes $nodes");
-        writeln();
-        if (mode == MODE_EVAL && isIncompleteDef(nodes.head)) {
-          mode = MODE_DEFN;
-        } else if (mode == MODE_DEFN && isCompleteDef(nodes.head)) {
-          mode = MODE_EVAL;
-        }
-        if (mode == MODE_DEFN) {
-          write(DEFPROMPT);
-        } else {
-          try {
-            interpreter.eval(nodes);
-            write(PROMPT);
-          } on InterpreterException catch (ex, st) {
-            writeln(ex.message);
-            write(PROMPT);
-          } on Exception catch (ex, st) {
-            writeln("oops: ${ex}");
-            write(PROMPT);
-          }
-        }
+        writeln(text);
+        try {
+          ListNode nodes = parser.parse(code);
+          interpreter.evalSequence(nodes);
+        } on InterpreterException catch (ex, st) {
+          writeln(ex.message);
+        } on Exception catch (ex, st) {
+          writeln("oops: ${ex}");
+        } 
       }
       e.preventDefault();
-    } else if (mode == MODE_EVAL) {
-      // Ensure that text gets inserted at the end, by placing caret at the end.
-      consoleElem.setSelectionRange(consoleElem.textLength, consoleElem.textLength, "");
+      prompt();
     }
+  }
+  
+  /**
+   *  Ensure the cursor does not move into the prompt.
+   */
+  void handleKeyDown(/* html.KeyboardEvent */ e) {
+    if (LEFT == e.keyCode
+        && shellElem.selectionStart == PROMPT.length
+        && shellElem.selectionEnd == PROMPT.length) {
+      e.preventDefault();
+    }
+  }
+  
+  void handleCommitClick(/* html.Event */ e) {
+    userText = editorElem.value;
+    ListNode nodes = parser.parse(userText);
+    List<Node> nonDefnNodes = [];
+    String names = "";
+    for (Node n in nodes) {
+      if (n.isDefn()) {
+        DefnNode defn = n;
+        interpreter.define(defn);
+        if (names.isEmpty) {
+          names = defn.name;
+        } else {
+          names = names.concat(", ${defn.name}");
+        }
+      } else {
+        nonDefnNodes.add(n);
+      }
+    }
+    ListNode nodesToEval = ListNode.makeList(nonDefnNodes);
+    interpreter.evalSequence(nodesToEval);
+    if (!names.isEmpty) {
+      writeln("You defined $names");
+    }
+    if (!nodesToEval.isNil()) {
+      writeln("Executing $nodesToEval");
+    }
+    hideEditor();
   }
 }

@@ -28,9 +28,7 @@ part "scope.dart";
 part "turtle.dart";
 
 class ArrowLogo {
-
-  static final int NEWLINE = 0xD;
-
+  
   html.CanvasElement userCanvas;
   html.CanvasElement turtleCanvas;
   html.TextAreaElement commandListElem;
@@ -45,22 +43,35 @@ class ArrowLogo {
     parser = new Parser(toplevel);
   }
       
+  static num getNum(String sizePx) {
+    String size = sizePx.substring(0, sizePx.length - 2);
+    return math.parseInt(size);
+  }
+  
   void run() {
-    userCanvas = html.document.query("#user_canvas");
+    userCanvas = html.document.query("#user");
     var userCtx = userCanvas.getContext("2d");
-    turtleCanvas = html.document.query("#turtle_canvas");
+    turtleCanvas = html.document.query("#turtle");
     var turtleCtx = turtleCanvas.getContext("2d");
-    commandListElem = html.document.query("#command_list");
 
-    num width = math.parseInt(userCanvas.attributes["width"]);
-    num height = math.parseInt(userCanvas.attributes["height"]);
-    turtle = new Turtle(turtleCtx, userCtx, width, height);
-    turtle.draw();
-    var consoleElem = html.document.query('#console');
-    consoleElem.focus();
-    console = new Console(consoleElem, parser);
-    interpreter = new Interpreter(turtle, console, toplevel.extend());
-    console.init(interpreter);
+    var shellElem = html.document.query('#shell');
+    var historyElem = html.document.query('#history');
+    var editorElem = html.document.query('#editor');
+    var editorCommitButton = html.document.query('#commit');
+    shellElem.focus();
+    console = new Console(shellElem, historyElem, editorElem,
+        editorCommitButton, parser);
+
+    userCanvas.computedStyle.then((value) {
+      html.CSSStyleDeclaration style = value;
+      num width = getNum(style.width);
+      num height = getNum(style.height);
+      
+      turtle = new Turtle(turtleCtx, userCtx, width, height);
+      turtle.draw();
+      interpreter = new Interpreter(turtle, console, toplevel.extend());
+      console.init(interpreter);
+    });
   }
 }
 

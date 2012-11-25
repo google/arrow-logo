@@ -21,6 +21,7 @@ class Primitive extends Node {
   static const CLEARSCREEN = const Primitive(0, "cs", "clearscreen");
   static const CLEARTEXT = const Primitive(0, "ct", "cleartext");
   static const CONS = const Primitive(2, "_cons"); 
+  static const EDALL = const Primitive(1, "edall"); 
   static const EQUALS = const Primitive(2, "==", "equals"); 
   static const FALSE = const Primitive(0, "false"); 
   static const FORWARD = const Primitive(1, "fd", "forward"); 
@@ -50,6 +51,7 @@ class Primitive extends Node {
   static const QUOTIENT = const Primitive(2, "/", "quotient"); 
   static const REPEAT = const Primitive(2, "repeat"); 
   static const RIGHT = const Primitive(1, "rt", "right");
+  static const RUN = const Primitive(1, "run");
   static const SETPENCOLOR = const Primitive(1, "setpc", "setpencolor");
   static const STOP = const Primitive(0, "stop");
   static const SUM = const Primitive(2, "+", "sum"); 
@@ -70,7 +72,7 @@ class Primitive extends Node {
   // const INCOMPLETE = const Primitive(1, "_incomplete");
   
   static const List<Primitive> commandsList = const [ 
-    BACK, CLEAN, CLEARSCREEN, CLEARTEXT, CONS, FORWARD, HELP, HIDETURTLE,
+    BACK, CLEAN, CLEARSCREEN, CLEARTEXT, CONS, EDALL, FORWARD, HELP, HIDETURTLE,
     HOME, IF, IFELSE, LOCAL, LEFT, MAKE, NIL, PENDOWN, PENUP, PRINT, REPEAT, RIGHT,
     SETPENCOLOR, SHOWTURTLE, STOP ];
 
@@ -143,7 +145,7 @@ class Primitive extends Node {
     String this.name,
     [String this.altName = null]) : super(Node.KIND_PRIM);
   
-  String toString() => "Prim($name)";
+  String toString() => name;
 }
 
 OPattern<Node> prim(OPattern<Primitive> p) =>

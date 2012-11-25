@@ -42,17 +42,17 @@ class InterpreterTest {
 
   void testEvalValues() {
     expect(       
-      interpreter.eval(ListNode.NIL),
+      interpreter.evalSequence(ListNode.NIL),
       equals(Primitive.UNIT));
     expect(
-      interpreter.eval(ListNode.makeList([new NumberNode.int(1)])),
+      interpreter.evalSequence(ListNode.makeList([new NumberNode.int(1)])),
       equals(new NumberNode.int(1)));
     expect(
-      interpreter.eval(    
+      interpreter.evalSequence(    
         ListNode.makeList([ListNode.makeList([new NumberNode.int(1)])])),
       equals(ListNode.makeList([new NumberNode.int(1)])));
     expect(
-      interpreter.eval(
+      interpreter.evalSequence(
         ListNode.makeList([ListNode.makeList([Primitive.FORWARD])])),
       equals(ListNode.makeList([Primitive.FORWARD])));    
   }
@@ -60,22 +60,22 @@ class InterpreterTest {
   void testEvalIf() {
     Node fortyTwo = new NumberNode.int(42);
     expect(
-      interpreter.eval(
+      interpreter.evalSequence(
         ListNode.makeList([
           Primitive.IF, Primitive.TRUE, fortyTwo])),
       equals(fortyTwo));
     expect(
-      interpreter.eval(
+      interpreter.evalSequence(
         ListNode.makeList([
           Primitive.IF, Primitive.FALSE, fortyTwo])),
       equals(Primitive.UNIT));
     expect(
-      interpreter.eval(
+      interpreter.evalSequence(
         ListNode.makeList([
           Primitive.IFELSE, Primitive.TRUE, fortyTwo, Primitive.PI])),
       equals(fortyTwo));
     expect(
-      interpreter.eval(
+      interpreter.evalSequence(
         ListNode.makeList([
           Primitive.IFELSE, Primitive.FALSE, fortyTwo, Primitive.PI])),
       equals(new NumberNode.float(math.PI)));
@@ -90,8 +90,9 @@ class InterpreterTest {
         Primitive.QUOTIENT,
         Primitive.THING, new WordNode("\"x"),
         new NumberNode.int(2)]));
-    expect(interpreter.eval(
-        ListNode.makeList([defn, new WordNode("foo"), fortyTwo])),
+    interpreter.define(defn);
+    expect(interpreter.evalSequence(
+        ListNode.makeList([new WordNode("foo"), fortyTwo])),
         equals(twentyOne));
   }
   
@@ -100,11 +101,11 @@ class InterpreterTest {
     Node bar = new WordNode("\"bar");
     Node barlist = ListNode.makeList([bar]);
     
-    expect(interpreter.eval(
+    expect(interpreter.evalSequence(
         ListNode.makeList([Primitive.FPUT, foo, barlist])),
         equals(ListNode.makeList([foo, bar])));
 
-    expect(interpreter.eval(
+    expect(interpreter.evalSequence(
         ListNode.makeList([Primitive.LPUT, foo, barlist])),
         equals(ListNode.makeList([bar, foo])));                               
   }
@@ -126,7 +127,7 @@ class InterpreterTest {
                 new NumberNode.int(2)
                 ])
             ]);  
-    expect(makeInterpreter(makeGlobalScope()).eval(nodes),
+    expect(makeInterpreter(makeGlobalScope()).evalSequence(nodes),
         equals(new NumberNode.int(3)));
   }
 
@@ -137,7 +138,7 @@ class InterpreterTest {
             new WordNode("\"x"),
             new NumberNode.int(3)]);
     Scope globalScope = makeGlobalScope();
-    expect(makeInterpreter(globalScope).eval(nodes),
+    expect(makeInterpreter(globalScope).evalSequence(nodes),
         equals(Primitive.UNIT));
     expect(globalScope["\"x"], equals(new NumberNode.int(3)));  
   }
@@ -151,13 +152,17 @@ class InterpreterTest {
           make \"x 2
           setx
           make \"y :x
-        end
-        callx""");
+        end""");
     Scope globalScope = makeGlobalScope();
-    expect(makeInterpreter(globalScope).eval(nodes),
+    Interpreter interpreter = makeInterpreter(globalScope);
+    for (Node defn in nodes) {
+      interpreter.define(defn);
+    }
+    expect(interpreter.evalSequence(
+        new ListNode.cons(new WordNode("callx"), new ListNode.nil())),
         equals(Primitive.UNIT));
-    expect(globalScope["\"x"], equals(null));  
-    expect(globalScope["\"y"], equals(new NumberNode.int(3)));  
+    expect(interpreter.globalScope["\"x"], equals(null));  
+    expect(interpreter.globalScope["\"y"], equals(new NumberNode.int(3)));  
   }
   
   void run() {
