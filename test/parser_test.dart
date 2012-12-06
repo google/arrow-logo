@@ -11,18 +11,22 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-part of arrowlogo;
+library parser_test;
 
-// Unit tests for Parser.
+import 'package:unittest/unittest.dart';
+
+import "../lib/nodes.dart";
+import "../lib/parser.dart";
+
 class ParserTest {
 
   final Parser parser;
   
   ParserTest() 
-      : parser = new Parser(new Scope(Primitive.getBuiltIns())) {}
+      : parser = new Parser(Primitive.getBuiltIns());
   
   void testAdvanceWhile() {
-    Scanner s = new Scanner(new Scope(new Map()));
+    Scanner s = parser;
     s.initialize("  a");
     expect(s.advanceWhile(Scanner.isSpace), equals(2));
     s.initialize("a");

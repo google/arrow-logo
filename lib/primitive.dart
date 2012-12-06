@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-part of arrowlogo;
+part of nodes;
 
 class Primitive extends Node {
  
@@ -61,15 +61,13 @@ class Primitive extends Node {
   
   static const UNIT = const Primitive(0, "unit");
   
-  static Scope makeTopLevel() {
-    Map<String, Node> map = new Map();
+  static Map<String, Primitive> makeTopLevel() {
+    Map<String, Primitive> map = new Map();
     for (String k in getBuiltIns().keys) {
       map[k] = getBuiltIns()[k];
     }
-    return new Scope(map);
+    return map;
   }
-
-  // const INCOMPLETE = const Primitive(1, "_incomplete");
   
   static const List<Primitive> commandsList = const [ 
     BACK, CLEAN, CLEARSCREEN, CLEARTEXT, CONS, EDALL, FORWARD, HELP, HIDETURTLE,
@@ -147,7 +145,3 @@ class Primitive extends Node {
   
   String toString() => name;
 }
-
-OPattern<Node> prim(OPattern<Primitive> p) =>
-    constructor([p],
-        (s) => s.isPrim() ? new Option.some([s]) : new Option.none());

@@ -11,36 +11,49 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-part of arrowlogo;
+library interpreter_test;
 
-class MockTurtle implements Turtle {
-  
-}
+import 'package:unittest/unittest.dart';
 
-class MockConsole implements Console {
+import "dart:isolate" as isolate;
+import "dart:math" as math;
+
+import "../lib/interpreter.dart";
+import "../lib/nodes.dart";
+import "../lib/parser.dart";
+import "../lib/scope.dart";
+
+class MockReceivePort implements isolate.SendPort {
+  void send(dynamic msg, [isolate.SendPort replyTo]) {
+    
+  }
   
+  Future<dynamic> call(dynamic msg) {
+    return null;
+  }
 }
 
 class InterpreterTest {
 
-  var mockTurtle;
-  var mockConsole;
   Scope globalScope;
+  var turtle = new MockReceivePort();
+  var console = new MockReceivePort();
+  var parent = new MockReceivePort();
   Interpreter interpreter;
 
-  Scope makeGlobalScope() => new Scope(new Map());
-  
-  Interpreter makeInterpreter (scope) =>
-      new Interpreter(mockTurtle, mockConsole, scope);
+  Interpreter makeInterpreter() {
+    globalScope = new Scope(new Map());
+    interpreter = new Interpreter(globalScope, parent, turtle, console);
+  }
   
   InterpreterTest() {
-    mockTurtle = new MockTurtle();
-    mockConsole = new MockConsole();
-    globalScope = makeGlobalScope();
-    interpreter = makeInterpreter(globalScope);
+    turtle = new MockReceivePort();
+    console = new MockReceivePort();
+    parent = new MockReceivePort();
   }
 
   void testEvalValues() {
+    makeInterpreter();
     expect(       
       interpreter.evalSequence(ListNode.NIL),
       equals(Primitive.UNIT));
@@ -58,6 +71,7 @@ class InterpreterTest {
   }
 
   void testEvalIf() {
+    makeInterpreter();
     Node fortyTwo = new NumberNode.int(42);
     expect(
       interpreter.evalSequence(
@@ -82,6 +96,7 @@ class InterpreterTest {
   }
   
   void testEvalDefn() {
+    makeInterpreter();
     Node fortyTwo = new NumberNode.int(42);
     Node twentyOne = new NumberNode.int(21);
     Node defn = new DefnNode("foo",
@@ -97,6 +112,8 @@ class InterpreterTest {
   }
   
   void testEvalConcat() {
+    makeInterpreter();
+
     Node foo = new WordNode("\"foo");
     Node bar = new WordNode("\"bar");
     Node barlist = ListNode.makeList([bar]);
@@ -111,6 +128,8 @@ class InterpreterTest {
   }
   
   void testApplyTemplate() {
+    makeInterpreter();
+
     ListNode nodes = 
         ListNode.makeList([
             Primitive.APPLY, // new WordNode("optwo"),
@@ -127,25 +146,28 @@ class InterpreterTest {
                 new NumberNode.int(2)
                 ])
             ]);  
-    expect(makeInterpreter(makeGlobalScope()).evalSequence(nodes),
+    expect(interpreter.evalSequence(nodes),
         equals(new NumberNode.int(3)));
   }
 
   void testMakeSimple() {
+    makeInterpreter();
+
     ListNode nodes = 
         ListNode.makeList([
             Primitive.MAKE, // new WordNode("optwo"),
             new WordNode("\"x"),
             new NumberNode.int(3)]);
-    Scope globalScope = makeGlobalScope();
-    expect(makeInterpreter(globalScope).evalSequence(nodes),
+    expect(
+        interpreter.evalSequence(nodes),
         equals(Primitive.UNIT));
     expect(globalScope["\"x"], equals(new NumberNode.int(3)));  
   }
   
   void testMakeLocal() {
-    Scope topLevel = Primitive.makeTopLevel();
-    ListNode nodes = new Parser(topLevel).parse("""
+    makeInterpreter();
+
+    ListNode nodes = new Parser(Primitive.makeTopLevel()).parse("""
         to setx make \"x :x + 1 end
         to callx 
           local \"x
@@ -153,16 +175,14 @@ class InterpreterTest {
           setx
           make \"y :x
         end""");
-    Scope globalScope = makeGlobalScope();
-    Interpreter interpreter = makeInterpreter(globalScope);
     for (Node defn in nodes) {
       interpreter.define(defn);
     }
     expect(interpreter.evalSequence(
         new ListNode.cons(new WordNode("callx"), new ListNode.nil())),
         equals(Primitive.UNIT));
-    expect(interpreter.globalScope["\"x"], equals(null));  
-    expect(interpreter.globalScope["\"y"], equals(new NumberNode.int(3)));  
+    expect(globalScope["\"x"], equals(null));  
+    expect(globalScope["\"y"], equals(new NumberNode.int(3)));  
   }
   
   void run() {

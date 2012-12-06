@@ -11,17 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+library nodes;
 
-// Runs all unit tests. Use this command line:
-// dart --enable-checked-mode --package-root=`pwd`/packages/ tests/tests.dart
-library arrowlogo;
-
-import 'interpreter_test.dart';
-import 'node_test.dart';
-import 'parser_test.dart';
-
-void main() {
-  new NodeTest().run();
-  new ParserTest().run();
-  new InterpreterTest().run();
-}
+part 'node.dart';
+part 'primitive.dart';

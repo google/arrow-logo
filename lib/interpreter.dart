@@ -11,7 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-part of arrowlogo;
+library interpreter;
+
+import 'dart:isolate';
+import 'dart:math' as math;
+
+import 'nodes.dart';
+import 'parser.dart';
+import 'scope.dart';
 
 /**
  * Something went wrong. TODO: useful messaging
@@ -29,15 +36,47 @@ class InterpreterOutputException {
   const InterpreterOutputException(this.result);
 }
 
+InterpreterWorker interpreterWorker;
+
+class InterpreterWorker {
+  
+  final SendPort debug;
+  final Scope globalScope;
+  Parser parser;
+  Interpreter interpreter;
+
+  InterpreterWorker(SendPort this.debug, SendPort turtle, SendPort console)
+      : globalScope = new Scope(Primitive.makeTopLevel()) {
+    parser = new Parser(globalScope.symtab);
+    interpreter = new Interpreter(globalScope, debug, turtle, console);
+    debug.send("constructed InterpreterProcess");
+  }
+  
+  void interpret(String code) {
+    ListNode nodes = interpreterWorker.parser.parse(code);
+    List<Node> nonDefnNodes = [];
+    for (Node n in nodes) {
+      if (n.isDefn()) {
+        DefnNode defn = n;
+        interpreter.define(defn);
+      } else {
+        nonDefnNodes.add(n);
+      }
+    }
+    ListNode nodesToEval = ListNode.makeList(nonDefnNodes);
+    interpreter.evalSequence(nodesToEval);
+  }
+}
+
 class Interpreter {
   
-  final Turtle turtle;
-  final Console console;
   final Scope globalScope;
+  final SendPort parent;
+  final SendPort turtle;
+  final SendPort console;
   
-  Interpreter(this.turtle, this.console, Scope topLevel)
-      : globalScope = new Scope(topLevel.symtab);
-  
+  Interpreter(this.globalScope, this.parent, this.turtle, this.console);
+    
   static WordNode deref(WordNode word, Scope scope) {
     if (scope == null) {
       return word;
@@ -148,31 +187,81 @@ class Interpreter {
       case Primitive.UNIT:
         break;
         
+        // turtle 0-arg
+
+      case Primitive.CLEAN:
+      case Primitive.CLEARSCREEN:
+      case Primitive.HIDETURTLE:
+      case Primitive.HOME:
+      case Primitive.PENDOWN:  
+      case Primitive.PENUP:  
+      case Primitive.SHOWTURTLE:
+        turtle.send([p.name]);
+        break;
+
+        // turtle 1-arg
+
       case Primitive.BACK:
         nodes = evalInScope(nodes, scope);
         ensureNum(nodes.head);
         NumberNode wn = nodes.head;
         nodes = nodes.tail;
-        turtle.back(wn.getNumValue());
+        turtle.send([p.name, wn.getNumValue()]);
+        break;  
+        
+      case Primitive.RIGHT:
+        nodes = evalInScope(nodes, scope);
+        ensureNum(nodes.head);
+        NumberNode nn = nodes.head;
+        nodes = nodes.tail;
+        turtle.send([p.name, nn.getNumValue()]);
         break;
         
-      case Primitive.CLEAN:
-        turtle.clean();
+      case Primitive.SETPENCOLOR:
+        nodes = evalInScope(nodes, scope);
+        ensureNum(nodes.head);
+        NumberNode nn = nodes.head;
+        nodes = nodes.tail;
+        if (!nn.isInt()) {
+          throw new InterpreterException("invalid color code ${nn.getNumValue()}");
+        }
+        turtle.send([p.name, nn.getIntValue()]);
         break;
         
-      case Primitive.CLEARSCREEN:
-        turtle.clean();
-        turtle.home();
+      case Primitive.FORWARD:
+        nodes = evalInScope(nodes, scope);
+        ensureNum(nodes.head);
+        NumberNode wn = nodes.head;
+        nodes = nodes.tail;
+        turtle.send([p.name, wn.getNumValue()]);
         break;
+
+      case Primitive.LEFT:
+        nodes = evalInScope(nodes, scope);
+        ensureNum(nodes.head);
+        NumberNode wn = nodes.head;
+        nodes = nodes.tail;
+        turtle.send([p.name, wn.getNumValue()]);
+        break;
+        
+        // end turtle commands
+        
+        // begin console commands
         
       case Primitive.CLEARTEXT:
-        console.clearText();
-        break;
-        
       case Primitive.EDALL:
-        console.showEditor();
+      case Primitive.HELP:
+        console.send([p.name]);
         break;
         
+      case Primitive.PRINT:
+        nodes = evalInScope(nodes, scope);
+        Node n = nodes.head;
+        nodes = nodes.tail;
+        console.send([p.name, n.toString()]);
+        break;
+        
+        // end console commands
       case Primitive.EQUALS:
         // TODO equality for words, lists
         return evalBinCmp(nodes, scope, primEqualsNum);
@@ -180,13 +269,6 @@ class Interpreter {
       case Primitive.FALSE:
         return new ListNode.cons(p, nodes);
         
-      case Primitive.FORWARD:
-        nodes = evalInScope(nodes, scope);
-        ensureNum(nodes.head);
-        NumberNode wn = nodes.head;
-        nodes = nodes.tail;
-        turtle.forward(wn.getNumValue()); 
-        break;
 
       case Primitive.FPUT:
         nodes = evalInScope(nodes, scope);
@@ -196,14 +278,6 @@ class Interpreter {
         ListNode ln = nodes.head;
         nodes = nodes.tail;
         return new ListNode.cons(new ListNode.cons(first, ln), nodes);
-
-      case Primitive.HELP:
-        console.showHelp();
-        break;
-        
-      case Primitive.HOME:
-        turtle.home();
-        break;
         
       case Primitive.IF:
         nodes = evalInScope(nodes, scope);
@@ -251,17 +325,6 @@ class Interpreter {
         
         return new ListNode.cons(result, nodes);
       
-      case Primitive.HIDETURTLE:
-        turtle.hideTurtle();
-        break;
-        
-      case Primitive.LEFT:
-        nodes = evalInScope(nodes, scope);
-        ensureNum(nodes.head);
-        NumberNode wn = nodes.head;
-        nodes = nodes.tail;
-        turtle.left(wn.getNumValue()); 
-        break;
      
       case Primitive.LPUT:
         nodes = evalInScope(nodes, scope);
@@ -296,13 +359,6 @@ class Interpreter {
       case Primitive.PI:
         return new ListNode.cons(new NumberNode.float(math.PI), nodes);
         
-      case Primitive.PRINT:
-        nodes = evalInScope(nodes, scope);
-        Node n = nodes.head;
-        nodes = nodes.tail;
-        console.writeln(n.toString());
-        break;
-        
       case Primitive.REPEAT:
         nodes = evalInScope(nodes, scope);
         ensureNum(nodes.head);
@@ -320,23 +376,7 @@ class Interpreter {
         }
         break;
         
-      case Primitive.RIGHT:
-        nodes = evalInScope(nodes, scope);
-        ensureNum(nodes.head);
-        NumberNode nn = nodes.head;
-        nodes = nodes.tail;
-        turtle.right(nn.getNumValue());
-        break;
-        
-      case Primitive.SETPENCOLOR:
-        nodes = evalInScope(nodes, scope);
-        ensureNum(nodes.head);
-        NumberNode nn = nodes.head;
-        nodes = nodes.tail;
-        if (!nn.isInt() || !turtle.setPenColor(nn.getIntValue())) {
-          throw new InterpreterException("invalid color code ${nn.getNumValue()}");
-        }
-        break;
+
         
       case Primitive.THING:
         Node arg = nodes.head;
@@ -348,23 +388,11 @@ class Interpreter {
         }
         return new ListNode.cons(lookup, nodes.tail);
         
-      case Primitive.PENDOWN:
-        turtle.penDown();
-        break;
-        
-      case Primitive.PENUP:
-        turtle.penUp();
-        break;
-                
       case Primitive.RUN:
         Node arg = nodes.head;
         ensureList(arg);
         ListNode list = arg;
         return new ListNode.cons(evalSequenceInScope(list, scope), nodes.tail);
-        
-      case Primitive.SHOWTURTLE:
-        turtle.showTurtle();
-        break;
       
       case Primitive.TRUE:
         return new ListNode.cons(p, nodes);
@@ -407,8 +435,7 @@ class Interpreter {
 
       default:
         throw new InterpreterException("not implemented: $p");
-    }
-    turtle.draw();  
+    }  
     return new ListNode.cons(Primitive.UNIT, nodes);
   }
   
@@ -532,7 +559,7 @@ class Interpreter {
       return nodes;
     }
     
-    if (head.isWord() && head.stringValue.startsWith("\"")) {
+    if (head.isWord() && (head as WordNode).stringValue.startsWith("\"")) {
       return nodes;
     }
     

@@ -11,7 +11,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-part of arrowlogo;
+library parser;
+
+import "dart:math" as math;
+
+import "nodes.dart";
+
+class ParseException {
+  final String message;
+  const ParseException(this.message);
+}
 
 class Token {
 
@@ -212,13 +221,13 @@ class Scanner {
     return pos;
   }
   
-  final Scope toplevel;
+  final Map<String, Primitive> toplevel;
   final Token token;
   String text;
   int pos;
   
   /** @param toplevel used for looking up keywords */
-  Scanner(Scope this.toplevel) : token = new Token();
+  Scanner(Map<String, Primitive> this.toplevel) : token = new Token();
   
   void initialize(String text) {
     this.text = text;
@@ -376,7 +385,7 @@ class Parser extends Scanner {
   
   OpInfo opstack;
   
-  Parser(Scope toplevel) : opstack = null, super(toplevel);
+  Parser(Map<String, Primitive> toplevel) : opstack = null, super(toplevel);
   
   /**
    * @pre token.kind == TOKEN_LBRACKET
@@ -505,7 +514,7 @@ class Parser extends Scanner {
   void parseDefn(List<Node> nodeList) {
     nextToken();
     if (token.kind != Token.TOKEN_WORD) {
-      throw new Exception("expected word");
+      throw new ParseException("expected word");
     }
     WordNode wn = token.node;
     String name = wn.stringValue;

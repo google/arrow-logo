@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-part of arrowlogo;
+part of nodes;
 
 /** Represents an ArrowLogo object, primitive or definition.
  *  
@@ -25,7 +25,7 @@ part of arrowlogo;
  *     Primitive  // see Primitive.dart
  *     Defn(name, arity, body)
  */
-class Node {
+abstract class Node {
   
   static const int KIND_WORD = 0;
   static const int KIND_LIST = 1;
@@ -118,16 +118,6 @@ class ListNode extends Node {
   }
 }
 
-OPattern<Node> nil() =>
-    constructor([],
-        (s) => (s is ListNode && s.isNil()) 
-            ? new Option.some([]) : new Option.none());
-
-OPattern<Node> cons(OPattern p1, OPattern<ListNode> p2) =>
-    constructor([p1, p2],
-        (s) => (s is ListNode && s.isCons())
-            ? new Option.some([s.head, s.tail]) : new Option.none());
-
 class ListNodeIterator implements Iterator<Node> {
   
   ListNode node;  
@@ -165,13 +155,6 @@ class WordNode extends Node {
     return stringValue;
   }
 }
-
-OPattern<Node> word(OPattern<String> p) =>
-    constructor([p],
-        (s) => s.isWord()
-            ? new Option.some([s.stringValue])
-            : new Option.none());
-
 
 class NumberNode extends Node {
   
@@ -225,12 +208,6 @@ class NumberNode extends Node {
   }
 }
 
-OPattern<Node> number(OPattern<num> p) =>
-    constructor([p],
-        (s) => s.isNum()
-            ? new Option.some([s.getNumValue()])
-            : new Option.none());
-
 class DefnNode extends Node {
   
   final String name;
@@ -255,10 +232,5 @@ class DefnNode extends Node {
   }
 }
 
-OPattern<DefnNode> defn(OPattern<String> name, OPattern<ListNode> vars, 
-    OPattern<ListNode> body) =>
-        constructor([name, vars, body],
-            (s) => s.isDefn()
-                ? new Option.some([s.name, s.vars, s.body])
-                : new Option.none());
+
 

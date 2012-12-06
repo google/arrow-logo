@@ -11,27 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-part of arrowlogo;
+library nodes;
+
+import 'package:unittest/unittest.dart';
+
+part "../lib/primitive.dart";
+part "../lib/node.dart";
 
 class NodeTest {
-  
-  String matchWord(Node n) {
-    return match(n).with(
-        word(eq("foo")) >> (_) { throw "cannothappen"; }
-      | word(v.x)       >> (e) { return e.x; }
-      | v.x             >> (_) { return "no"; }
-    );
-  }
-  
-  void testBasicMatch() {
-    match("foo").with( eq("foo") >> (_) {} );
-    match("foo").with( 
-        eq("bar") >> (_) { throw "cannothappen"; }
-        | v.x     >> (_) { return ""; }
-    );
-    expect(matchWord(new WordNode("hello")), equals("hello"));
-    expect(matchWord(new NumberNode.int(3)), equals("no"));
-  }
   
   void testListToString() {
     Node foo = new WordNode("\"foo");
@@ -42,8 +29,11 @@ class NodeTest {
   
   void run() {
     group("NodeTest", () {
-      test("basic match", testBasicMatch);
       test("list construction and string", testListToString);
-      });
+    });
   }
+}
+
+void main() {
+  new NodeTest().run();
 }

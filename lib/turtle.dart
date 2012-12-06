@@ -11,8 +11,109 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-part of arrowlogo;
+library turtle;
 
+import "dart:html" as html;
+import "dart:isolate" as isolate;
+import "dart:math" as math;
+
+import "nodes.dart";
+
+TurtleWorker turtleWorker;
+
+/**
+ * Receives turtle commands and executes them.
+ */
+class TurtleWorker {
+  
+  Turtle turtle;
+  
+  static num getNum(String sizePx) {
+    String size = sizePx.substring(0, sizePx.length - 2);
+    return math.parseInt(size);
+  }
+  
+  TurtleWorker() {
+    var userCanvas = html.document.query("#user");
+    var userCtx = userCanvas.getContext("2d");
+    var turtleCanvas = html.document.query("#turtle");
+    var turtleCtx = turtleCanvas.getContext("2d");
+
+    userCanvas.computedStyle.then((value) {
+      html.CssStyleDeclaration style = value;
+      num width = getNum(style.width);
+      num height = getNum(style.height);
+      turtle = new Turtle(turtleCtx, userCtx, width, height);
+      turtle.draw();
+    });
+  }
+  
+  void receive(dynamic raw, isolate.SendPort replyTo) {
+    List msg = raw;
+    Primitive prim = Primitive.lookup(msg[0]);
+    switch (prim) {
+      
+      case Primitive.BACK:
+        turtle.back(msg[1]);
+        break;
+        
+      case Primitive.CLEAN:
+        turtle.clean();
+        break;
+        
+      case Primitive.CLEARSCREEN:
+        turtle.clean();
+        turtle.home();
+        break;
+
+      case Primitive.FORWARD:
+        turtle.forward(msg[1]);
+        break;
+      
+      case Primitive.LEFT:
+        turtle.left(msg[1]);
+        break;
+      
+      case Primitive.RIGHT:
+        turtle.right(msg[1]);
+        break;
+      
+      case Primitive.HIDETURTLE:
+        turtle.hideTurtle();
+        break;
+      
+      case Primitive.HOME:
+        turtle.home();
+        break;
+    
+      case Primitive.PENDOWN: 
+        turtle.penDown();
+        break;
+        
+      case Primitive.PENUP:  
+        turtle.penUp();
+        break;
+          
+      case Primitive.SHOWTURTLE:
+        turtle.showTurtle();
+        break;
+
+      case Primitive.RIGHT:
+        turtle.right(msg[1]);
+        break;  
+      
+      case Primitive.SETPENCOLOR:
+        turtle.setPenColor(msg[1]);
+        break;  
+
+    }
+    turtle.draw();
+  }
+}
+
+/**
+ * Keeps state of the turtle and updates canvas when drawing.
+ */
 class Turtle {
   static final String ORANGE = "orange";
   static final String GREEN = "green";
@@ -30,8 +131,8 @@ class Turtle {
   static final int PENUP = 0;
   static final int PENDOWN = 1;
 
-  final /* html.CanvasRenderingContext2D */ turtleCtx;
-  final /* html.CanvasRenderingContext2D */ userCtx;
+  final html.CanvasRenderingContext2D turtleCtx;
+  final html.CanvasRenderingContext2D userCtx;
   final num xmax;
   final num ymax;
   num xhome;
@@ -68,11 +169,11 @@ class Turtle {
     blankCtx(userCtx);
   }
   
-  void cleanCtx(/* html.CanvasRenderingContext2D */ ctx) {
+  void cleanCtx(html.CanvasRenderingContext2D ctx) {
     ctx.clearRect(0, 0, xmax, ymax);
   }
   
-  void blankCtx(/* html.CanvasRenderingContext2D */ ctx) {
+  void blankCtx(html.CanvasRenderingContext2D ctx) {
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, xmax, ymax);
   }

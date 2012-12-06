@@ -11,31 +11,41 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-part of arrowlogo;
+library console;
 
-class Console {  
-  static final int MODE_EVAL = 0;
-  static final int MODE_DEFN = 1;
+import 'dart:html' as html;
+import 'dart:isolate';
+
+import "interpreter.dart";
+import "nodes.dart";
+import "parser.dart";
+import "scope.dart";
+
+class Console {
   
   static final int NEWLINE = 0xD;
   static final int LEFT = 37;
   static final String PROMPT = "?";
 
-  final /* html.TextAreaElement */ shellElem;
-  final /* html.TextAreaElement */ historyElem;
-  final /* html.TextAreaElement */ editorElem;
-  final /* html.Element */ editorCommitButton;
+  final html.TextAreaElement shellElem;
+  final html.TextAreaElement historyElem;
+  final html.TextAreaElement editorElem;
+  final html.Element editorCommitButton;
   
   final Parser parser;
+  SendPort interpreterPort;
   Interpreter interpreter;
   
   String userText;
 
-  Console(this.shellElem, this.historyElem, this.editorElem,
-      this.editorCommitButton, this.parser);
-  
-  void init(Interpreter interp) {
-    this.interpreter = interp;
+  Console(SendPort interpreterPort)
+      : shellElem = html.document.query('#shell'),
+        historyElem = html.document.query('#history'),
+        editorElem = html.document.query('#editor'),
+        editorCommitButton  = html.document.query('#commit'),
+        parser = new Parser(Primitive.makeTopLevel()) {
+    shellElem.focus();
+    this.interpreterPort = interpreterPort;
     shellElem.on.keyPress.add(handleKeyPress);
     shellElem.on.keyDown.add(handleKeyDown);
     editorCommitButton.on.click.add(handleCommitClick);
@@ -43,6 +53,29 @@ class Console {
     writeln("Type 'help' for help.");
     writeln("Type 'edall' to switch to the editor.");
     prompt();
+  }
+  
+  void receiveFun(dynamic raw, SendPort replyTo) {
+    print("console $raw");
+    List msg = raw;
+    Primitive p = Primitive.lookup(msg[0]);
+    switch (p) {
+      case Primitive.CLEARTEXT:
+        clearText();
+        break;
+        
+      case Primitive.EDALL:
+        showEditor();
+        break;
+
+      case Primitive.HELP:
+        showHelp();
+        break;
+        
+      case Primitive.PRINT:
+        writeln(msg[1]);
+        break;
+    }
   }
   
   void hideEditor() {
@@ -73,18 +106,6 @@ class Console {
     historyElem.value = historyElem.value.concat(message).concat("\n");    
   }
 
-  bool isIncompleteDef(Node node) {
-    if (!node.isWord()) {
-      return false;
-    }
-    WordNode wn = node;
-    return wn.stringValue == "INCOMPLETE_DEFINITION";
-  }
-
-  bool isCompleteDef(Node node) {
-    return node.isDefn();
-  }
-
   void showHelp() {
     writeln("  supported commands:");
     for (Primitive p in Primitive.commandsList) {
@@ -106,14 +127,8 @@ class Console {
       String code = text.substring(PROMPT.length);
       if (!code.isEmpty) {
         writeln(text);
-        try {
-          ListNode nodes = parser.parse(code);
-          interpreter.evalSequence(nodes);
-        } on InterpreterException catch (ex, st) {
-          writeln(ex.message);
-        } on Exception catch (ex, st) {
-          writeln("oops: ${ex}");
-        } 
+        // TODO: get back errors
+        interpreterPort.send([code]);
       }
       e.preventDefault();
       prompt();
@@ -123,7 +138,7 @@ class Console {
   /**
    *  Ensure the cursor does not move into the prompt.
    */
-  void handleKeyDown(/* html.KeyboardEvent */ e) {
+  void handleKeyDown(html.KeyboardEvent e) {
     if (LEFT == e.keyCode
         && shellElem.selectionStart == PROMPT.length
         && shellElem.selectionEnd == PROMPT.length) {
@@ -131,15 +146,23 @@ class Console {
     }
   }
   
-  void handleCommitClick(/* html.Event */ e) {
+  void handleCommitClick(html.Event e) {
     userText = editorElem.value;
-    ListNode nodes = parser.parse(userText);
+    ListNode nodes;
+    
+    try {
+      nodes = parser.parse(userText);
+    } on Exception catch (ex) {
+      html.window.alert("parse error $ex");
+    }
+    // no parse error, 
+    interpreterPort.send(userText);
+
     List<Node> nonDefnNodes = [];
     String names = "";
     for (Node n in nodes) {
       if (n.isDefn()) {
         DefnNode defn = n;
-        interpreter.define(defn);
         if (names.isEmpty) {
           names = defn.name;
         } else {
@@ -150,13 +173,13 @@ class Console {
       }
     }
     ListNode nodesToEval = ListNode.makeList(nonDefnNodes);
-    interpreter.evalSequence(nodesToEval);
     if (!names.isEmpty) {
       writeln("You defined $names");
     }
     if (!nodesToEval.isNil()) {
       writeln("Executing $nodesToEval");
     }
+    
     hideEditor();
   }
 }
