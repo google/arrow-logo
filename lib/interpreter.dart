@@ -53,29 +53,60 @@ class InterpreterWorker {
   }
   
   void interpret(String code) {
-    ListNode nodes = interpreterWorker.parser.parse(code);
+    debug.send("code $code");
+
+    ListNode nodes;   
+    try {
+      nodes = interpreterWorker.parser.parse(code);
+    } on ParseException catch (ex) {
+      interpreter.console.send({"exception": ex.message});
+      return;
+    }
+    // no parse error, 
     List<Node> nonDefnNodes = [];
     for (Node n in nodes) {
       if (n.isDefn()) {
-        DefnNode defn = n;
+        DefnNode defn = n;        
         interpreter.define(defn);
       } else {
         nonDefnNodes.add(n);
       }
     }
     ListNode nodesToEval = ListNode.makeList(nonDefnNodes);
-    interpreter.evalSequence(nodesToEval);
+    try {
+      interpreter.evalSequence(nodesToEval);      
+    } on InterpreterException catch (ex) {
+      interpreter.console.send({"exception": ex.message});
+    }
+  }
+}
+
+class InterpreterState {
+  Set<String> traced;
+  
+  bool isTraced(String name) {
+    return traced.contains(name);
+  }
+  
+  void trace(String name) {
+    traced.add(name);
+  }
+  
+  void untrace(String name) {
+    traced.remove(name);
   }
 }
 
 class Interpreter {
   
   final Scope globalScope;
-  final SendPort parent;
+  final SendPort debug;
   final SendPort turtle;
   final SendPort console;
+  InterpreterState state;
   
-  Interpreter(this.globalScope, this.parent, this.turtle, this.console);
+  Interpreter(this.globalScope, this.debug, this.turtle, this.console)
+      : state = new InterpreterState();
     
   static WordNode deref(WordNode word, Scope scope) {
     if (scope == null) {
@@ -376,8 +407,6 @@ class Interpreter {
         }
         break;
         
-
-        
       case Primitive.THING:
         Node arg = nodes.head;
         ensureWord(arg);
@@ -433,6 +462,31 @@ class Interpreter {
         Node head = nodes.head;
         throw new InterpreterOutputException(head);
 
+      case Primitive.TRACE:
+        Node head = nodes.head;
+        nodes = nodes.tail;
+        
+        if (head.isWord()) {
+          Node n = scope[(head as WordNode).stringValue];
+          if (n != null && n.isDefn()) {
+            DefnNode defn = n;
+            state.trace(defn.name);
+          }
+        }
+        break;
+        
+      case Primitive.UNTRACE:
+        Node head = nodes.head;
+        nodes = nodes.tail;
+        if (head.isWord()) {
+          Node n = scope[(head as WordNode).stringValue];
+          if (n != null && n.isDefn()) {
+            DefnNode defn = n;
+            state.untrace(defn.name);           
+          }
+        }
+        break;
+
       default:
         throw new InterpreterException("not implemented: $p");
     }  
@@ -482,6 +536,12 @@ class Interpreter {
     ListNode formalParams = defn.vars;
     ListNode body = defn.body;
     Map<String, Node> env = new Map();
+    bool traced = state.isTraced(defn.name);
+    StringBuffer trace;
+    if (traced) {
+      trace = new StringBuffer();
+      trace.add(defn.name);
+    }
     while (!formalParams.isNil()) {
       WordNode formalParam = formalParams.head;
       formalParams = formalParams.tail;
@@ -492,6 +552,13 @@ class Interpreter {
       tail = tail.tail;
 
       env[formalParam.stringValue] = actualParam;
+      if (traced) {
+        trace.add(" ");
+        trace.add(actualParam);
+      }
+    }
+    if (traced) {
+      console.send({"trace": trace.toString()});
     }
     scope = new Scope(env, scope);
     Node result;
@@ -519,6 +586,7 @@ class Interpreter {
    */
   void define(DefnNode defn) {
     globalScope.bind(defn.name, defn);
+    console.send({"defined": defn.name});
   }
   
   /**

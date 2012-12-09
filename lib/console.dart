@@ -56,7 +56,24 @@ class Console {
   }
   
   void receiveFun(dynamic raw, SendPort replyTo) {
-    print("console $raw");
+    if (raw is Map) {
+      Map map = raw;
+      print(map);
+      if (map.containsKey("exception")) {
+        writeln(map["exception"]);
+      } else if (map.containsKey("defined")) {
+        String name = map["defined"];
+        writeln("You defined $name");
+      } else if (map.containsKey("trace")) {
+        String trace = map["trace"];
+        writeln(trace);
+      } 
+      return;
+    }
+    if (raw is String) {
+      writeln(raw);
+      return;
+    }
     List msg = raw;
     Primitive p = Primitive.lookup(msg[0]);
     switch (p) {
@@ -149,37 +166,8 @@ class Console {
   void handleCommitClick(html.Event e) {
     userText = editorElem.value;
     ListNode nodes;
-    
-    try {
-      nodes = parser.parse(userText);
-    } on Exception catch (ex) {
-      html.window.alert("parse error $ex");
-    }
-    // no parse error, 
-    interpreterPort.send(userText);
 
-    List<Node> nonDefnNodes = [];
-    String names = "";
-    for (Node n in nodes) {
-      if (n.isDefn()) {
-        DefnNode defn = n;
-        if (names.isEmpty) {
-          names = defn.name;
-        } else {
-          names = names.concat(", ${defn.name}");
-        }
-      } else {
-        nonDefnNodes.add(n);
-      }
-    }
-    ListNode nodesToEval = ListNode.makeList(nonDefnNodes);
-    if (!names.isEmpty) {
-      writeln("You defined $names");
-    }
-    if (!nodesToEval.isNil()) {
-      writeln("Executing $nodesToEval");
-    }
-    
+    interpreterPort.send([userText]);
     hideEditor();
   }
 }

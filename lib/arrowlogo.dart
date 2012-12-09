@@ -65,8 +65,8 @@ void interpreterTopLevel() {
   isolate.port.receive((msg, replyPort) {
     if (msg[0] == INIT) {
       interpreterWorker = new InterpreterWorker(msg[1], msg[2], msg[3]);
-    } else {
-      interpreterWorker.interpret(msg[0]);
-    }
+      return;
+    } 
+    interpreterWorker.interpret(msg[0]);
   });
 }

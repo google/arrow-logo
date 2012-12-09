@@ -286,8 +286,8 @@ class Scanner {
     } else if (word == "end") {
       token.kind = Token.TOKEN_END;
     } else {
-      Primitive p = toplevel[word];
-      if (p == null)
+      Node p = toplevel[word];
+      if (p == null || !p.isPrim())
         token.setWord(new WordNode(word));
       else
         token.setPrim(p);
