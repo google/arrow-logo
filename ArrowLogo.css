@@ -62,7 +62,7 @@ canvas#turtle {
   z-index: 1;
 }
 
-textarea#history, textarea#shell, textarea#editor {
+textarea#history, textarea#shell, textarea#editor, div#editorBackground {
   font-family: monospace;
   width: 300px;
   background: rgb(230,230,230);
@@ -76,7 +76,7 @@ textarea#shell {
   height: 20px;
 }
 
-textarea#editor {
+textarea#editor, div#editorBackground {
   position: absolute;
   left: 0;
   top: 0;
@@ -88,6 +88,7 @@ input#commit {
   right: 1em;
   bottom: 1em;
 }
+
 .invisible {
   display: none;
 }

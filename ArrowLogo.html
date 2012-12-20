@@ -19,7 +19,8 @@
 <html>
   <head>
     <title>ArrowLogo</title>
-    <link rel="stylesheet" href="ArrowLogo.css">
+    <link rel="stylesheet" href="ArrowLogo.css"></link>
+    <link rel="stylesheet" href="jslib/codemirror.css"></link>
   </head>
   <body>
     <h1 class="title">ArrowLogo</h1>
@@ -33,11 +34,15 @@
       <div class="right_panel">
         <textarea id="shell"></textarea>
         <textarea id="history"></textarea>
-        <input id="commit" type="button" value="ok" class="invisible"></input>
+        <div id="editorBackground" class="invisible"></div>
         <textarea id="editor" class="invisible"></textarea>
+        <input id="commit" type="button" value="ok" class="invisible"></input>
       </div>
     </div>
     
+    <script type="application/javascript" src="jslib/codemirror.js"></script>
+    <script type="application/javascript" src="jslib/logo.js"></script>
+    <script type="application/javascript" src="jslib/glue.js"></script>
     <script type="application/dart" src="lib/arrowlogo.dart"></script>
     <script src="http://dart.googlecode.com/svn/branches/bleeding_edge/dart/client/dart.js"></script>
   </body>

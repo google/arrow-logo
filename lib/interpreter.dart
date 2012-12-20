@@ -53,8 +53,6 @@ class InterpreterWorker {
   }
   
   void interpret(String code) {
-    debug.send("code $code");
-
     ListNode nodes;   
     try {
       nodes = interpreterWorker.parser.parse(code);
@@ -62,6 +60,7 @@ class InterpreterWorker {
       interpreter.console.send({"exception": ex.message});
       return;
     }
+    debug.send("parsed code $nodes");
     // no parse error, 
     List<Node> nonDefnNodes = [];
     for (Node n in nodes) {
@@ -77,12 +76,16 @@ class InterpreterWorker {
       interpreter.evalSequence(nodesToEval);      
     } on InterpreterException catch (ex) {
       interpreter.console.send({"exception": ex.message});
+    } on Exception catch (ex) {
+      interpreter.console.send({"exception": ex.toString()});
     }
   }
 }
 
 class InterpreterState {
-  Set<String> traced;
+  final Set<String> traced;
+  
+  InterpreterState() : traced = new Set<String>();
   
   bool isTraced(String name) {
     return traced.contains(name);
@@ -299,7 +302,6 @@ class Interpreter {
         
       case Primitive.FALSE:
         return new ListNode.cons(p, nodes);
-        
 
       case Primitive.FPUT:
         nodes = evalInScope(nodes, scope);
@@ -557,6 +559,7 @@ class Interpreter {
         trace.add(actualParam);
       }
     }
+
     if (traced) {
       console.send({"trace": trace.toString()});
     }

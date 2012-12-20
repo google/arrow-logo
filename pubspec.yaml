@@ -2,5 +2,6 @@ name: arrowlogo
 authors:
 - Burak Emir <burak.emir@gmail.com>
 dependencies:
-  unittest: { sdk: unittest }
+  unittest: { hosted: unittest }
+  js: { hosted: js }
 
