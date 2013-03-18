@@ -15,14 +15,13 @@ library arrowlogo;
 
 import 'dart:html' as html;
 import 'dart:isolate' as isolate;
-import 'dart:math' as math;
 
-import "console.dart";
-import 'interpreter.dart';
-import 'nodes.dart';
-import 'parser.dart';
-import "scope.dart";
-import "turtle.dart";
+import 'package:arrowlogo/console.dart';
+import 'package:arrowlogo/interpreter.dart';
+import 'package:arrowlogo/nodes.dart';
+import 'package:arrowlogo/parser.dart';
+import 'package:arrowlogo/scope.dart';
+import "package:arrowlogo/turtle.dart";
 
 class ArrowLogo {
   

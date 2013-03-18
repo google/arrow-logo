@@ -65,7 +65,7 @@ class ListNode extends Node {
         || (head == that.head && tail == that.tail);
   }
   
-  Iterator<Node> iterator() => new ListNodeIterator(this);
+  Iterator<Node> get iterator => new ListNodeIterator(this);
   
   final Node head;
   final ListNode tail;
@@ -120,20 +120,22 @@ class ListNode extends Node {
 
 class ListNodeIterator implements Iterator<Node> {
   
-  ListNode node;  
-  ListNodeIterator(ListNode this.node);
-  
-  Node next() {
-    if (node.isNil()) {
-      throw new Exception();
-    }
-    ListNode n = node;
-    node = node.tail;
-    return n.head;
+  ListNode nodes;  
+  ListNodeIterator(ListNode nodes) {
+    print(nodes);
+    this.nodes = new ListNode.cons(null, nodes);
   }
   
-  bool get hasNext {
-    return !node.isNil();
+  Node get current {
+    if (nodes.isNil()) {
+      throw new Exception();
+    }
+    return nodes.head;
+  }
+  
+  bool moveNext() {
+    nodes = nodes.tail;
+    return !nodes.isNil();
   }
 }
 

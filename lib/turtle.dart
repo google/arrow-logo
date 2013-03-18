@@ -13,11 +13,11 @@
 // limitations under the License.
 library turtle;
 
-import "dart:html" as html;
-import "dart:isolate" as isolate;
-import "dart:math" as math;
+import 'dart:html' as html;
+import 'dart:isolate' as isolate;
+import 'dart:math' as math;
 
-import "nodes.dart";
+import 'nodes.dart';
 
 TurtleWorker turtleWorker;
 
@@ -30,7 +30,7 @@ class TurtleWorker {
   
   static num getNum(String sizePx) {
     String size = sizePx.substring(0, sizePx.length - 2);
-    return math.parseInt(size);
+    return int.parse(size);
   }
   
   TurtleWorker() {
@@ -39,13 +39,11 @@ class TurtleWorker {
     var turtleCanvas = html.document.query("#turtle");
     var turtleCtx = turtleCanvas.getContext("2d");
 
-    userCanvas.computedStyle.then((value) {
-      html.CssStyleDeclaration style = value;
-      num width = getNum(style.width);
-      num height = getNum(style.height);
-      turtle = new Turtle(turtleCtx, userCtx, width, height);
-      turtle.draw();
-    });
+    html.CssStyleDeclaration style = userCanvas.getComputedStyle() ;
+    num width = getNum(style.width);
+    num height = getNum(style.height);
+    turtle = new Turtle(turtleCtx, userCtx, width, height);
+    turtle.draw();
   }
   
   void receive(dynamic raw, isolate.SendPort replyTo) {

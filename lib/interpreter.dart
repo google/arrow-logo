@@ -542,7 +542,7 @@ class Interpreter {
     StringBuffer trace;
     if (traced) {
       trace = new StringBuffer();
-      trace.add(defn.name);
+      trace.write(defn.name);
     }
     while (!formalParams.isNil()) {
       WordNode formalParam = formalParams.head;
@@ -555,8 +555,8 @@ class Interpreter {
 
       env[formalParam.stringValue] = actualParam;
       if (traced) {
-        trace.add(" ");
-        trace.add(actualParam);
+        trace.write(" ");
+        trace.write(actualParam);
       }
     }
 
@@ -637,7 +637,7 @@ class Interpreter {
     if (head.isPrim()) {
       return evalPrimFun(head, tail, scope);
     }
-    
+
     if (head.isWord()) {
       WordNode word = head;
       Node lookup = scope[word.stringValue];

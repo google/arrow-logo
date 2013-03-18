@@ -16,6 +16,7 @@ library interpreter_test;
 import 'package:unittest/unittest.dart';
 
 import "dart:isolate" as isolate;
+import "dart:async" as async;
 import "dart:math" as math;
 
 import "../lib/interpreter.dart";
@@ -28,7 +29,7 @@ class MockReceivePort implements isolate.SendPort {
     
   }
   
-  Future<dynamic> call(dynamic msg) {
+  async.Future<dynamic> call(dynamic msg) {
     return null;
   }
 }
@@ -176,6 +177,7 @@ class InterpreterTest {
           make \"y :x
         end""");
     for (Node defn in nodes) {
+      print("define ${defn}");
       interpreter.define(defn);
     }
     expect(interpreter.evalSequence(

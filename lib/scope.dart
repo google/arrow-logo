@@ -28,7 +28,7 @@ class Scope {
     StringBuffer sb = new StringBuffer();
     Scope scope = this;
     while (scope != null) {
-      sb.add(scope.symtab);
+      sb.write(scope.symtab);
       scope = scope.parent;
     }
     return sb.toString();

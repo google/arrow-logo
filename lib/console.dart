@@ -15,12 +15,12 @@ library console;
 
 import 'dart:html' as html;
 import 'dart:isolate';
-import "package:js/js.dart" as js;
+import 'package:js/js.dart' as js;
 
-import "interpreter.dart";
-import "nodes.dart";
-import "parser.dart";
-import "scope.dart";
+import 'interpreter.dart';
+import 'nodes.dart';
+import 'parser.dart';
+import 'scope.dart';
 
 class Console {
   
@@ -50,9 +50,9 @@ class Console {
         parser = new Parser(Primitive.makeTopLevel()) {
     shellElem.focus();
     this.interpreterPort = interpreterPort;
-    shellElem.on.keyPress.add(handleKeyPress);
-    shellElem.on.keyDown.add(handleKeyDown);
-    editorCommitButton.on.click.add(handleCommitClick);
+    shellElem.onKeyPress.listen(handleKeyPress);
+    shellElem.onKeyDown.listen(handleKeyDown);
+    editorCommitButton.onClick.listen(handleCommitClick);
     writeln("Welcome to ArrowLogo.");
     writeln("Type 'help' for help.");
     writeln("Type 'edall' to switch to the editor.");

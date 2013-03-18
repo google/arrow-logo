@@ -13,9 +13,9 @@
 // limitations under the License.
 library parser;
 
-import "dart:math" as math;
+import 'dart:math' as math;
 
-import "nodes.dart";
+import 'nodes.dart';
 
 class ParseException {
   final String message;
@@ -210,13 +210,13 @@ class Scanner {
    * */
   int advanceWhile(bool f(int)) {
     int len = text.length;
-    int ch = text.charCodeAt(pos);
+    int ch = text.codeUnitAt(pos);
     while (f(ch)) { 
       ++pos;
       if (pos == len) {
         return pos;
       }
-      ch = text.charCodeAt(pos);
+      ch = text.codeUnitAt(pos);
     }
     return pos;
   }
@@ -254,7 +254,7 @@ class Scanner {
    */
   void tokenizeVar() {
     int i = ++pos;
-    if (!isAlpha(text.charCodeAt(pos))) {
+    if (!isAlpha(text.codeUnitAt(pos))) {
       throw new Exception("expected alphabetical");
     }
     advanceWhile(isAlphaOrDigit);
@@ -271,8 +271,8 @@ class Scanner {
     advanceWhile(isDigitOrDot);
     String numtext = text.substring(i, pos);
     NumberNode nn = numtext.contains(".")
-        ? new NumberNode.float(math.parseDouble(numtext))
-        : new NumberNode.int(math.parseInt(numtext));
+        ? new NumberNode.float(double.parse(numtext))
+        : new NumberNode.int(int.parse(numtext));
     token.setNum(nn);
   }
   
@@ -339,7 +339,7 @@ class Scanner {
    * @post this.token is set to appropriate value
    */
   void tokenize() {
-    final int charCode = text.charCodeAt(pos);
+    final int charCode = text.codeUnitAt(pos);
     if (CHAR_COLON == charCode) {
       tokenizeVar();
     } else if (CHAR_QUOTE == charCode) {
@@ -431,7 +431,7 @@ class Parser extends Scanner {
   List<Node> reduceStack(OpInfo base, List<Node> top0, int prec,
                          bool isLeftAssoc) {
     List<Node> result = top0;
-    while (opstack !== base
+    while (opstack != base
         && (prec < Primitive.getPrecedence(opstack.binop)
             || (isLeftAssoc 
                 && prec == Primitive.getPrecedence(opstack.binop)))) {
