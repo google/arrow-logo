@@ -60,7 +60,7 @@ class InterpreterWorker {
       interpreter.console.send({"exception": ex.message});
       return;
     }
-    debug.send("parsed code $nodes");
+    // debug.send("parsed code $nodes");
     // no parse error, 
     List<Node> nonDefnNodes = [];
     for (Node n in nodes) {
