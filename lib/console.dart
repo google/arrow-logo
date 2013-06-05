@@ -126,21 +126,21 @@ class Console {
   }
   
   void write(String message) {
-    historyElem.value = historyElem.value.concat(message);    
+    historyElem.value = historyElem.value + message;    
   }
 
   void writeln([String message = ""]) {
-    historyElem.value = historyElem.value.concat(message).concat("\n");    
+    historyElem.value = historyElem.value + message + "\n";    
   }
 
   void showHelp() {
     writeln("  supported commands:");
     for (Primitive p in Primitive.commandsList) {
-      writeln(p.name.concat(p.altName != null ? "  ${p.altName}" : ""));
+      writeln(p.name + (p.altName != null ? "  ${p.altName}" : ""));
     }
     writeln("  supported operators:");
     for (Primitive p in Primitive.operatorList) {
-      writeln(p.name.concat(p.altName != null ? "  ${p.altName}" : ""));
+      writeln(p.name + (p.altName != null ? "  ${p.altName}" : ""));
     }
   }
   

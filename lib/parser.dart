@@ -259,7 +259,7 @@ class Scanner {
     }
     advanceWhile(isAlphaOrDigit);
     String word = text.substring(i, pos);
-    token.setVar(new WordNode("\"".concat(word)));
+    token.setVar(new WordNode("\"" + word));
   }
 
   /**

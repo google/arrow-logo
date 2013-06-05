@@ -507,8 +507,8 @@ class Interpreter {
     Map<String, Node> env = new Map();
     if (args.length != numFormals) {
       throw new InterpreterException(
-          "expected arguments ${numFormals}".concat(
-          "actual arguments: ${args.length}"));
+          "expected arguments ${numFormals}"
+          + "actual arguments: ${args.length}");
     }
     while (numFormals != 0) {
       WordNode formalParam = formalParams.head;

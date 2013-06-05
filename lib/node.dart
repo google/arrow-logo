@@ -113,8 +113,8 @@ class ListNode extends Node {
   
   String _toStringIter(String acc) {
     return isNil()
-        ? acc.concat(" ]")
-        : tail._toStringIter(acc.concat(" ").concat(head.toString()));
+        ? (acc + " ]")
+        : tail._toStringIter(acc + " " + head.toString());
   }
 }
 
