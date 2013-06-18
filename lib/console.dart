@@ -130,7 +130,8 @@ class Console {
   }
 
   void writeln([String message = ""]) {
-    historyElem.value = historyElem.value + message + "\n";    
+    historyElem.value = historyElem.value + message + "\n";   
+    historyElem.scrollTop = historyElem.scrollHeight;
   }
 
   void showHelp() {
