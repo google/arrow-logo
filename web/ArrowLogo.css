@@ -16,9 +16,17 @@
 
 body {
   background-color: lightgreen;
+  font-family: 'Averia Libre', cursive;
 }
 
+div#container {
+  margin: 0 auto;
+  height: 600px;
+  width: 910px;
+}
+  
 h1.title {
+  font-family: 'Averia Libre', cursive;
   text-align: right;
   margin-right: 1em;
   margin-top: 1em;
