@@ -35,7 +35,5 @@ main() {
   // Compute base path for the request based on the location of the
   // script and then start the server.
   File script = new File(new Options().script);
-  script.directory().then((Directory d) {
-    startServer(d.path);
-  });
+  startServer(script.directory.path);
 }
