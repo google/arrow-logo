@@ -25,18 +25,17 @@ class ParserTest {
   ParserTest() 
       : parser = new Parser(Primitive.getBuiltIns());
   
+  void expectAdvanceWhileConsumes(input, func, prefix) {
+    parser.initialize(input);
+    expect(parser.advanceWhile(func), equals(prefix.length));
+  }
+  
   void testAdvanceWhile() {
-    Scanner s = parser;
-    s.initialize("  a");
-    expect(s.advanceWhile(Scanner.isSpace), equals(2));
-    s.initialize("a");
-    expect(s.advanceWhile(Scanner.isSpace), equals(0));
-    s.initialize("abc");
-    expect(s.advanceWhile(Scanner.isAlpha), equals(3));
-    s.initialize("12a");
-    expect(s.advanceWhile(Scanner.isDigit), equals(2));
-    s.initialize(".2a");
-    expect(s.advanceWhile(Scanner.isDigitOrDot), equals(2));
+    expectAdvanceWhileConsumes("  a", Scanner.isSpace, "  ");
+    expectAdvanceWhileConsumes("a", Scanner.isSpace, "");
+    expectAdvanceWhileConsumes("abc", Scanner.isAlpha, "abc");
+    expectAdvanceWhileConsumes("12abc", Scanner.isDigit, "12");
+    expectAdvanceWhileConsumes(".2a", Scanner.isDigitOrDot, ".2");
   }
   
   void testTokenizeNum() {
