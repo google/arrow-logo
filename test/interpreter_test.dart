@@ -19,10 +19,10 @@ import "dart:isolate" as isolate;
 import "dart:async" as async;
 import "dart:math" as math;
 
-import "../lib/interpreter.dart";
-import "../lib/nodes.dart";
-import "../lib/parser.dart";
-import "../lib/scope.dart";
+import "package:arrowlogo/interpreter.dart";
+import "package:arrowlogo/nodes.dart";
+import "package:arrowlogo/parser.dart";
+import "package:arrowlogo/scope.dart";
 
 class MockReceivePort implements isolate.SendPort {
   void send(dynamic msg, [isolate.SendPort replyTo]) {

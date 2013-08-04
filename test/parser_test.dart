@@ -15,8 +15,8 @@ library parser_test;
 
 import 'package:unittest/unittest.dart';
 
-import "../lib/nodes.dart";
-import "../lib/parser.dart";
+import "package:arrowlogo/nodes.dart";
+import "package:arrowlogo/parser.dart";
 
 class ParserTest {
 
