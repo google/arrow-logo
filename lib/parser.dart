@@ -192,6 +192,9 @@ class Scanner {
   static bool isDigitOrDot(int charCode) => 
       CHAR_DOT == charCode || isDigit(charCode);
   
+  static bool isDot(int charCode) => 
+      CHAR_DOT == charCode;
+      
   static bool isSpace(int charCode) => 
       CHAR_BLANK == charCode;
       
@@ -210,6 +213,9 @@ class Scanner {
    * */
   int advanceWhile(bool f(int)) {
     int len = text.length;
+    if (pos == len) {
+      return pos;
+    }
     int ch = text.codeUnitAt(pos);
     while (f(ch)) { 
       ++pos;
@@ -268,7 +274,10 @@ class Scanner {
    */
   void tokenizeNum() {
     int i = pos;
-    advanceWhile(isDigitOrDot);
+    advanceWhile(isDigit);
+    advanceWhile(isDot);
+    advanceWhile(isDigit);
+
     String numtext = text.substring(i, pos);
     NumberNode nn = numtext.contains(".")
         ? new NumberNode.float(double.parse(numtext))
@@ -327,7 +336,7 @@ class Scanner {
         token.setKind(Token.TOKEN_EQ);
         break;
     
-      default: throw new Exception("unexpected char: ${text[0]}");
+      default: throw new Exception("unexpected char: ${text[pos]}");
     }
     ++pos;
   }
@@ -344,7 +353,7 @@ class Scanner {
       tokenizeVar();
     } else if (CHAR_QUOTE == charCode) {
       tokenizeQuotedWord();
-    } else if (isDigit(charCode)) {
+    } else if (isDigitOrDot(charCode)) {
       tokenizeNum();
     } else if (isAlpha(charCode)) {
       tokenizeWord();

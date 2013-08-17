@@ -60,6 +60,14 @@ class ParserTest {
     NumberNode numFloat = n;
     expect(numFloat.isFloat(), true);
     expect(1.2, numFloat.getFloatValue());
+    
+    parser.initialize(".7");
+    parser.tokenizeNum();
+    n = parser.token.node;
+    expect(n.isNum(), true);
+    numFloat = n;
+    expect(numFloat.isFloat(), true);
+    expect(.7, numFloat.getFloatValue());
   }
   
   void testTokenizeWordOrKeyword() {
@@ -176,6 +184,12 @@ class ParserTest {
           new NumberNode.int(3), 
           new NumberNode.int(4),
         new NumberNode.int(2)])));
+    expect(
+        parser.parse(":x*.7"),
+        equals(ListNode.makeList([ 
+                                  Primitive.PRODUCT, 
+                                  Primitive.THING, new WordNode("\"x"),
+                                  new NumberNode.float(.7)])));
     expect(
       parser.parse("2^3.5^(7+1) / 3 - 2"),
       equals(ListNode.makeList([
