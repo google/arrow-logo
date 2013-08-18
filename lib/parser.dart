@@ -204,7 +204,22 @@ class Scanner {
   
   static bool isAlphaOrDigit(int charCode) =>
       isAlpha(charCode) || isDigit(charCode);
-      
+     
+  /** 
+   * Advances [pos] if f(text.charCodeAt(pos)) holds.
+   */
+  int advanceIf(bool f(int)) {
+    int len = text.length;
+    if (pos == len) {
+      return pos;
+    }
+    int ch = text.codeUnitAt(pos);
+    if (f(ch)) { 
+      ++pos;
+    }
+    return pos;
+  }
+  
   /** 
    * Advances [pos] until the following holds:
    * 
@@ -275,7 +290,7 @@ class Scanner {
   void tokenizeNum() {
     int i = pos;
     advanceWhile(isDigit);
-    advanceWhile(isDot);
+    advanceIf(isDot);
     advanceWhile(isDigit);
 
     String numtext = text.substring(i, pos);
