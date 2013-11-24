@@ -57,23 +57,6 @@ class InterpreterProxy extends InterpreterInterface {
   void interpret(String code) { delegate.interpret(code); }
 }
 
-class InterpreterWorker extends InterpreterInterface {
-  
-  final Debug debug;
-  final Scope globalScope;
-  Interpreter interpreter;
-
-  InterpreterWorker(this.debug, TurtleWorker turtle, Console console)
-      : globalScope = new Scope(Primitive.makeTopLevel()) {
-    interpreter = new Interpreter(globalScope, debug, turtle, console);
-    debug.log("constructed InterpreterProcess");
-  }
-  
-  void interpret(String code) {
-    interpreter.interpret(code);
-  }
-}
-
 class InterpreterState {
   final Set<String> traced;
   
@@ -92,7 +75,7 @@ class InterpreterState {
   }
 }
 
-class Interpreter {
+class InterpreterImpl extends InterpreterInterface {
   
   final Scope globalScope;
   final Parser parser;
@@ -101,7 +84,15 @@ class Interpreter {
   final Console console;
   InterpreterState state;
   
-  Interpreter(Scope globalScope, this.debug, this.turtle, this.console)
+  factory InterpreterImpl(Debug debug, TurtleWorker turtle, Console console) {
+    InterpreterImpl impl = new InterpreterImpl.internal(
+        new Scope(Primitive.makeTopLevel()), debug, turtle, console);
+    debug.log("constructed Interpreter");
+    return impl;
+  }
+  
+  InterpreterImpl.internal(
+      Scope globalScope, this.debug, this.turtle, this.console)
       : this.globalScope = globalScope,
         state = new InterpreterState(),
         parser = new Parser(globalScope.symtab) {

@@ -31,7 +31,7 @@ class ArrowLogo {
     turtle = new TurtleWorker();
     interpreterProxy = new InterpreterProxy();
     console = new Console(interpreterProxy);
-    interpreter = new InterpreterWorker(debug, turtle, console);
+    interpreter = new InterpreterImpl(debug, turtle, console);
     
   }
   

@@ -15,8 +15,6 @@ library interpreter_test;
 
 import 'package:unittest/unittest.dart';
 
-import "dart:isolate" as isolate;
-import "dart:async" as async;
 import "dart:math" as math;
 
 import "package:arrowlogo/interpreter.dart";
@@ -24,33 +22,21 @@ import "package:arrowlogo/nodes.dart";
 import "package:arrowlogo/parser.dart";
 import "package:arrowlogo/scope.dart";
 
-class MockReceivePort implements isolate.SendPort {
-  void send(dynamic msg, [isolate.SendPort replyTo]) {
-    
-  }
-  
-  async.Future<dynamic> call(dynamic msg) {
-    return null;
-  }
-}
-
 class InterpreterTest {
 
   Scope globalScope;
-  var turtle = new MockReceivePort();
-  var console = new MockReceivePort();
-  var parent = new MockReceivePort();
-  Interpreter interpreter;
+  var turtle = new Object();
+  var console = new Object();
+  var parent = new Object();
+  InterpreterImpl interpreter;
 
-  Interpreter makeInterpreter() {
+  InterpreterImpl makeInterpreter() {
     globalScope = new Scope(new Map());
-    interpreter = new Interpreter(globalScope, parent, turtle, console);
+    interpreter = new InterpreterImpl.internal(
+        globalScope, parent, turtle, console);
   }
   
   InterpreterTest() {
-    turtle = new MockReceivePort();
-    console = new MockReceivePort();
-    parent = new MockReceivePort();
   }
 
   void testEvalValues() {
