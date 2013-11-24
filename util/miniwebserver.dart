@@ -14,15 +14,13 @@ startServer(String basePath) {
       final File file = new File('${basePath}${path}');
       file.exists().then((bool found) {
         if (found) {
-          file.fullPath().then((String fullPath) {
-            if (!fullPath.startsWith(basePath)) {
-              _sendNotFound(request.response);
-            } else {
-              file.openRead()
-                  .pipe(request.response)
-                  .catchError((e) { });
-            }
-          });
+          if (!file.path.startsWith(basePath)) {
+            _sendNotFound(request.response);
+          } else {
+            file.openRead()
+                .pipe(request.response)
+                .catchError((e) { });
+          }
         } else {
           _sendNotFound(request.response);
         }
@@ -34,6 +32,6 @@ startServer(String basePath) {
 main() {
   // Compute base path for the request based on the location of the
   // script and then start the server.
-  File script = new File(new Options().script);
-  startServer(script.directory.path);
+  File script = new File(Platform.script.toFilePath());
+  startServer(script.parent.path);
 }
