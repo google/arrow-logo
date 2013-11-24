@@ -13,59 +13,33 @@
 // limitations under the License.
 library arrowlogo;
 
-import 'dart:html' as html;
-import 'dart:isolate' as isolate;
-
 import 'package:arrowlogo/console.dart';
+import 'package:arrowlogo/debug.dart';
 import 'package:arrowlogo/interpreter.dart';
-import 'package:arrowlogo/nodes.dart';
-import 'package:arrowlogo/parser.dart';
-import 'package:arrowlogo/scope.dart';
 import "package:arrowlogo/turtle.dart";
 
 class ArrowLogo {
   
-  final isolate.ReceivePort debugPort;
-  final isolate.ReceivePort consolePort;
-  final isolate.ReceivePort turtlePort;
-  final isolate.SendPort interpreterPort;
- 
-  TurtleWorker turtleWorker;
+  Debug debug;
+  TurtleWorker turtle;
   Console console;
-  
-  ArrowLogo() 
-      : debugPort = new isolate.ReceivePort(),
-        consolePort = new isolate.ReceivePort(),
-        turtlePort = new isolate.ReceivePort(),
-        interpreterPort = isolate.spawnFunction(interpreterTopLevel) {
-    turtleWorker = new TurtleWorker();
-    console = new Console(interpreterPort);
+  InterpreterProxy interpreterProxy;
+  InterpreterInterface interpreter;
+   
+  ArrowLogo() {
+    debug = new SimpleDebug();
+    turtle = new TurtleWorker();
+    interpreterProxy = new InterpreterProxy();
+    console = new Console(interpreterProxy);
+    interpreter = new InterpreterWorker(debug, turtle, console);
+    
   }
   
   void run() {
-    debugPort.receive((msg, _) {
-      print(msg);
-    });
-    
-    interpreterPort.send([INIT, debugPort.toSendPort(),
-        turtlePort.toSendPort(), consolePort.toSendPort()]);
-    consolePort.receive(console.receiveFun);   
-    turtlePort.receive(turtleWorker.receive);
+    interpreterProxy.init(interpreter);
   }
 }
 
 void main() {
   new ArrowLogo().run();
-}
-
-const String INIT = "init";
-
-void interpreterTopLevel() {
-  isolate.port.receive((msg, replyPort) {
-    if (msg[0] == INIT) {
-      interpreterWorker = new InterpreterWorker(msg[1], msg[2], msg[3]);
-      return;
-    } 
-    interpreterWorker.interpret(msg[0]);
-  });
 }

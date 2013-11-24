@@ -13,12 +13,14 @@
 // limitations under the License.
 library interpreter;
 
-import 'dart:isolate';
 import 'dart:math' as math;
 
+import 'console.dart';
+import 'debug.dart';
 import 'nodes.dart';
 import 'parser.dart';
 import 'scope.dart';
+import 'turtle.dart';
 
 /**
  * Something went wrong. TODO: useful messaging
@@ -38,47 +40,37 @@ class InterpreterOutputException {
 
 InterpreterWorker interpreterWorker;
 
-class InterpreterWorker {
+abstract class InterpreterInterface {
+  void interpret(String code);
+}
+
+class InterpreterProxy extends InterpreterInterface {
+
+  InterpreterInterface delegate;
+
+  InterpreterProxy();
   
-  final SendPort debug;
+  void init(InterpreterInterface delegate) {
+    this.delegate = delegate;
+  }
+  
+  void interpret(String code) { delegate.interpret(code); }
+}
+
+class InterpreterWorker extends InterpreterInterface {
+  
+  final Debug debug;
   final Scope globalScope;
-  Parser parser;
   Interpreter interpreter;
 
-  InterpreterWorker(SendPort this.debug, SendPort turtle, SendPort console)
+  InterpreterWorker(this.debug, TurtleWorker turtle, Console console)
       : globalScope = new Scope(Primitive.makeTopLevel()) {
-    parser = new Parser(globalScope.symtab);
     interpreter = new Interpreter(globalScope, debug, turtle, console);
-    debug.send("constructed InterpreterProcess");
+    debug.log("constructed InterpreterProcess");
   }
   
   void interpret(String code) {
-    ListNode nodes;   
-    try {
-      nodes = interpreterWorker.parser.parse(code);
-    } on ParseException catch (ex) {
-      interpreter.console.send({"exception": ex.message});
-      return;
-    }
-    // debug.send("parsed code $nodes");
-    // no parse error, 
-    List<Node> nonDefnNodes = [];
-    for (Node n in nodes) {
-      if (n.isDefn()) {
-        DefnNode defn = n;        
-        interpreter.define(defn);
-      } else {
-        nonDefnNodes.add(n);
-      }
-    }
-    ListNode nodesToEval = ListNode.makeList(nonDefnNodes);
-    try {
-      interpreter.evalSequence(nodesToEval);      
-    } on InterpreterException catch (ex) {
-      interpreter.console.send({"exception": ex.message});
-    } on Exception catch (ex) {
-      interpreter.console.send({"exception": ex.toString()});
-    }
+    interpreter.interpret(code);
   }
 }
 
@@ -103,13 +95,17 @@ class InterpreterState {
 class Interpreter {
   
   final Scope globalScope;
-  final SendPort debug;
-  final SendPort turtle;
-  final SendPort console;
+  final Parser parser;
+  final Debug debug;
+  final TurtleWorker turtle;
+  final Console console;
   InterpreterState state;
   
-  Interpreter(this.globalScope, this.debug, this.turtle, this.console)
-      : state = new InterpreterState();
+  Interpreter(Scope globalScope, this.debug, this.turtle, this.console)
+      : this.globalScope = globalScope,
+        state = new InterpreterState(),
+        parser = new Parser(globalScope.symtab) {
+  }
     
   static WordNode deref(WordNode word, Scope scope) {
     if (scope == null) {
@@ -117,6 +113,36 @@ class Interpreter {
     }
     WordNode lookup = scope[word.stringValue];
     return deref(lookup, scope);
+  }
+  
+  // Entry point.
+  void interpret(String code) {
+    ListNode nodes;   
+    try {
+      nodes = parser.parse(code);
+    } on ParseException catch (ex) {
+      console.receive({"exception": ex.message});
+      return;
+    }
+    // debug.log("parsed code $nodes");
+    // no parse error, 
+    List<Node> nonDefnNodes = [];
+    for (Node n in nodes) {
+      if (n.isDefn()) {
+        DefnNode defn = n;        
+        define(defn);
+      } else {
+        nonDefnNodes.add(n);
+      }
+    }
+    ListNode nodesToEval = ListNode.makeList(nonDefnNodes);
+    try {
+      evalSequence(nodesToEval);      
+    } on InterpreterException catch (ex) {
+      console.receive({"exception": ex.message});
+    } on Exception catch (ex) {
+      console.receive({"exception": ex.toString()});
+    }
   }
   
   Node evalBinCmp(ListNode nodes, Scope scope, cmpNum(num x, num y)) {
@@ -230,7 +256,7 @@ class Interpreter {
       case Primitive.PENDOWN:  
       case Primitive.PENUP:  
       case Primitive.SHOWTURTLE:
-        turtle.send([p.name]);
+        turtle.receive([p.name]);
         break;
 
         // turtle 1-arg
@@ -240,7 +266,7 @@ class Interpreter {
         ensureNum(nodes.head);
         NumberNode wn = nodes.head;
         nodes = nodes.tail;
-        turtle.send([p.name, wn.getNumValue()]);
+        turtle.receive([p.name, wn.getNumValue()]);
         break;  
         
       case Primitive.RIGHT:
@@ -248,7 +274,7 @@ class Interpreter {
         ensureNum(nodes.head);
         NumberNode nn = nodes.head;
         nodes = nodes.tail;
-        turtle.send([p.name, nn.getNumValue()]);
+        turtle.receive([p.name, nn.getNumValue()]);
         break;
         
       case Primitive.SETPENCOLOR:
@@ -259,7 +285,7 @@ class Interpreter {
         if (!nn.isInt()) {
           throw new InterpreterException("invalid color code ${nn.getNumValue()}");
         }
-        turtle.send([p.name, nn.getIntValue()]);
+        turtle.receive([p.name, nn.getIntValue()]);
         break;
         
       case Primitive.FORWARD:
@@ -267,7 +293,7 @@ class Interpreter {
         ensureNum(nodes.head);
         NumberNode wn = nodes.head;
         nodes = nodes.tail;
-        turtle.send([p.name, wn.getNumValue()]);
+        turtle.receive([p.name, wn.getNumValue()]);
         break;
 
       case Primitive.LEFT:
@@ -275,7 +301,7 @@ class Interpreter {
         ensureNum(nodes.head);
         NumberNode wn = nodes.head;
         nodes = nodes.tail;
-        turtle.send([p.name, wn.getNumValue()]);
+        turtle.receive([p.name, wn.getNumValue()]);
         break;
         
         // end turtle commands
@@ -285,14 +311,14 @@ class Interpreter {
       case Primitive.CLEARTEXT:
       case Primitive.EDALL:
       case Primitive.HELP:
-        console.send([p.name]);
+        console.receive([p.name]);
         break;
         
       case Primitive.PRINT:
         nodes = evalInScope(nodes, scope);
         Node n = nodes.head;
         nodes = nodes.tail;
-        console.send([p.name, n.toString()]);
+        console.receive([p.name, n.toString()]);
         break;
         
         // end console commands

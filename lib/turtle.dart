@@ -46,7 +46,7 @@ class TurtleWorker {
     turtle.draw();
   }
   
-  void receive(dynamic raw, isolate.SendPort replyTo) {
+  void receive(dynamic raw) {
     List msg = raw;
     Primitive prim = Primitive.lookup(msg[0]);
     switch (prim) {

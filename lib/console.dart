@@ -14,13 +14,11 @@
 library console;
 
 import 'dart:html' as html;
-import 'dart:isolate';
 import 'package:js/js.dart' as js;
 
 import 'interpreter.dart';
 import 'nodes.dart';
 import 'parser.dart';
-import 'scope.dart';
 
 class Console {
   
@@ -36,12 +34,11 @@ class Console {
   js.Proxy jsCodeMirrorInstance;
   
   final Parser parser;
-  SendPort interpreterPort;
-  Interpreter interpreter;
+  InterpreterInterface interpreter;
   
   String userText;
 
-  Console(SendPort interpreterPort)
+  Console(this.interpreter)
       : shellElem = html.document.query('#shell'),
         historyElem = html.document.query('#history'),
         editorElem = html.document.query('#editor'),
@@ -49,7 +46,6 @@ class Console {
         editorCommitButton  = html.document.query('#commit'),
         parser = new Parser(Primitive.makeTopLevel()) {
     shellElem.focus();
-    this.interpreterPort = interpreterPort;
     shellElem.onKeyPress.listen(handleKeyPress);
     shellElem.onKeyDown.listen(handleKeyDown);
     editorCommitButton.onClick.listen(handleCommitClick);
@@ -59,7 +55,7 @@ class Console {
     prompt();
   }
   
-  void receiveFun(dynamic raw, SendPort replyTo) {
+  void receive(dynamic raw) {
     if (raw is Map) {
       Map map = raw;
       if (map.containsKey("exception")) {
@@ -115,10 +111,7 @@ class Console {
     historyElem.classes.add('invisible');
     editorElem.focus();
     
-    js.scoped(() {
-      jsCodeMirrorInstance = js.context.showCmEditor();
-      js.retain(jsCodeMirrorInstance);
-    });
+    jsCodeMirrorInstance = js.context.showCmEditor();
   }
   
   void prompt() {
@@ -156,7 +149,7 @@ class Console {
       if (!code.isEmpty) {
         writeln(text);
         // TODO: get back errors
-        interpreterPort.send([code]);
+        interpreter.interpret(code);
       }
       e.preventDefault();
       prompt();
@@ -175,13 +168,11 @@ class Console {
   }
   
   void handleCommitClick(html.Event e) {
-    js.scoped(() {
-      js.context.hideCmEditor(jsCodeMirrorInstance);
-    });
+    js.context.hideCmEditor(jsCodeMirrorInstance);
     userText = editorElem.value;
     ListNode nodes;
 
-    interpreterPort.send([userText]);
+    interpreter.interpret(userText);
     hideEditor();
   }
 }
