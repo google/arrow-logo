@@ -1,13 +1,15 @@
 #!/bin/sh
-rm -Rf deploy/*
-mkdir -p deploy/web
-mkdir -p deploy/web/packages/browser
-cp packages/browser/dart.js deploy/web/packages/browser/dart.js
-cp web/*.css web/*.dart web/*.js deploy/web/
-cp web/ArrowLogo.html deploy/web/ArrowLogo.html
-cp web/ArrowLogoRedirect.html deploy/ArrowLogo.html
-cp -r jslib deploy/
+DEST=deploy
+
+rm -Rf ${DEST}/*
+mkdir -p ${DEST}/web
+mkdir -p ${DEST}/web/packages/browser
+cp packages/browser/dart.js ${DEST}/web/packages/browser/dart.js
+cp packages/browser/interop.js ${DEST}/web/packages/browser/interop.js
+cp web/*.css web/*.dart web/*.js ${DEST}/web/
+cp web/ArrowLogo.html ${DEST}/web/ArrowLogo.html
+cp -r jslib ${DEST}/
 # for easy testing
-cp util/miniwebserver.dart deploy/
-chmod -R uog+r deploy/
+cp util/miniwebserver.dart ${DEST}/
+chmod -R uog+r ${DEST}/
 
