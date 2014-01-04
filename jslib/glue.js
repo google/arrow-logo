@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-function showCmEditor() {
-  var editorElem = document.getElementById("editor");
-  return CodeMirror.fromTextArea(editorElem);
-}
-
-function hideCmEditor(cm) {
-  cm.toTextArea();
-}
+var Glue = function() {
+  // This seems a bit roundabout, but calling CodeMirror directly does not
+  // work. TODO: isolate the bug and file a report.
+  this.showCmEditor = function() {
+    var editorElem = document.getElementById("editor");
+    return CodeMirror.fromTextArea(editorElem);
+  }
+  this.hideCmEditor = function(cm) {
+    cm.toTextArea();
+  }
+};

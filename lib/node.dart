@@ -65,6 +65,10 @@ class ListNode extends Node {
         || (head == that.head && tail == that.tail);
   }
   
+  int get hashCode {
+    return isNil() ? -1 : head.hashCode * 7 + tail.hashCode;
+  }
+  
   Iterator<Node> get iterator => new ListNodeIterator(this);
   
   final Node head;
@@ -153,6 +157,10 @@ class WordNode extends Node {
     return stringValue == that.stringValue;
   }
   
+  int get hashCode {
+    return stringValue.hashCode;
+  }
+  
   String toString() {
     return stringValue;
   }
@@ -184,6 +192,10 @@ class NumberNode extends Node {
       return that.isFloat() && getFloatValue() == that.getFloatValue();
     }
     throw new Exception("neither int nor float");
+  }
+  
+  int get hashCode {
+    return isInt() ? getIntValue().hashCode : getFloatValue().hashCode;
   }
   
   bool isInt() { return (tag & NUMBER_MASK) == NUMBER_INT; }
@@ -227,6 +239,10 @@ class DefnNode extends Node {
     }
     DefnNode that = node;
     return name == that.name && body == that.body;
+  }
+  
+  int get hashCode {
+    return 5 * name.hashCode + body.hashCode;
   }
   
   String toString() {

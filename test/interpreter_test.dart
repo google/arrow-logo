@@ -22,11 +22,15 @@ import "package:arrowlogo/nodes.dart";
 import "package:arrowlogo/parser.dart";
 import "package:arrowlogo/scope.dart";
 
+class MockConsole {
+  void receive(dynamic raw) {}
+}
+
 class InterpreterTest {
 
   Scope globalScope;
   var turtle = new Object();
-  var console = new Object();
+  var console = new MockConsole();
   var parent = new Object();
   InterpreterImpl interpreter;
 

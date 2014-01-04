@@ -1,6 +1,5 @@
 name: arrowlogo
 author: Burak Emir <burak.emir@gmail.com>
 dependencies:
-  unittest: any
-  js: any
   browser: any
+  unittest: any

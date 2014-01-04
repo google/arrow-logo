@@ -14,9 +14,11 @@
 library arrowlogo;
 
 import 'package:arrowlogo/console.dart';
+import 'package:arrowlogo/console_impl.dart';
 import 'package:arrowlogo/debug.dart';
 import 'package:arrowlogo/interpreter.dart';
 import "package:arrowlogo/turtle.dart";
+import "package:arrowlogo/turtle_impl.dart";
 
 class ArrowLogo {
   
@@ -28,11 +30,10 @@ class ArrowLogo {
    
   ArrowLogo() {
     debug = new SimpleDebug();
-    turtle = new TurtleWorker();
+    turtle = new TurtleWorkerImpl();
     interpreterProxy = new InterpreterProxy();
-    console = new Console(interpreterProxy);
+    console = new ConsoleImpl(interpreterProxy);
     interpreter = new InterpreterImpl(debug, turtle, console);
-    
   }
   
   void run() {

@@ -38,8 +38,6 @@ class InterpreterOutputException {
   const InterpreterOutputException(this.result);
 }
 
-InterpreterWorker interpreterWorker;
-
 abstract class InterpreterInterface {
   void interpret(String code);
 }
@@ -578,7 +576,7 @@ class InterpreterImpl extends InterpreterInterface {
     }
 
     if (traced) {
-      console.send({"trace": trace.toString()});
+      console.receive({"trace": trace.toString()});
     }
     scope = new Scope(env, scope);
     Node result;
@@ -606,7 +604,7 @@ class InterpreterImpl extends InterpreterInterface {
    */
   void define(DefnNode defn) {
     globalScope.bind(defn.name, defn);
-    console.send({"defined": defn.name});
+    console.receive({"defined": defn.name});
   }
   
   /**
