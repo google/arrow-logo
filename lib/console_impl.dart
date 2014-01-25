@@ -32,7 +32,6 @@ class ConsoleImpl extends Console {
   final html.TextAreaElement editorElem;
   final html.Element editorBackground;
   final html.Element editorCommitButton;
-  JsObject jsCodeMirrorInstance;
   
   final Parser parser;
   InterpreterInterface interpreter;
@@ -111,8 +110,6 @@ class ConsoleImpl extends Console {
     shellElem.classes.add('invisible');
     historyElem.classes.add('invisible');
     editorElem.focus();
-    
-    jsCodeMirrorInstance = new JsObject(context['Glue']).callMethod('showCmEditor');
   }
   
   void prompt() {
@@ -169,8 +166,6 @@ class ConsoleImpl extends Console {
   }
   
   void handleCommitClick(html.Event e) {
-    new JsObject(context['Glue'])
-        .callMethod('hideCmEditor', [jsCodeMirrorInstance]);
     userText = editorElem.value;
     ListNode nodes;
 
