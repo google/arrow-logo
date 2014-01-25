@@ -13,8 +13,6 @@
 // limitations under the License.
 library parser;
 
-import 'dart:math' as math;
-
 import 'nodes.dart';
 
 class ParseException {
