@@ -88,6 +88,7 @@ class Primitive extends Node {
     case GREATEROREQUAL:
     case LESSTHAN: 
     case LESSOREQUAL:
+    case EQUALS:
       return 5;
     case SUM: 
     case DIFFERENCE:

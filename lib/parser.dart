@@ -51,6 +51,7 @@ class Token {
   static const int TOKEN_LE = 59;  
   static const int TOKEN_GE = 60;  
   static const int TOKEN_EQ = 61;  
+  static const int TOKEN_EQEQ = 62;
 
   int kind;
   Node node;
@@ -103,6 +104,7 @@ class Token {
       case TOKEN_LE: return "LE";  
       case TOKEN_GE: return "GE";  
       case TOKEN_EQ: return "EQ";  
+      case TOKEN_EQEQ: return "EQEQ";
 
       default: return "???";
     }
@@ -115,6 +117,7 @@ class Token {
       case TOKEN_SLASH:
       case TOKEN_STAR:
       case TOKEN_CARET:
+      case TOKEN_EQEQ:
       case TOKEN_LT:
       case TOKEN_LE:
       case TOKEN_GT:
@@ -152,6 +155,8 @@ class Token {
         return Primitive.PRODUCT;
       case TOKEN_CARET:
         return Primitive.POWER;
+      case TOKEN_EQEQ:
+        return Primitive.EQUALS;
       case TOKEN_LT:
         return Primitive.LESSTHAN;
       case TOKEN_LE:
@@ -330,7 +335,7 @@ class Scanner {
       case '/': token.setKind(Token.TOKEN_SLASH); break;
       case '^': token.setKind(Token.TOKEN_CARET); break;
       case '<': 
-        if (text.length > 1 && text[1] == '=') {
+        if (text.length > pos + 1 && text[pos + 1] == '=') {
           token.setKind(Token.TOKEN_LE);
           pos += 2;
           return;
@@ -338,7 +343,7 @@ class Scanner {
         token.setKind(Token.TOKEN_LT);
         break;
       case '>':
-        if (text.length > 1 && text[1] == '=') {
+        if (text.length > pos + 1 && text[pos + 1] == '=') {
           token.setKind(Token.TOKEN_GE);
           pos += 2;
           return;
@@ -346,6 +351,11 @@ class Scanner {
         token.setKind(Token.TOKEN_GT);
         break;
       case '=': 
+        if (text.length > pos + 1 && text[pos + 1] == '=') {
+          token.setKind(Token.TOKEN_EQEQ);
+          pos += 2;
+          return;
+        }
         token.setKind(Token.TOKEN_EQ);
         break;
     
