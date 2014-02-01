@@ -212,10 +212,16 @@ class InterpreterImpl extends InterpreterInterface {
     }  
   }
 
+  // Round to the last two digits.
+  double trunc(double src) {
+    return (100 * src).round() / 100;
+  }
+
   /**
    * Evaluates a primitive function (aka command/operator).
    * 
-   * @return uninterpreted tail
+   * Evaluates the primitive function [p] with (yet unevaluated) arguments
+   * available in [nodes]. Returns the (uninterpreted) tail.
    */
   ListNode evalPrimFun(Primitive p, ListNode nodes, Scope scope) {
     switch (p) {
@@ -248,6 +254,14 @@ class InterpreterImpl extends InterpreterInterface {
         turtle.receive([p.name]);
         break;
 
+      case Primitive.TURTLE_GET_STATE:
+        var turtleState = turtle.state;
+        var stateObject = ListNode.makeList([
+            new WordNode('"x'), new NumberNode.float(trunc(turtleState.x)),
+            new WordNode('"y'), new NumberNode.float(trunc(turtleState.y)),
+            new WordNode('"heading'), new NumberNode.float(
+                trunc(turtleState.heading))]);
+        return new ListNode.cons(stateObject, nodes);
         // turtle 1-arg
 
       case Primitive.BACK:

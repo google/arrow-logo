@@ -58,6 +58,7 @@ class Primitive extends Node {
   static const THING = const Primitive(1, "thing"); 
   static const TRACE = const Primitive(1, "trace"); 
   static const TRUE = const Primitive(0, "true"); 
+  static const TURTLE_GET_STATE = const Primitive(0, "turtlegetstate");
   static const SHOWTURTLE = const Primitive(0, "st", "showturtle");
   
   static const UNIT = const Primitive(0, "unit");
@@ -74,7 +75,7 @@ class Primitive extends Node {
   static const List<Primitive> commandsList = const [ 
     BACK, CLEAN, CLEARSCREEN, CLEARTEXT, CONS, EDALL, FORWARD, HELP, HIDETURTLE,
     HOME, IF, IFELSE, LOCAL, LEFT, MAKE, NIL, PENDOWN, PENUP, PRINT, REPEAT, RIGHT,
-    SETPENCOLOR, SHOWTURTLE, STOP, TRACE, UNTRACE ];
+    SETPENCOLOR, SHOWTURTLE, STOP, TRACE, TURTLE_GET_STATE, UNTRACE ];
 
   static const List<Primitive> operatorList = const [
     DIFFERENCE, FALSE, FPUT, LESSOREQUAL, LESSTHAN, GREATEROREQUAL,

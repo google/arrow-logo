@@ -43,6 +43,9 @@ class TurtleWorkerImpl extends TurtleWorker {
     turtle = new Turtle(turtleCtx, userCtx, width, height);
     turtle.draw();
   }
+
+  // TODO: consider turning into a logo object right here?
+  TurtleState get state => turtle.state;
   
   void receive(dynamic raw) {
     List msg = raw;
@@ -157,6 +160,11 @@ class Turtle {
     home();
   }
   
+  TurtleState get state => new TurtleState(
+     x.toDouble(),
+     y.toDouble(),
+     heading.toDouble());
+
   double getHeadingRad() {
     return TAU * (heading / 360.0);
   }

@@ -16,9 +16,18 @@ library turtle;
 /**
  * Receives turtle commands and executes them.
  */
+class TurtleState {
+  double x;
+  double y;
+  double heading;
+  TurtleState(this.x, this.y, this.heading);
+}
+
 abstract class TurtleWorker {
     
   TurtleWorker() {}
   
   void receive(dynamic raw);
+
+  TurtleState get state;
 }
