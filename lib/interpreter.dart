@@ -343,6 +343,9 @@ class InterpreterImpl extends InterpreterInterface {
         
       case Primitive.IF:
         nodes = evalInScope(nodes, scope);
+        if (!(nodes.head is Primitive)) {
+          throw new InterpreterException("expected boolean value, found ${nodes.head}");
+        }
         Primitive cond = nodes.head;
         nodes = nodes.tail;
         Node result;
