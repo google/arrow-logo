@@ -184,6 +184,7 @@ class Scanner {
   static const int CHAR_TAB = 9; 
   static const int CHAR_NEWLINE = 10;
   static const int CHAR_COLON = 58; 
+  static const int CHAR_SEMI = 59;
   
   static bool isAlpha(int charCode) =>
       (CHAR_a <= charCode && charCode <= CHAR_z)
@@ -207,6 +208,9 @@ class Scanner {
   
   static bool isAlphaOrDigit(int charCode) =>
       isAlpha(charCode) || isDigit(charCode);
+  
+  static bool notNewLine(int charCode) =>
+      CHAR_NEWLINE != charCode;
      
   /** 
    * Advances [pos] if f(text.charCodeAt(pos)) holds.
@@ -364,8 +368,12 @@ class Scanner {
     ++pos;
   }
   
+  void skipComment() {
+    advanceWhile(notNewLine);
+  }
+  
   /**
-   * Tokenizes a prefix of `text', returns rest.
+   * Tokenizes a prefix of `text'.
    *
    * @pre text == text.trim()
    * @post this.token is set to appropriate value
@@ -391,7 +399,13 @@ class Scanner {
       token.setEof();
       return;
     }
+    
     advanceWhile(isWhiteSpace);
+    if (CHAR_SEMI == text.codeUnitAt(pos)) {
+      skipComment();
+      nextToken();
+      return;
+    }
     tokenize();
   }
 }

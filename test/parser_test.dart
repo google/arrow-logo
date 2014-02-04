@@ -38,6 +38,13 @@ class ParserTest {
     expectAdvanceWhileConsumes(".2a", Scanner.isDigitOrDot, ".2");
   }
   
+  void testSkipComment() {
+    parser.initialize(";123\n1");
+    parser.nextToken();
+    expect(parser.token.kind, equals(Token.TOKEN_NUM));    
+    expect(parser.token.node.isNum(), true);     
+  }
+
   void testTokenizeNum() {
     parser.initialize("1");
     parser.tokenizeNum();
@@ -219,6 +226,7 @@ class ParserTest {
   void run() {
     group("ParserTest", () {
       test("advance while", testAdvanceWhile);
+      test("skip comment", testSkipComment);
       test("tokenize num", testTokenizeNum);
       test("tokenize word or keyword", testTokenizeWordOrKeyword);
       test("parse some words and numbers", testParseSomeAtoms);
