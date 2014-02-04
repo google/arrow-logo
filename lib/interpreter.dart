@@ -318,6 +318,9 @@ class InterpreterImpl extends InterpreterInterface {
         break;
         
       case Primitive.PRINT:
+        if (nodes.isNil()) {
+          throw new InterpreterException("not enough inputs to print");
+        }
         nodes = evalInScope(nodes, scope);
         Node n = nodes.head;
         nodes = nodes.tail;
