@@ -52,6 +52,7 @@ class Token {
   static const int TOKEN_GE = 60;  
   static const int TOKEN_EQ = 61;  
   static const int TOKEN_EQEQ = 62;
+  static const int TOKEN_PERCENT = 63;
 
   int kind;
   Node node;
@@ -105,6 +106,7 @@ class Token {
       case TOKEN_GE: return "GE";  
       case TOKEN_EQ: return "EQ";  
       case TOKEN_EQEQ: return "EQEQ";
+      case TOKEN_PERCENT: return "PERCENT";
 
       default: return "???";
     }
@@ -112,6 +114,7 @@ class Token {
   
   bool isInfixOp() {
     switch (kind) {
+      case TOKEN_PERCENT:
       case TOKEN_PLUS:
       case TOKEN_MINUS:
       case TOKEN_SLASH:
@@ -145,6 +148,8 @@ class Token {
   
   Primitive getInfixOp() {
     switch (kind) {
+      case TOKEN_PERCENT:
+        return Primitive.REMAINDER;
       case TOKEN_PLUS:
         return Primitive.SUM;
       case TOKEN_MINUS:
@@ -337,6 +342,7 @@ class Scanner {
       case '-': token.setKind(Token.TOKEN_MINUS); break;
       case '*': token.setKind(Token.TOKEN_STAR); break;
       case '/': token.setKind(Token.TOKEN_SLASH); break;
+      case '%': token.setKind(Token.TOKEN_PERCENT); break;
       case '^': token.setKind(Token.TOKEN_CARET); break;
       case '<': 
         if (text.length > pos + 1 && text[pos + 1] == '=') {

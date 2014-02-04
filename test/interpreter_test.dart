@@ -118,12 +118,65 @@ class InterpreterTest {
         equals(ListNode.makeList([bar, foo])));                               
   }
   
+  void testEvalOp() {
+    makeInterpreter();
+
+    expect(
+      interpreter.evalSequence(
+        ListNode.makeList([
+            Primitive.SUM,
+            new NumberNode.int(2),
+            new NumberNode.int(2)
+        ])),
+      equals(new NumberNode.int(4)));
+    expect(
+      interpreter.evalSequence(
+        ListNode.makeList([
+            Primitive.DIFFERENCE,
+            new NumberNode.int(2),
+            new NumberNode.float(5.3)
+        ])),
+      equals(new NumberNode.float(-3.3)));
+    expect(
+      interpreter.evalSequence(
+        ListNode.makeList([
+            Primitive.PRODUCT,
+            new NumberNode.int(3),
+            new NumberNode.float(3.0)
+        ])),
+      equals(new NumberNode.float(9.0)));
+    expect(
+      interpreter.evalSequence(
+        ListNode.makeList([
+            Primitive.QUOTIENT,
+            new NumberNode.int(10),
+            new NumberNode.int(3)
+        ])),
+      equals(new NumberNode.int(3)));
+    expect(
+          interpreter.evalSequence(
+            ListNode.makeList([
+                Primitive.QUOTIENT,
+                new NumberNode.float(9.0),
+                new NumberNode.int(3)
+            ])),
+          equals(new NumberNode.float(3.0)));
+    expect(
+          interpreter.evalSequence(
+            ListNode.makeList([
+                Primitive.REMAINDER,
+                new NumberNode.float(19.0),
+                new NumberNode.int(3)
+            ])),
+          equals(new NumberNode.float(1.0)));
+  }
+  
   void testApplyTemplate() {
     makeInterpreter();
 
     ListNode nodes = 
         ListNode.makeList([
-            Primitive.APPLY, // new WordNode("optwo"),
+            Primitive.APPLY,
             ListNode.makeList([
                 ListNode.makeList([
                     new WordNode("x"), new WordNode("y")
@@ -183,6 +236,7 @@ class InterpreterTest {
       test("eval if", testEvalIf);
       test("eval defn", testEvalDefn);
       test("eval defn concat", testEvalConcat);
+      test("eval op", testEvalOp);
       test("apply template", testApplyTemplate);
       test("make simple", testMakeSimple);
       test("make local", testMakeLocal);

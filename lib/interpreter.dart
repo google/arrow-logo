@@ -134,7 +134,10 @@ class InterpreterImpl extends InterpreterInterface {
     }
   }
   
-  Node evalBinCmp(ListNode nodes, Scope scope, cmpNum(num x, num y)) {
+  Node evalBinCmp(p, ListNode nodes, Scope scope, cmpNum(num x, num y)) {
+    if (nodes.isNil()) {
+      throw new InterpreterException("not enough inputs to ${p}");
+    }
     nodes = evalInScope(nodes, scope);
     Node op1 = nodes.head;
     if (!(op1.isNum())) {
@@ -143,6 +146,9 @@ class InterpreterImpl extends InterpreterInterface {
     NumberNode op1node = op1;
     num op1num = op1node.getNumValue();
     nodes = nodes.tail;
+    if (nodes.isNil()) {
+          throw new InterpreterException("not enough inputs to ${p}");
+    }
     nodes = evalInScope(nodes, scope);
     Node op2 = nodes.head;
     if (!(op2.isNum())) {
@@ -155,7 +161,10 @@ class InterpreterImpl extends InterpreterInterface {
     return new ListNode.cons(res, nodes);
   }
     
-  Node evalBinOp(ListNode nodes, Scope scope, opInt(int x, int y), opFloat(double x, double y)) {   
+  Node evalBinOp(p, ListNode nodes, Scope scope, opInt(int x, int y), opFloat(double x, double y)) {   
+    if (nodes.isNil()) {
+      throw new InterpreterException("not enough inputs to ${p}");
+    }
     ListNode nodes1 = evalInScope(nodes, scope);
     Node op1 = nodes1.head;
     if (!(op1.isNum())) {
@@ -163,6 +172,9 @@ class InterpreterImpl extends InterpreterInterface {
     }
     NumberNode op1num = op1;
     nodes = nodes1.tail;
+    if (nodes.isNil()) {
+      throw new InterpreterException("not enough inputs to ${p}");
+    }
     nodes = evalInScope(nodes, scope);
     Node op2 = nodes.head;
     if (!(op2.isNum())) {
@@ -185,6 +197,8 @@ class InterpreterImpl extends InterpreterInterface {
   static double primDifferenceFloat(double a, double b) => a - b;
   static int primProductInt(int a, int b) => a * b;
   static double primProductFloat(double a, double b) => a * b;
+  static int primRemainderInt(int a, int b) => a % b;
+  static double primRemainderFloat(double a, double b) => a % b;
   static int primQuotientInt(int a, int b) => a ~/ b;
   static double primQuotientFloat(double a, double b) => a / b;
 
@@ -466,28 +480,31 @@ class InterpreterImpl extends InterpreterInterface {
       // math
         
       case Primitive.SUM:
-        return evalBinOp(nodes, scope, primSumInt, primSumFloat);
+        return evalBinOp(p, nodes, scope, primSumInt, primSumFloat);
  
       case Primitive.DIFFERENCE:
-        return evalBinOp(nodes, scope, primDifferenceInt, primDifferenceFloat);
+        return evalBinOp(p, nodes, scope, primDifferenceInt, primDifferenceFloat);
       
       case Primitive.PRODUCT:
-        return evalBinOp(nodes, scope, primProductInt, primProductFloat);
+        return evalBinOp(p, nodes, scope, primProductInt, primProductFloat);
+
+      case Primitive.REMAINDER:
+        return evalBinOp(p, nodes, scope, primRemainderInt, primRemainderFloat);
 
       case Primitive.QUOTIENT:
-        return evalBinOp(nodes, scope, primQuotientInt, primQuotientFloat);
+        return evalBinOp(p, nodes, scope, primQuotientInt, primQuotientFloat);
 
       case Primitive.GREATERTHAN:
-        return evalBinCmp(nodes, scope, primGreaterThanNum);
+        return evalBinCmp(p, nodes, scope, primGreaterThanNum);
 
       case Primitive.GREATEROREQUAL:
-        return evalBinCmp(nodes, scope, primGreaterOrEqualNum);
+        return evalBinCmp(p, nodes, scope, primGreaterOrEqualNum);
 
       case Primitive.LESSTHAN:
-        return evalBinCmp(nodes, scope, primLessThanNum);
+        return evalBinCmp(p, nodes, scope, primLessThanNum);
       
       case Primitive.LESSOREQUAL:
-        return evalBinCmp(nodes, scope, primLessOrEqualNum);  
+        return evalBinCmp(p, nodes, scope, primLessOrEqualNum);
 
       // control
         
