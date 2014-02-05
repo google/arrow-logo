@@ -179,6 +179,45 @@ class InterpreterTest {
           equals(Primitive.TRUE));
   }
   
+  void testEvalFirstButFirst() {
+    makeInterpreter();
+
+    expect(
+          interpreter.evalSequence(
+            ListNode.makeList([
+                Primitive.FIRST,
+                Primitive.QUOTE,
+                new WordNode("abc")
+            ])),
+          equals(new WordNode("a")));
+
+    expect(
+          interpreter.evalSequence(
+            ListNode.makeList([
+                Primitive.FIRST,
+                Primitive.QUOTE,
+                ListNode.makeList([new WordNode("abc")])
+            ])),
+          equals(new WordNode("abc")));
+
+    expect(
+          interpreter.evalSequence(
+            ListNode.makeList([
+                Primitive.BUTFIRST,
+                Primitive.QUOTE,
+                new WordNode("abc")
+            ])),
+          equals(new WordNode("bc")));
+
+    expect(
+          interpreter.evalSequence(
+            ListNode.makeList([
+                Primitive.BUTFIRST,
+                ListNode.makeList([new WordNode("abc")])
+            ])),
+          equals(ListNode.NIL));
+  }
+
   void testApplyTemplate() {
     makeInterpreter();
 
@@ -246,6 +285,7 @@ class InterpreterTest {
       test("eval defn", testEvalDefn);
       test("eval defn concat", testEvalConcat);
       test("eval op", testEvalOp);
+      test("eval first butfirst", testEvalFirstButFirst);
       test("apply template", testApplyTemplate);
       test("make simple", testMakeSimple);
       test("make local", testMakeLocal);

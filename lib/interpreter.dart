@@ -342,12 +342,36 @@ class InterpreterImpl extends InterpreterInterface {
         break;
         
         // end console commands
+
+      case Primitive.BUTFIRST:
+        nodes = evalInScope(nodes, scope);
+        Node arg = nodes.head;
+        if (arg.isWord()) {
+          var butfirst = (arg as WordNode).stringValue.substring(1);
+          return new ListNode.cons(new WordNode(butfirst), nodes.tail);
+        } else if (arg.isList()) {
+          var butfirst = (arg as ListNode).tail;
+          return new ListNode.cons(butfirst, nodes.tail);
+        }
+        throw new InterpreterException("butfirst expected word or list");
       case Primitive.EQUALS:
         // TODO equality for words, lists
         return evalBinCmp(p, nodes, scope, primEqualsNum);
         
       case Primitive.FALSE:
         return new ListNode.cons(p, nodes);
+
+      case Primitive.FIRST:
+        nodes = evalInScope(nodes, scope);
+        Node arg = nodes.head;
+        if (arg.isWord()) {
+          var first = (arg as WordNode).stringValue.substring(0, 1);
+          return new ListNode.cons(new WordNode(first), nodes.tail);
+        } else if (arg.isList()) {
+          var first = (arg as ListNode).head;
+          return new ListNode.cons(first, nodes.tail);
+        }
+        throw new InterpreterException("first expected word or list");
 
       case Primitive.FPUT:
         nodes = evalInScope(nodes, scope);
@@ -406,7 +430,6 @@ class InterpreterImpl extends InterpreterInterface {
         }
         
         return new ListNode.cons(result, nodes);
-      
      
       case Primitive.LPUT:
         nodes = evalInScope(nodes, scope);

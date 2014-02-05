@@ -17,13 +17,15 @@ class Primitive extends Node {
  
   static const APPLY = const Primitive(1, "apply"); 
   static const BACK = const Primitive(1, "bk", "back");
+  static const BUTFIRST = const Primitive(1, "butfirst");
   static const CLEAN = const Primitive(0, "clean");
   static const CLEARSCREEN = const Primitive(0, "cs", "clearscreen");
   static const CLEARTEXT = const Primitive(0, "ct", "cleartext");
   static const CONS = const Primitive(2, "_cons"); 
   static const EDALL = const Primitive(0, "edall"); 
   static const EQUALS = const Primitive(2, "==", "equals"); 
-  static const FALSE = const Primitive(0, "false"); 
+  static const FALSE = const Primitive(0, "false");
+  static const FIRST = const Primitive(1, "first");
   static const FORWARD = const Primitive(1, "fd", "forward"); 
   static const FPUT = const Primitive(1, "fput"); 
   static const GREATERTHAN = const Primitive(1, ">", "greaterthan"); 
@@ -80,7 +82,8 @@ class Primitive extends Node {
     SETPENCOLOR, SHOWTURTLE, STOP, TRACE, TURTLE_GET_STATE, UNTRACE ];
 
   static const List<Primitive> operatorList = const [
-    DIFFERENCE, FALSE, FPUT, LESSOREQUAL, LESSTHAN, GREATEROREQUAL,
+    BUTFIRST, DIFFERENCE, FALSE, FPUT, LESSOREQUAL, LESSTHAN, FIRST,
+    GREATEROREQUAL,
     GREATERTHAN, LPUT, OUTPUT, PRODUCT, QUOTE, QUOTIENT, POWER, PI, REMAINDER,
     SUM, THING, TRUE ];
 
