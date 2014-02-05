@@ -91,10 +91,10 @@ class InterpreterTest {
     Node fortyTwo = new NumberNode.int(42);
     Node twentyOne = new NumberNode.int(21);
     Node defn = new DefnNode("foo",
-      ListNode.makeList([ new WordNode("\"x") ]),
+      ListNode.makeList([ new WordNode("x") ]),
       ListNode.makeList([
         Primitive.QUOTIENT,
-        Primitive.THING, new WordNode("\"x"),
+        Primitive.THING, Primitive.QUOTE, new WordNode("x"),
         new NumberNode.int(2)]));
     interpreter.define(defn);
     expect(interpreter.evalSequence(
@@ -105,16 +105,16 @@ class InterpreterTest {
   void testEvalConcat() {
     makeInterpreter();
 
-    Node foo = new WordNode("\"foo");
-    Node bar = new WordNode("\"bar");
+    Node foo = new WordNode("foo");
+    Node bar = new WordNode("bar");
     Node barlist = ListNode.makeList([bar]);
     
     expect(interpreter.evalSequence(
-        ListNode.makeList([Primitive.FPUT, foo, barlist])),
+        ListNode.makeList([Primitive.FPUT, Primitive.QUOTE, foo, barlist])),
         equals(ListNode.makeList([foo, bar])));
 
     expect(interpreter.evalSequence(
-        ListNode.makeList([Primitive.LPUT, foo, barlist])),
+        ListNode.makeList([Primitive.LPUT, Primitive.QUOTE, foo, barlist])),
         equals(ListNode.makeList([bar, foo])));                               
   }
   
@@ -169,6 +169,14 @@ class InterpreterTest {
                 new NumberNode.int(3)
             ])),
           equals(new NumberNode.float(1.0)));
+    expect(
+          interpreter.evalSequence(
+            ListNode.makeList([
+                Primitive.EQUALS,
+                new NumberNode.float(19.0),
+                new NumberNode.float(19.0)
+            ])),
+          equals(Primitive.TRUE));
   }
   
   void testApplyTemplate() {
@@ -199,13 +207,14 @@ class InterpreterTest {
 
     ListNode nodes = 
         ListNode.makeList([
-            Primitive.MAKE, // new WordNode("optwo"),
-            new WordNode("\"x"),
+            Primitive.MAKE,
+            Primitive.QUOTE,
+            new WordNode("x"),
             new NumberNode.int(3)]);
     expect(
         interpreter.evalSequence(nodes),
         equals(Primitive.UNIT));
-    expect(globalScope["\"x"], equals(new NumberNode.int(3)));  
+    expect(globalScope["x"], equals(new NumberNode.int(3)));
   }
   
   void testMakeLocal() {
@@ -226,8 +235,8 @@ class InterpreterTest {
     expect(interpreter.evalSequence(
         new ListNode.cons(new WordNode("callx"), new ListNode.nil())),
         equals(Primitive.UNIT));
-    expect(globalScope["\"x"], equals(null));  
-    expect(globalScope["\"y"], equals(new NumberNode.int(3)));  
+    expect(globalScope["x"], equals(null));
+    expect(globalScope["y"], equals(new NumberNode.int(3)));
   }
   
   void run() {

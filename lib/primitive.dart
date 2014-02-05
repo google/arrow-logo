@@ -48,6 +48,7 @@ class Primitive extends Node {
   static const POWER = const Primitive(2, "^", "power"); 
   static const PRODUCT = const Primitive(2, "*", "product"); 
   static const PRINT = const Primitive(1, "pr", "print");   
+  static const QUOTE = const Primitive(1, "quote");
   static const QUOTIENT = const Primitive(2, "/", "quotient"); 
   static const REMAINDER = const Primitive(2, "%", "remainder");
   static const REPEAT = const Primitive(2, "repeat"); 
@@ -80,7 +81,7 @@ class Primitive extends Node {
 
   static const List<Primitive> operatorList = const [
     DIFFERENCE, FALSE, FPUT, LESSOREQUAL, LESSTHAN, GREATEROREQUAL,
-    GREATERTHAN, LPUT, OUTPUT, PRODUCT, QUOTIENT, POWER, PI, REMAINDER,
+    GREATERTHAN, LPUT, OUTPUT, PRODUCT, QUOTE, QUOTIENT, POWER, PI, REMAINDER,
     SUM, THING, TRUE ];
 
   static getPrecedence(Primitive p) {

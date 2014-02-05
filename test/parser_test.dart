@@ -99,7 +99,7 @@ class ParserTest {
       equals(ListNode.makeList([
         Primitive.FORWARD, new NumberNode.int(1),
         Primitive.FORWARD, new NumberNode.float(1.2),
-        new WordNode("\"baz")])
+        Primitive.QUOTE, new WordNode("baz")])
       ));
   }
   
@@ -145,10 +145,11 @@ class ParserTest {
       parser.parse("to box :size fd :size end"),
       equals(ListNode.makeList([
         new DefnNode("box",
-          ListNode.makeList([new WordNode("\"size")]),
+          ListNode.makeList([new WordNode("size")]),
           ListNode.makeList([                                                             
             Primitive.FORWARD,
-            Primitive.THING, new WordNode("\"size")]))]) 
+            Primitive.THING,
+            Primitive.QUOTE, new WordNode("size")]))])
       ));
   }
 
@@ -195,7 +196,8 @@ class ParserTest {
         parser.parse(":x*.7"),
         equals(ListNode.makeList([ 
                                   Primitive.PRODUCT, 
-                                  Primitive.THING, new WordNode("\"x"),
+                                  Primitive.THING,
+                                      Primitive.QUOTE, new WordNode("x"),
                                   new NumberNode.float(.7)])));
     expect(
       parser.parse("2^3.5^(7+1) / 3 - 2"),
@@ -218,7 +220,7 @@ class ParserTest {
       parser.parse("(:g > 2)"),
       equals(ListNode.makeList(
         [Primitive.GREATERTHAN,
-         Primitive.THING, new WordNode("\"g"),
+         Primitive.THING, Primitive.QUOTE, new WordNode("g"),
          new NumberNode.int(2)])
       ));
   }

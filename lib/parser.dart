@@ -26,7 +26,6 @@ class Token {
   static const int TOKEN_NUM = 0;
   static const int TOKEN_WORD = 1;
   static const int TOKEN_PRIM = 2;
-  static const int TOKEN_QUOTED_WORD = 3;
   static const int TOKEN_LBRACE = 123;
   static const int TOKEN_RBRACE = 125;
   static const int TOKEN_LBRACKET = 91;
@@ -69,8 +68,7 @@ class Token {
   
   Token setPrim(Primitive p)     => setKind(TOKEN_PRIM).setNode(p);
   Token setWord(WordNode word)   => setKind(TOKEN_WORD).setNode(word);
-  Token setQuotedWord(WordNode word) => 
-      setKind(TOKEN_QUOTED_WORD).setNode(word);
+  
   Token setVar(WordNode v)       => setKind(TOKEN_VAR).setNode(v);
   Token setNum(NumberNode n)     => setKind(TOKEN_NUM).setNode(n);
   Token setEof()                 => setKind(TOKEN_EOF).setNode(null);
@@ -82,7 +80,6 @@ class Token {
       case TOKEN_NUM: return "NUM";
       case TOKEN_WORD: return "WORD";
       case TOKEN_PRIM: return "PRIM";
-      case TOKEN_WORD: return "QUOTED_WORD";
       case TOKEN_LBRACE: return "LBRACE";
       case TOKEN_RBRACE: return "RBRACE";
       case TOKEN_LBRACKET: return "LBRACKET";
@@ -137,7 +134,6 @@ class Token {
       case Token.TOKEN_NUM:
       case Token.TOKEN_WORD:
       case Token.TOKEN_VAR:
-      case Token.TOKEN_QUOTED_WORD:
       case Token.TOKEN_LPAREN:
       case Token.TOKEN_LBRACKET:
         return true;
@@ -268,19 +264,6 @@ class Scanner {
   }
 
   /**
-   * @pre  text.charCodeAt(0) == CHAR_QUOTE
-   * @post token.kind == Token.TOKEN_QUOTED_WORD
-   * @post token.node.isWord()
-   */
-  void tokenizeQuotedWord() {
-    int i = pos;
-    ++pos;
-    advanceWhile(isAlphaOrDigit);
-    String word = text.substring(i, pos);
-    token.setQuotedWord(new WordNode(word));
-  }
-
-  /**
    * @pre  text.charCodeAt(0) == CHAR_COLON
    * @post token.kind == Token.TOKEN_VAR
    * @post token.node.isWord()
@@ -292,7 +275,7 @@ class Scanner {
     }
     advanceWhile(isAlphaOrDigit);
     String word = text.substring(i, pos);
-    token.setVar(new WordNode("\"" + word));
+    token.setVar(new WordNode(word));
   }
 
   /**
@@ -389,7 +372,15 @@ class Scanner {
     if (CHAR_COLON == charCode) {
       tokenizeVar();
     } else if (CHAR_QUOTE == charCode) {
-      tokenizeQuotedWord();
+      ++pos;
+      if (pos == text.length) {
+        token.setWord(new WordNode(""));  // empty word
+      } else if (pos < text.length && isWhiteSpace(text.codeUnitAt(pos))) {
+        ++pos;
+        token.setWord(new WordNode(""));  // empty word
+      } else {
+        token.setPrim(Primitive.QUOTE);
+      }
     } else if (isDigitOrDot(charCode)) {
       tokenizeNum();
     } else if (isAlpha(charCode)) {
@@ -456,19 +447,19 @@ class Parser extends Scanner {
   }
   
   /**
-   *     atom ::= int | float | var | word | qword
+   *     atom ::= int | float | var | word
    */ 
   void parseAtom(List<Node> nodeList) {
     switch (token.kind) {
       case Token.TOKEN_PRIM:
       case Token.TOKEN_NUM:
       case Token.TOKEN_WORD:
-      case Token.TOKEN_QUOTED_WORD:
         nodeList.add(token.node);
         nextToken();
         return;
       case Token.TOKEN_VAR:
         nodeList.add(Primitive.THING);
+        nodeList.add(Primitive.QUOTE);
         nodeList.add(token.node);
         nextToken();
         return;
@@ -506,7 +497,6 @@ class Parser extends Scanner {
       case Token.TOKEN_NUM:
       case Token.TOKEN_WORD:
       case Token.TOKEN_VAR:
-      case Token.TOKEN_QUOTED_WORD:
         parseAtom(nodeList);
         break;
       case Token.TOKEN_LBRACKET:
@@ -605,7 +595,6 @@ class Parser extends Scanner {
     while (token.kind != Token.TOKEN_EOF) {
       switch (token.kind) {
         case Token.TOKEN_WORD:
-        case Token.TOKEN_QUOTED_WORD:
         case Token.TOKEN_PRIM:
         case Token.TOKEN_NUM:
         case Token.TOKEN_VAR:

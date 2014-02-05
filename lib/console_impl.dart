@@ -14,7 +14,6 @@
 library console_impl;
 
 import 'dart:html' as html;
-import 'dart:js';
 
 import 'console.dart';
 import 'interpreter.dart';

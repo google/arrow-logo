@@ -344,7 +344,7 @@ class InterpreterImpl extends InterpreterInterface {
         // end console commands
       case Primitive.EQUALS:
         // TODO equality for words, lists
-        return evalBinCmp(nodes, scope, primEqualsNum);
+        return evalBinCmp(p, nodes, scope, primEqualsNum);
         
       case Primitive.FALSE:
         return new ListNode.cons(p, nodes);
@@ -438,6 +438,9 @@ class InterpreterImpl extends InterpreterInterface {
         scope.assign(varRefWord.stringValue, value);
         return new ListNode.cons(Primitive.UNIT, nodes.tail);
         
+      case Primitive.QUOTE:
+        return nodes;
+
       case Primitive.PI:
         return new ListNode.cons(new NumberNode.float(math.PI), nodes);
         
@@ -459,6 +462,7 @@ class InterpreterImpl extends InterpreterInterface {
         break;
         
       case Primitive.THING:
+        nodes = evalInScope(nodes, scope);
         Node arg = nodes.head;
         ensureWord(arg);
         WordNode wordNode = arg;
@@ -682,6 +686,7 @@ class InterpreterImpl extends InterpreterInterface {
       return nodes;
     }
     
+    // ?
     if (head.isWord() && (head as WordNode).stringValue.startsWith("\"")) {
       return nodes;
     }
