@@ -15,7 +15,7 @@ part of nodes;
 
 class Primitive extends Node {
  
-  static const APPLY = const Primitive(1, "apply"); 
+  static const APPLY = const Primitive(2, "apply");
   static const BACK = const Primitive(1, "bk", "back");
   static const BUTFIRST = const Primitive(1, "butfirst");
   static const CLEAN = const Primitive(0, "clean");
@@ -27,7 +27,7 @@ class Primitive extends Node {
   static const FALSE = const Primitive(0, "false");
   static const FIRST = const Primitive(1, "first");
   static const FORWARD = const Primitive(1, "fd", "forward"); 
-  static const FPUT = const Primitive(1, "fput"); 
+  static const FPUT = const Primitive(2, "fput");
   static const GREATERTHAN = const Primitive(1, ">", "greaterthan"); 
   static const GREATEROREQUAL = const Primitive(1, ">=", "greaterorequal"); 
   static const HIDETURTLE = const Primitive(0, "ht", "hideturtle");
@@ -40,7 +40,7 @@ class Primitive extends Node {
   static const LESSTHAN = const Primitive(1, "<", "lessthan"); 
   static const LESSOREQUAL = const Primitive(1, "<=", "lessorequal"); 
   static const LOCAL = const Primitive(1, "local"); 
-  static const LPUT = const Primitive(1, "lput"); 
+  static const LPUT = const Primitive(2, "lput"); 
   static const DIFFERENCE = const Primitive(2, "-", "difference"); 
   static const MAKE = const Primitive(2, "make");
   static const NIL = const Primitive(0, "_nil"); 
@@ -83,7 +83,7 @@ class Primitive extends Node {
     SETPENCOLOR, SHOWTURTLE, STOP, TRACE, TURTLE_GET_STATE, UNTRACE ];
 
   static const List<Primitive> operatorList = const [
-    BUTFIRST, DIFFERENCE, FALSE, FPUT, LESSOREQUAL, LESSTHAN, FIRST,
+    APPLY, BUTFIRST, DIFFERENCE, FALSE, FPUT, LESSOREQUAL, LESSTHAN, FIRST,
     GREATEROREQUAL,
     GREATERTHAN, ITEM, LPUT, OUTPUT, PRODUCT, QUOTE, QUOTIENT, POWER, PI,
     REMAINDER,
@@ -156,5 +156,9 @@ class Primitive extends Node {
     String this.name,
     [String this.altName = null]) : super(Node.KIND_PRIM);
   
+  bool get needsLazyEval =>
+    this == Primitive.IF
+    || this == Primitive.IFELSE
+    || this == Primitive.REPEAT;
   String toString() => name;
 }

@@ -134,59 +134,17 @@ class InterpreterImpl extends InterpreterInterface {
     }
   }
   
-  Node evalBinCmp(p, ListNode nodes, Scope scope, cmpNum(num x, num y)) {
-    if (nodes.isNil()) {
-      throw new InterpreterException("not enough inputs to ${p}");
-    }
-    nodes = evalInScope(nodes, scope);
-    Node op1 = nodes.head;
-    if (!(op1.isNum())) {
-      throw new InterpreterException("expected num for op1 was ${op1}");
-    }
-    NumberNode op1node = op1;
-    num op1num = op1node.getNumValue();
-    nodes = nodes.tail;
-    if (nodes.isNil()) {
-          throw new InterpreterException("not enough inputs to ${p}");
-    }
-    nodes = evalInScope(nodes, scope);
-    Node op2 = nodes.head;
-    if (!(op2.isNum())) {
-      throw new InterpreterException("expected num for op2 was ${op2}");
-    }
-    NumberNode op2node = op2;
-    num op2num = op2node.getNumValue();
-    nodes = nodes.tail;
-    Node res = cmpNum(op1num, op2num) ? Primitive.TRUE : Primitive.FALSE;
+  Node evalBinCmp(p, NumberNode op1, NumberNode op2, ListNode nodes, cmpNum(num x, num y)) {
+    Node res = cmpNum(op1.getNumValue(), op2.getNumValue()) ? Primitive.TRUE : Primitive.FALSE;
     return new ListNode.cons(res, nodes);
   }
     
-  Node evalBinOp(p, ListNode nodes, Scope scope, opInt(int x, int y), opFloat(double x, double y)) {   
-    if (nodes.isNil()) {
-      throw new InterpreterException("not enough inputs to ${p}");
-    }
-    ListNode nodes1 = evalInScope(nodes, scope);
-    Node op1 = nodes1.head;
-    if (!(op1.isNum())) {
-      throw new InterpreterException("expected num for op1 was ${op1}");
-    }
-    NumberNode op1num = op1;
-    nodes = nodes1.tail;
-    if (nodes.isNil()) {
-      throw new InterpreterException("not enough inputs to ${p}");
-    }
-    nodes = evalInScope(nodes, scope);
-    Node op2 = nodes.head;
-    if (!(op2.isNum())) {
-      throw new InterpreterException("expected num for op2 was ${op2}");
-    }
-    NumberNode op2num = op2;
-    nodes = nodes.tail;
+  Node evalBinOp(p, NumberNode op1, NumberNode op2, ListNode nodes, opInt(int x, int y), opFloat(double x, double y)) {   
     Node res;
-    if (op1num.isInt() && op2num.isInt()) {
-       res = new NumberNode.int(opInt(op1num.getIntValue(), op2num.getIntValue()));
+    if (op1.isInt() && op2.isInt()) {
+       res = new NumberNode.int(opInt(op1.getIntValue(), op2.getIntValue()));
     } else {
-      res = new NumberNode.float(opFloat(op1num.getFloatValue(), op2num.getFloatValue()));
+      res = new NumberNode.float(opFloat(op1.getFloatValue(), op2.getFloatValue()));
     }  
     return new ListNode.cons(res, nodes);
   }
@@ -208,22 +166,25 @@ class InterpreterImpl extends InterpreterInterface {
   static bool primGreaterThanNum(num a, num b) => a > b;
   static bool primGreaterOrEqualNum(num a, num b) => a >= b;
 
-  void ensureNum(Node node) {
+  NumberNode ensureNum(Node node) {
     if (!node.isNum()) {
       throw new InterpreterException("expected number");
     }
+    return node;
   }
   
-  void ensureWord(Node node) {
+  WordNode ensureWord(Node node) {
     if (!node.isWord()) {
       throw new InterpreterException("expected word"); 
     }
+    return node;
   }
   
-  void ensureList(Node node) {
+  ListNode ensureList(Node node) {
     if (!node.isList()) {
       throw new InterpreterException("expected list");
     }  
+    return node;
   }
 
   // Round to the last two digits.
@@ -238,17 +199,28 @@ class InterpreterImpl extends InterpreterInterface {
    * available in [nodes]. Returns the (uninterpreted) tail.
    */
   ListNode evalPrimFun(Primitive p, ListNode nodes, Scope scope) {
+    if (p == Primitive.QUOTE) {
+      return nodes;
+    }
+    var args = [];
+    if (!p.needsLazyEval) {
+      for (int i = 0; i < p.arity; ++i) {
+        if (nodes.isNil()) {
+          throw new InterpreterException("not enough inputs to $p");
+        }
+        nodes = evalInScope(nodes, scope);
+        args.add(nodes.head);
+        nodes = nodes.tail;
+      }
+    }
     switch (p) {
       case Primitive.APPLY:
-        nodes = evalInScope(nodes, scope);
-        Node fn = nodes.head;
-        nodes = evalInScope(nodes.tail, scope);
-        Node args = nodes.head;
-        nodes = nodes.tail;
+        Node fn = args[0];
+        Node fnargs = args[1];
         if (fn.isPrim()) {
-          return new ListNode.cons(evalPrimFun(fn, args, scope), nodes);
+          return new ListNode.cons(evalPrimFun(fn, fnargs, scope), nodes);
         } else if (fn.isList()) {
-          Node result = applyTemplate(fn, args, scope);
+          Node result = applyTemplate(fn, fnargs, scope);
           return new ListNode.cons(result, nodes);
         }
         break;
@@ -279,26 +251,17 @@ class InterpreterImpl extends InterpreterInterface {
         // turtle 1-arg
 
       case Primitive.BACK:
-        nodes = evalInScope(nodes, scope);
-        ensureNum(nodes.head);
-        NumberNode wn = nodes.head;
-        nodes = nodes.tail;
+        NumberNode wn = ensureNum(args[0]);
         turtle.receive([p.name, wn.getNumValue()]);
         break;  
         
       case Primitive.RIGHT:
-        nodes = evalInScope(nodes, scope);
-        ensureNum(nodes.head);
-        NumberNode nn = nodes.head;
-        nodes = nodes.tail;
+        NumberNode nn = ensureNum(args[0]);
         turtle.receive([p.name, nn.getNumValue()]);
         break;
         
       case Primitive.SETPENCOLOR:
-        nodes = evalInScope(nodes, scope);
-        ensureNum(nodes.head);
-        NumberNode nn = nodes.head;
-        nodes = nodes.tail;
+        NumberNode nn = ensureNum(args[0]);
         if (!nn.isInt()) {
           throw new InterpreterException("invalid color code ${nn.getNumValue()}");
         }
@@ -306,19 +269,13 @@ class InterpreterImpl extends InterpreterInterface {
         break;
         
       case Primitive.FORWARD:
-        nodes = evalInScope(nodes, scope);
-        ensureNum(nodes.head);
-        NumberNode wn = nodes.head;
-        nodes = nodes.tail;
-        turtle.receive([p.name, wn.getNumValue()]);
+        NumberNode nn = ensureNum(args[0]);
+        turtle.receive([p.name, nn.getNumValue()]);
         break;
 
       case Primitive.LEFT:
-        nodes = evalInScope(nodes, scope);
-        ensureNum(nodes.head);
-        NumberNode wn = nodes.head;
-        nodes = nodes.tail;
-        turtle.receive([p.name, wn.getNumValue()]);
+        NumberNode nn = ensureNum(args[0]);
+        turtle.receive([p.name, nn.getNumValue()]);
         break;
         
         // end turtle commands
@@ -332,54 +289,43 @@ class InterpreterImpl extends InterpreterInterface {
         break;
         
       case Primitive.PRINT:
-        if (nodes.isNil()) {
-          throw new InterpreterException("not enough inputs to print");
-        }
-        nodes = evalInScope(nodes, scope);
-        Node n = nodes.head;
-        nodes = nodes.tail;
+        Node n = args[0];
         console.receive([p.name, n.toString()]);
         break;
         
         // end console commands
 
       case Primitive.BUTFIRST:
-        nodes = evalInScope(nodes, scope);
-        Node arg = nodes.head;
+        Node arg = args[0];
         if (arg.isWord()) {
           var butfirst = (arg as WordNode).stringValue.substring(1);
-          return new ListNode.cons(new WordNode(butfirst), nodes.tail);
+          return new ListNode.cons(new WordNode(butfirst), nodes);
         } else if (arg.isList()) {
           var butfirst = (arg as ListNode).tail;
-          return new ListNode.cons(butfirst, nodes.tail);
+          return new ListNode.cons(butfirst, nodes);
         }
         throw new InterpreterException("butfirst expected word or list");
       case Primitive.EQUALS:
         // TODO equality for words, lists
-        return evalBinCmp(p, nodes, scope, primEqualsNum);
+        return evalBinCmp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primEqualsNum);
         
       case Primitive.FALSE:
         return new ListNode.cons(p, nodes);
 
       case Primitive.FIRST:
-        nodes = evalInScope(nodes, scope);
-        Node arg = nodes.head;
+        Node arg = args[0];
         if (arg.isWord()) {
           var first = (arg as WordNode).stringValue.substring(0, 1);
-          return new ListNode.cons(new WordNode(first), nodes.tail);
+          return new ListNode.cons(new WordNode(first), nodes);
         } else if (arg.isList()) {
           var first = (arg as ListNode).head;
-          return new ListNode.cons(first, nodes.tail);
+          return new ListNode.cons(first, nodes);
         }
         throw new InterpreterException("first expected word or list");
 
       case Primitive.FPUT:
-        nodes = evalInScope(nodes, scope);
-        Node first = nodes.head;
-        nodes = evalInScope(nodes.tail, scope);
-        ensureList(nodes.head);
-        ListNode ln = nodes.head;
-        nodes = nodes.tail;
+        Node first = args[0];
+        ListNode ln = ensureList(args[1]);
         return new ListNode.cons(new ListNode.cons(first, ln), nodes);
         
       case Primitive.IF:
@@ -432,8 +378,7 @@ class InterpreterImpl extends InterpreterInterface {
         return new ListNode.cons(result, nodes);
      
       case Primitive.ITEM:
-        nodes = evalInScope(nodes, scope);
-        Node index = nodes.head;
+        Node index = args[0];
         if (!index.isNum() || !(index as NumberNode).isInt()) {
           throw new InterpreterException("item expected int as first arg");
         }
@@ -442,49 +387,35 @@ class InterpreterImpl extends InterpreterInterface {
         if (intIndex < 0) {
           throw new InterpreterException("item expected positive non-zero int");
         }
-        nodes = evalInScope(nodes.tail, scope);
-        Node arg = nodes.head;
+        Node arg = args[1];
         if (arg.isWord()) {
           
           var item = (arg as WordNode)
               .stringValue
               .substring(intIndex, intIndex + 1);
-          return new ListNode.cons(new WordNode(item), nodes.tail);
+          return new ListNode.cons(new WordNode(item), nodes);
         } else if (arg.isList()) {
           var item = (arg as ListNode).getSuffix(intIndex).head;
-          return new ListNode.cons(item, nodes.tail);
+          return new ListNode.cons(item, nodes);
         }
         throw new InterpreterException("first expected word or list");
 
       case Primitive.LPUT:
-        nodes = evalInScope(nodes, scope);
-        Node last = nodes.head;
-        nodes = evalInScope(nodes.tail, scope);
-        ensureList(nodes.head);
-        ListNode ln = nodes.head;
-        nodes = nodes.tail;
+        Node last = args[0];
+        ListNode ln = ensureList(args[1]);
         ListNode result = ln.append(ListNode.makeList([last]));
         return new ListNode.cons(result, nodes);
            
       case Primitive.LOCAL:
-        nodes = evalInScope(nodes, scope);
-        Node name = nodes.head;
-        ensureWord(name);
-        WordNode word = name;
-        nodes = nodes.tail;
+        WordNode word = ensureWord(args[0]);
         scope.defineLocal(word.stringValue);
         return new ListNode.cons(Primitive.UNIT, nodes);
 
       case Primitive.MAKE:
-        nodes = evalInScope(nodes, scope);
-        Node varRef = nodes.head;        
-        nodes = nodes.tail;
-        ensureWord(varRef);
-        WordNode varRefWord = varRef;
-        nodes = evalInScope(nodes, scope);
-        Node value = nodes.head;
+        WordNode varRefWord = ensureWord(args[0]);
+        Node value = args[1];
         scope.assign(varRefWord.stringValue, value);
-        return new ListNode.cons(Primitive.UNIT, nodes.tail);
+        return new ListNode.cons(Primitive.UNIT, nodes);
         
       case Primitive.QUOTE:
         return nodes;
@@ -510,20 +441,15 @@ class InterpreterImpl extends InterpreterInterface {
         break;
         
       case Primitive.THING:
-        nodes = evalInScope(nodes, scope);
-        Node arg = nodes.head;
-        ensureWord(arg);
-        WordNode wordNode = arg;
+        WordNode wordNode = ensureWord(args[0]);
         Node lookup = scope[wordNode.stringValue];
         if (lookup == null) {
           throw new InterpreterException("no value for: ${arg}");
         }
-        return new ListNode.cons(lookup, nodes.tail);
+        return new ListNode.cons(lookup, nodes);
         
       case Primitive.RUN:
-        Node arg = nodes.head;
-        ensureList(arg);
-        ListNode list = arg;
+        ListNode list = ensureList(args[0]);
         return new ListNode.cons(evalSequenceInScope(list, scope), nodes.tail);
       
       case Primitive.TRUE:
@@ -532,31 +458,31 @@ class InterpreterImpl extends InterpreterInterface {
       // math
         
       case Primitive.SUM:
-        return evalBinOp(p, nodes, scope, primSumInt, primSumFloat);
+        return evalBinOp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primSumInt, primSumFloat);
  
       case Primitive.DIFFERENCE:
-        return evalBinOp(p, nodes, scope, primDifferenceInt, primDifferenceFloat);
+        return evalBinOp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primDifferenceInt, primDifferenceFloat);
       
       case Primitive.PRODUCT:
-        return evalBinOp(p, nodes, scope, primProductInt, primProductFloat);
+        return evalBinOp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primProductInt, primProductFloat);
 
       case Primitive.REMAINDER:
-        return evalBinOp(p, nodes, scope, primRemainderInt, primRemainderFloat);
+        return evalBinOp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primRemainderInt, primRemainderFloat);
 
       case Primitive.QUOTIENT:
-        return evalBinOp(p, nodes, scope, primQuotientInt, primQuotientFloat);
+        return evalBinOp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primQuotientInt, primQuotientFloat);
 
       case Primitive.GREATERTHAN:
-        return evalBinCmp(p, nodes, scope, primGreaterThanNum);
+        return evalBinCmp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primGreaterThanNum);
 
       case Primitive.GREATEROREQUAL:
-        return evalBinCmp(p, nodes, scope, primGreaterOrEqualNum);
+        return evalBinCmp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primGreaterOrEqualNum);
 
       case Primitive.LESSTHAN:
-        return evalBinCmp(p, nodes, scope, primLessThanNum);
+        return evalBinCmp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primLessThanNum);
       
       case Primitive.LESSOREQUAL:
-        return evalBinCmp(p, nodes, scope, primLessOrEqualNum);
+        return evalBinCmp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primLessOrEqualNum);
 
       // control
         
@@ -564,32 +490,24 @@ class InterpreterImpl extends InterpreterInterface {
         throw new InterpreterOutputException(Primitive.UNIT);
      
       case Primitive.OUTPUT:
-        nodes = evalInScope(nodes, scope);
-        Node head = nodes.head;
+        Node head = args[0];
         throw new InterpreterOutputException(head);
 
       case Primitive.TRACE:
-        Node head = nodes.head;
-        nodes = nodes.tail;
-        
-        if (head.isWord()) {
-          Node n = scope[(head as WordNode).stringValue];
-          if (n != null && n.isDefn()) {
-            DefnNode defn = n;
-            state.trace(defn.name);
-          }
+        WordNode head = ensureWord(args[0]);
+        Node n = scope[head.stringValue];
+        if (n != null && n.isDefn()) {
+          DefnNode defn = n;
+          state.trace(defn.name);
         }
         break;
         
       case Primitive.UNTRACE:
-        Node head = nodes.head;
-        nodes = nodes.tail;
-        if (head.isWord()) {
-          Node n = scope[(head as WordNode).stringValue];
-          if (n != null && n.isDefn()) {
-            DefnNode defn = n;
-            state.untrace(defn.name);           
-          }
+        WordNode head = ensureWord(args[0]);
+        Node n = scope[head.stringValue];
+        if (n != null && n.isDefn()) {
+          DefnNode defn = n;
+          state.untrace(defn.name);           
         }
         break;
 
