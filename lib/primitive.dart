@@ -35,6 +35,7 @@ class Primitive extends Node {
   static const HOME = const Primitive(0, "home");
   static const IF = const Primitive(2, "if");
   static const IFELSE = const Primitive(3, "ifelse");
+  static const ITEM = const Primitive(2, "item");
   static const LEFT = const Primitive(1, "lt", "left"); 
   static const LESSTHAN = const Primitive(1, "<", "lessthan"); 
   static const LESSOREQUAL = const Primitive(1, "<=", "lessorequal"); 
@@ -84,7 +85,8 @@ class Primitive extends Node {
   static const List<Primitive> operatorList = const [
     BUTFIRST, DIFFERENCE, FALSE, FPUT, LESSOREQUAL, LESSTHAN, FIRST,
     GREATEROREQUAL,
-    GREATERTHAN, LPUT, OUTPUT, PRODUCT, QUOTE, QUOTIENT, POWER, PI, REMAINDER,
+    GREATERTHAN, ITEM, LPUT, OUTPUT, PRODUCT, QUOTE, QUOTIENT, POWER, PI,
+    REMAINDER,
     SUM, THING, TRUE ];
 
   static getPrecedence(Primitive p) {

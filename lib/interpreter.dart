@@ -431,6 +431,31 @@ class InterpreterImpl extends InterpreterInterface {
         
         return new ListNode.cons(result, nodes);
      
+      case Primitive.ITEM:
+        nodes = evalInScope(nodes, scope);
+        Node index = nodes.head;
+        if (!index.isNum() || !(index as NumberNode).isInt()) {
+          throw new InterpreterException("item expected int as first arg");
+        }
+        // ITEM uses 1-indexed addressing
+        int intIndex = (index as NumberNode).intValue - 1;
+        if (intIndex < 0) {
+          throw new InterpreterException("item expected positive non-zero int");
+        }
+        nodes = evalInScope(nodes.tail, scope);
+        Node arg = nodes.head;
+        if (arg.isWord()) {
+          
+          var item = (arg as WordNode)
+              .stringValue
+              .substring(intIndex, intIndex + 1);
+          return new ListNode.cons(new WordNode(item), nodes.tail);
+        } else if (arg.isList()) {
+          var item = (arg as ListNode).getSuffix(intIndex).head;
+          return new ListNode.cons(item, nodes.tail);
+        }
+        throw new InterpreterException("first expected word or list");
+
       case Primitive.LPUT:
         nodes = evalInScope(nodes, scope);
         Node last = nodes.head;

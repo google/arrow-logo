@@ -241,6 +241,34 @@ class InterpreterTest {
         equals(new NumberNode.int(3)));
   }
 
+  void testItem() {
+      makeInterpreter();
+
+      ListNode nodes = 
+          ListNode.makeList([
+              Primitive.ITEM,
+              new NumberNode.int(3),
+              Primitive.QUOTE,
+              new WordNode("abcx"),
+              ]);
+      expect(
+          interpreter.evalSequence(nodes),
+          equals(new WordNode("c")));
+      
+      nodes = 
+          ListNode.makeList([
+              Primitive.ITEM,
+              new NumberNode.int(3),
+              ListNode.makeList([
+                new WordNode("a"),
+                new WordNode("b"),
+                new WordNode("c"),
+              ])]);
+      expect(
+          interpreter.evalSequence(nodes),
+          equals(new WordNode("c")));
+  }
+  
   void testMakeSimple() {
     makeInterpreter();
 
@@ -287,6 +315,7 @@ class InterpreterTest {
       test("eval op", testEvalOp);
       test("eval first butfirst", testEvalFirstButFirst);
       test("apply template", testApplyTemplate);
+      test("item", testItem);
       test("make simple", testMakeSimple);
       test("make local", testMakeLocal);
     });
