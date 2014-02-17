@@ -237,7 +237,7 @@ class InterpreterImpl extends InterpreterInterface {
       case Primitive.PENDOWN:  
       case Primitive.PENUP:  
       case Primitive.SHOWTURTLE:
-        turtle.receive([p.name]);
+        turtle.receive(p, []);
         break;
 
       case Primitive.TURTLE_GET_STATE:
@@ -252,12 +252,12 @@ class InterpreterImpl extends InterpreterInterface {
 
       case Primitive.BACK:
         NumberNode wn = ensureNum(args[0]);
-        turtle.receive([p.name, wn.getNumValue()]);
+        turtle.receive(p, [wn.getNumValue()]);
         break;  
         
       case Primitive.RIGHT:
         NumberNode nn = ensureNum(args[0]);
-        turtle.receive([p.name, nn.getNumValue()]);
+        turtle.receive(p, [nn.getNumValue()]);
         break;
         
       case Primitive.SETPENCOLOR:
@@ -265,17 +265,17 @@ class InterpreterImpl extends InterpreterInterface {
         if (!nn.isInt()) {
           throw new InterpreterException("invalid color code ${nn.getNumValue()}");
         }
-        turtle.receive([p.name, nn.getIntValue()]);
+        turtle.receive(p, [nn.getIntValue()]);
         break;
         
       case Primitive.FORWARD:
         NumberNode nn = ensureNum(args[0]);
-        turtle.receive([p.name, nn.getNumValue()]);
+        turtle.receive(p, [nn.getNumValue()]);
         break;
 
       case Primitive.LEFT:
         NumberNode nn = ensureNum(args[0]);
-        turtle.receive([p.name, nn.getNumValue()]);
+        turtle.receive(p, [nn.getNumValue()]);
         break;
         
         // end turtle commands
@@ -444,7 +444,7 @@ class InterpreterImpl extends InterpreterInterface {
         WordNode wordNode = ensureWord(args[0]);
         Node lookup = scope[wordNode.stringValue];
         if (lookup == null) {
-          throw new InterpreterException("no value for: ${arg}");
+          throw new InterpreterException("no value for: ${wordNode.stringValue}");
         }
         return new ListNode.cons(lookup, nodes);
         

@@ -47,13 +47,11 @@ class TurtleWorkerImpl extends TurtleWorker {
   // TODO: consider turning into a logo object right here?
   TurtleState get state => turtle.state;
   
-  void receive(dynamic raw) {
-    List msg = raw;
-    Primitive prim = Primitive.lookup(msg[0]);
+  void receive(Primitive prim, List<dynamic> args) {
     switch (prim) {
       
       case Primitive.BACK:
-        turtle.back(msg[1]);
+        turtle.back(args[0]);
         break;
         
       case Primitive.CLEAN:
@@ -66,15 +64,15 @@ class TurtleWorkerImpl extends TurtleWorker {
         break;
 
       case Primitive.FORWARD:
-        turtle.forward(msg[1]);
+        turtle.forward(args[0]);
         break;
       
       case Primitive.LEFT:
-        turtle.left(msg[1]);
+        turtle.left(args[0]);
         break;
       
       case Primitive.RIGHT:
-        turtle.right(msg[1]);
+        turtle.right(args[0]);
         break;
       
       case Primitive.HIDETURTLE:
@@ -98,11 +96,11 @@ class TurtleWorkerImpl extends TurtleWorker {
         break;
 
       case Primitive.RIGHT:
-        turtle.right(msg[1]);
+        turtle.right(args[0]);
         break;  
       
       case Primitive.SETPENCOLOR:
-        turtle.setPenColor(msg[1]);
+        turtle.setPenColor(args[0]);
         break;  
 
     }

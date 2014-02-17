@@ -13,6 +13,8 @@
 // limitations under the License.
 library turtle;
 
+import 'nodes.dart';
+
 /**
  * Receives turtle commands and executes them.
  */
@@ -27,7 +29,7 @@ abstract class TurtleWorker {
     
   TurtleWorker() {}
   
-  void receive(dynamic raw);
+  void receive(Primitive p, List<dynamic> args);
 
   TurtleState get state;
 }
