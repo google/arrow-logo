@@ -491,7 +491,7 @@ class Parser extends Scanner {
   /**
    *     part ::= atom | list | '(' expr ')'
    */
-  String parsePart(List<Node> nodeList) {
+  void parsePart(List<Node> nodeList) {
     switch (token.kind) {
       case Token.TOKEN_PRIM:
       case Token.TOKEN_NUM:
