@@ -38,6 +38,7 @@ class InterpreterTest {
     globalScope = new Scope(new Map());
     interpreter = new InterpreterImpl.internal(
         globalScope, parent, turtle, console);
+    return interpreter;
   }
   
   InterpreterTest() {
