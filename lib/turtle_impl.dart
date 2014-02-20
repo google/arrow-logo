@@ -63,6 +63,10 @@ class TurtleWorkerImpl extends TurtleWorker {
         turtle.home();
         break;
 
+      case Primitive.DRAWTEXT:
+        turtle.drawText(args[0]);
+        break;
+
       case Primitive.FORWARD:
         turtle.forward(args[0]);
         break;
@@ -102,7 +106,6 @@ class TurtleWorkerImpl extends TurtleWorker {
       case Primitive.SETPENCOLOR:
         turtle.setPenColor(args[0]);
         break;  
-
     }
     turtle.draw();
   }
@@ -179,7 +182,13 @@ class Turtle {
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, xmax, ymax);
   }
-  
+
+  void drawText(String text) {
+    userCtx.font = "bold 12px sans-serif";
+    userCtx.fillStyle = penColor;
+    userCtx.fillText(text, x, y);
+  }
+
   void home() {
     x = xhome;
     y = yhome;

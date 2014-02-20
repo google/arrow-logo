@@ -22,6 +22,7 @@ class Primitive extends Node {
   static const CLEARSCREEN = const Primitive(0, "cs", "clearscreen");
   static const CLEARTEXT = const Primitive(0, "ct", "cleartext");
   static const CONS = const Primitive(2, "_cons"); 
+  static const DRAWTEXT = const Primitive(1, "drawtext");
   static const EDALL = const Primitive(0, "edall"); 
   static const EQUALS = const Primitive(2, "==", "equals"); 
   static const FALSE = const Primitive(0, "false");
@@ -78,8 +79,10 @@ class Primitive extends Node {
   }
   
   static const List<Primitive> commandsList = const [ 
-    BACK, CLEAN, CLEARSCREEN, CLEARTEXT, CONS, EDALL, FORWARD, HELP, HIDETURTLE,
-    HOME, IF, IFELSE, LOCAL, LEFT, MAKE, NIL, PENDOWN, PENUP, PRINT, REPEAT, RIGHT,
+    BACK, CLEAN, CLEARSCREEN, CLEARTEXT, CONS, DRAWTEXT, EDALL, FORWARD, HELP,
+    HIDETURTLE,
+    HOME, IF, IFELSE, LOCAL, LEFT, MAKE, NIL, PENDOWN, PENUP, PRINT, REPEAT,
+    RIGHT,
     SETPENCOLOR, SHOWTURTLE, STOP, TRACE, TURTLE_GET_STATE, UNTRACE ];
 
   static const List<Primitive> operatorList = const [

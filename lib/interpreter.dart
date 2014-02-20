@@ -230,6 +230,11 @@ class InterpreterImpl extends InterpreterInterface {
         
         // turtle 0-arg
 
+      case Primitive.DRAWTEXT:
+        WordNode wn = ensureWord(args[0]);
+        turtle.receive(p, [wn.stringValue]);
+        break;
+
       case Primitive.CLEAN:
       case Primitive.CLEARSCREEN:
       case Primitive.HIDETURTLE:
