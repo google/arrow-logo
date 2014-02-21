@@ -35,7 +35,7 @@ class Scope {
   }
   
   operator [](String name) {
-    var t = symtab[name];
+    var t = symtab[name.toLowerCase()];
     if (t != null || parent == null) {
       return t;
     }
@@ -43,25 +43,25 @@ class Scope {
   }
   
   void defineLocal(String name) {
-    symtab[name] = Primitive.UNIT;
+    symtab[name.toLowerCase()] = Primitive.UNIT;
   }
   
   void assign(String name, Node value) {
-    var t = symtab[name];
+    var t = symtab[name.toLowerCase()];
     if (t != null || parent == null) {
-      symtab[name] = value;
+      symtab[name.toLowerCase()] = value;
       return;
     }
     parent.assign(name, value);
   }
 
   void bind(String name, Node defn) {
-    symtab[name] = defn;
+    symtab[name.toLowerCase()] = defn;
   }
 
   void bindGlobal(String name, Node defn) {
     if (parent == null) {
-      symtab[name] = defn;
+      symtab[name.toLowerCase()] = defn;
     } else {
       parent.bindGlobal(name, defn);
     }

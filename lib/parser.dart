@@ -255,7 +255,7 @@ class Scanner {
   String text;
   int pos;
   
-  /** @param toplevel used for looking up keywords */
+  /** @param toplevel used for looking up keywords (lowercase forms) */
   Scanner(Map<String, Primitive> this.toplevel) : token = new Token();
   
   void initialize(String text) {
@@ -305,7 +305,7 @@ class Scanner {
     } else if (word == "end") {
       token.kind = Token.TOKEN_END;
     } else {
-      Node p = toplevel[word];
+      Node p = toplevel[word.toLowerCase()];
       if (p == null || !p.isPrim())
         token.setWord(new WordNode(word));
       else
