@@ -105,7 +105,19 @@ class TurtleWorkerImpl extends TurtleWorker {
       
       case Primitive.SETPENCOLOR:
         turtle.setPenColor(args[0]);
-        break;  
+        break;
+
+      case Primitive.SETFONT:
+        turtle.font = args[0];
+        break;
+
+      case Primitive.SETTEXTALIGN:
+        turtle.textAlign = args[0];
+        break;
+
+      case Primitive.SETTEXTBASELINE:
+        turtle.textBaseline = args[0];
+        break;
     }
     turtle.draw();
   }
@@ -148,6 +160,11 @@ class Turtle {
   
   String penColor;
   String backgroundColor;
+  String font = "12px sans-serif";
+  // one of {start, end, left, right, center}
+  String textAlign = "left";
+  // one of {top, hanging, middle, alphabetic, ideographic, bottom}
+  String textBaseline = "bottom";
   
   Turtle(this.turtleCtx, this.userCtx, this.xmax, this.ymax) {
     xhome = xmax / 2;
@@ -184,7 +201,9 @@ class Turtle {
   }
 
   void drawText(String text) {
-    userCtx.font = "bold 12px sans-serif";
+    userCtx.font = font;
+    userCtx.textAlign = textAlign;
+    userCtx.textBaseline = textBaseline;
     userCtx.fillStyle = penColor;
     userCtx.fillText(text, x, y);
   }

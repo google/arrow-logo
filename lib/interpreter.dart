@@ -264,6 +264,14 @@ class InterpreterImpl extends InterpreterInterface {
         NumberNode nn = ensureNum(args[0]);
         turtle.receive(p, [nn.getNumValue()]);
         break;
+
+      case Primitive.SETFONT:
+      case Primitive.SETTEXTALIGN:
+      case Primitive.SETTEXTBASELINE:
+        // TODO: list
+        WordNode wn = ensureWord(args[0]);
+        turtle.receive(p, [wn.stringValue]);
+        break;
         
       case Primitive.SETPENCOLOR:
         NumberNode nn = ensureNum(args[0]);
