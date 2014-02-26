@@ -135,16 +135,16 @@ class InterpreterImpl extends InterpreterInterface {
   }
   
   Node evalBinCmp(p, NumberNode op1, NumberNode op2, ListNode nodes, cmpNum(num x, num y)) {
-    Node res = cmpNum(op1.getNumValue(), op2.getNumValue()) ? Primitive.TRUE : Primitive.FALSE;
+    Node res = cmpNum(op1.numValue, op2.numValue) ? Primitive.TRUE : Primitive.FALSE;
     return new ListNode.cons(res, nodes);
   }
     
   Node evalBinOp(p, NumberNode op1, NumberNode op2, ListNode nodes, opInt(int x, int y), opFloat(double x, double y)) {   
     Node res;
     if (op1.isInt && op2.isInt) {
-       res = new NumberNode.int(opInt(op1.getIntValue(), op2.getIntValue()));
+       res = new NumberNode.int(opInt(op1.intValue, op2.intValue));
     } else {
-      res = new NumberNode.float(opFloat(op1.getFloatValue(), op2.getFloatValue()));
+      res = new NumberNode.float(opFloat(op1.floatValue, op2.floatValue));
     }  
     return new ListNode.cons(res, nodes);
   }
@@ -205,7 +205,7 @@ class InterpreterImpl extends InterpreterInterface {
     var args = [];
     if (!p.needsLazyEval) {
       for (int i = 0; i < p.arity; ++i) {
-        if (nodes.isNil()) {
+        if (nodes.isNil) {
           throw new InterpreterException("not enough inputs to $p");
         }
         nodes = evalInScope(nodes, scope);
@@ -257,12 +257,12 @@ class InterpreterImpl extends InterpreterInterface {
 
       case Primitive.BACK:
         NumberNode wn = ensureNum(args[0]);
-        turtle.receive(p, [wn.getNumValue()]);
+        turtle.receive(p, [wn.numValue]);
         break;  
         
       case Primitive.RIGHT:
         NumberNode nn = ensureNum(args[0]);
-        turtle.receive(p, [nn.getNumValue()]);
+        turtle.receive(p, [nn.numValue]);
         break;
 
       case Primitive.SETFONT:
@@ -276,19 +276,19 @@ class InterpreterImpl extends InterpreterInterface {
       case Primitive.SETPENCOLOR:
         NumberNode nn = ensureNum(args[0]);
         if (!nn.isInt) {
-          throw new InterpreterException("invalid color code ${nn.getNumValue()}");
+          throw new InterpreterException("invalid color code ${nn.numValue}");
         }
-        turtle.receive(p, [nn.getIntValue()]);
+        turtle.receive(p, [nn.intValue]);
         break;
         
       case Primitive.FORWARD:
         NumberNode nn = ensureNum(args[0]);
-        turtle.receive(p, [nn.getNumValue()]);
+        turtle.receive(p, [nn.numValue]);
         break;
 
       case Primitive.LEFT:
         NumberNode nn = ensureNum(args[0]);
-        turtle.receive(p, [nn.getNumValue()]);
+        turtle.receive(p, [nn.numValue]);
         break;
         
         // end turtle commands
@@ -441,7 +441,7 @@ class InterpreterImpl extends InterpreterInterface {
         ensureNum(nodes.head);
         NumberNode nn = nodes.head;
         nodes = nodes.tail;
-        int times = nn.getNumValue();
+        int times = nn.numValue;
         Node body = nodes.head;
         // Coercing single argument into list. TODO(bqe): error prone, remove.
         if (!body.isList) {
@@ -579,7 +579,7 @@ class InterpreterImpl extends InterpreterInterface {
       trace = new StringBuffer();
       trace.write(defn.name);
     }
-    while (!formalParams.isNil()) {
+    while (!formalParams.isNil) {
       WordNode formalParam = formalParams.head;
       formalParams = formalParams.tail;
       
@@ -634,7 +634,7 @@ class InterpreterImpl extends InterpreterInterface {
    */
   Node evalSequenceInScope(ListNode nodes, Scope scope) {
     Node result;
-    while (!nodes.isNil()) {
+    while (!nodes.isNil) {
       nodes = evalInScope(nodes, scope);
       result = nodes.head;
       nodes = nodes.tail;
@@ -651,7 +651,7 @@ class InterpreterImpl extends InterpreterInterface {
    * @return [result] ++ suffix of unused nodes
    */
   ListNode evalInScope(ListNode nodes, Scope scope) {
-    if (nodes.isNil()) {
+    if (nodes.isNil) {
       return nodes;
     }
     Node head = nodes.head;
