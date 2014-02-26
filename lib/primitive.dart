@@ -95,41 +95,6 @@ class Primitive extends Node {
     GREATERTHAN, ITEM, LPUT, OUTPUT, PRODUCT, QUOTE, QUOTIENT, POWER, PI,
     REMAINDER,
     SUM, THING, TRUE ];
-
-  static getPrecedence(Primitive p) {
-    switch (p) {
-    case GREATERTHAN: 
-    case GREATEROREQUAL:
-    case LESSTHAN: 
-    case LESSOREQUAL:
-    case EQUALS:
-      return 5;
-    case SUM: 
-    case DIFFERENCE:
-      return 10;
-    case REMAINDER:
-    case PRODUCT:
-    case QUOTIENT:
-      return 20;
-    case POWER:
-      return 30;
-    default:
-      return 0;
-    }
-  }
-  
-  static isLeftAssoc(Primitive p) {
-    switch (p) {
-    case SUM: 
-    case DIFFERENCE:
-    case PRODUCT:
-    case REMAINDER:
-    case QUOTIENT:
-      return true;
-    default:
-      return false;
-    }
-  }
   
   static Map<String, Primitive> commandsMap = null;
   
@@ -167,5 +132,41 @@ class Primitive extends Node {
     this == Primitive.IF
     || this == Primitive.IFELSE
     || this == Primitive.REPEAT;
+
+  int get precedence {
+    switch (this) {
+    case GREATERTHAN:
+    case GREATEROREQUAL:
+    case LESSTHAN:
+    case LESSOREQUAL:
+    case EQUALS:
+      return 5;
+    case SUM:
+    case DIFFERENCE:
+      return 10;
+    case REMAINDER:
+    case PRODUCT:
+    case QUOTIENT:
+      return 20;
+    case POWER:
+      return 30;
+    default:
+      return 0;
+    }
+  }
+
+  bool get isLeftAssoc {
+    switch (this) {
+    case SUM:
+    case DIFFERENCE:
+    case PRODUCT:
+    case REMAINDER:
+    case QUOTIENT:
+      return true;
+    default:
+      return false;
+    }
+  }
+
   String toString() => name;
 }

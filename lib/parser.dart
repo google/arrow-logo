@@ -408,7 +408,7 @@ class Scanner {
 }
 
 class OpInfo {
-  final Node binop;
+  final Primitive binop;
   final List<Node> operand;
   final OpInfo next;
   
@@ -475,9 +475,9 @@ class Parser extends Scanner {
                          bool isLeftAssoc) {
     List<Node> result = top0;
     while (opstack != base
-        && (prec < Primitive.getPrecedence(opstack.binop)
+        && (prec < opstack.binop.precedence
             || (isLeftAssoc 
-                && prec == Primitive.getPrecedence(opstack.binop)))) {
+                && prec == opstack.binop.precedence))) {
       OpInfo top = opstack;
       List<Node> tmp = [opstack.binop];
       tmp.addAll(opstack.operand);
@@ -524,8 +524,8 @@ class Parser extends Scanner {
     while (token.isInfixOp()) {
       Primitive binop = token.getInfixOp();
       operand = reduceStack(
-          base, operand, Primitive.getPrecedence(binop), 
-          Primitive.isLeftAssoc(binop));
+          base, operand, binop.precedence,
+          binop.isLeftAssoc);
       opstack = new OpInfo(binop, operand, opstack);
       nextToken();
       operand = [];
