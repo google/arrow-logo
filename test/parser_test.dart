@@ -42,7 +42,7 @@ class ParserTest {
     parser.initialize(";123\n1");
     parser.nextToken();
     expect(parser.token.kind, equals(Token.TOKEN_NUM));    
-    expect(parser.token.node.isNum(), true);     
+    expect(parser.token.node.isNum, true);
   }
 
   void testTokenizeNum() {
@@ -50,31 +50,31 @@ class ParserTest {
     parser.tokenizeNum();
     expect(parser.pos, equals("1".length));
     expect(parser.token.kind, equals(Token.TOKEN_NUM));    
-    expect(parser.token.node.isNum(), true);
+    expect(parser.token.node.isNum, true);
     Node n = parser.token.node;
-    expect(n.isNum(), true);
+    expect(n.isNum, true);
     NumberNode numInt = n;
-    expect(numInt.isInt(), true);
-    expect(1, numInt.getIntValue());
+    expect(numInt.isInt, true);
+    expect(1, numInt.intValue);
 
     parser.initialize("1.2x");
     parser.tokenizeNum();
     expect(parser.pos, equals("1.2".length));
     expect(parser.token.kind, equals(Token.TOKEN_NUM));
-    expect(parser.token.node.isNum(), true);
+    expect(parser.token.node.isNum, true);
     n = parser.token.node;
-    expect(n.isNum(), true);
+    expect(n.isNum, true);
     NumberNode numFloat = n;
-    expect(numFloat.isFloat(), true);
-    expect(1.2, numFloat.getFloatValue());
+    expect(numFloat.isFloat, true);
+    expect(1.2, numFloat.floatValue);
     
     parser.initialize(".7");
     parser.tokenizeNum();
     n = parser.token.node;
-    expect(n.isNum(), true);
+    expect(n.isNum, true);
     numFloat = n;
-    expect(numFloat.isFloat(), true);
-    expect(.7, numFloat.getFloatValue());
+    expect(numFloat.isFloat, true);
+    expect(.7, numFloat.floatValue);
   }
   
   void testTokenizeWordOrKeyword() {

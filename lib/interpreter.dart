@@ -117,7 +117,7 @@ class InterpreterImpl extends InterpreterInterface {
     // no parse error, 
     List<Node> nonDefnNodes = [];
     for (Node n in nodes) {
-      if (n.isDefn()) {
+      if (n.isDefn) {
         DefnNode defn = n;        
         define(defn);
       } else {
@@ -141,7 +141,7 @@ class InterpreterImpl extends InterpreterInterface {
     
   Node evalBinOp(p, NumberNode op1, NumberNode op2, ListNode nodes, opInt(int x, int y), opFloat(double x, double y)) {   
     Node res;
-    if (op1.isInt() && op2.isInt()) {
+    if (op1.isInt && op2.isInt) {
        res = new NumberNode.int(opInt(op1.getIntValue(), op2.getIntValue()));
     } else {
       res = new NumberNode.float(opFloat(op1.getFloatValue(), op2.getFloatValue()));
@@ -167,21 +167,21 @@ class InterpreterImpl extends InterpreterInterface {
   static bool primGreaterOrEqualNum(num a, num b) => a >= b;
 
   NumberNode ensureNum(Node node) {
-    if (!node.isNum()) {
+    if (!node.isNum) {
       throw new InterpreterException("expected number");
     }
     return node;
   }
   
   WordNode ensureWord(Node node) {
-    if (!node.isWord()) {
+    if (!node.isWord) {
       throw new InterpreterException("expected word"); 
     }
     return node;
   }
   
   ListNode ensureList(Node node) {
-    if (!node.isList()) {
+    if (!node.isList) {
       throw new InterpreterException("expected list");
     }  
     return node;
@@ -217,9 +217,9 @@ class InterpreterImpl extends InterpreterInterface {
       case Primitive.APPLY:
         Node fn = args[0];
         Node fnargs = args[1];
-        if (fn.isPrim()) {
+        if (fn.isPrim) {
           return new ListNode.cons(evalPrimFun(fn, fnargs, scope), nodes);
-        } else if (fn.isList()) {
+        } else if (fn.isList) {
           Node result = applyTemplate(fn, fnargs, scope);
           return new ListNode.cons(result, nodes);
         }
@@ -275,7 +275,7 @@ class InterpreterImpl extends InterpreterInterface {
         
       case Primitive.SETPENCOLOR:
         NumberNode nn = ensureNum(args[0]);
-        if (!nn.isInt()) {
+        if (!nn.isInt) {
           throw new InterpreterException("invalid color code ${nn.getNumValue()}");
         }
         turtle.receive(p, [nn.getIntValue()]);
@@ -310,10 +310,10 @@ class InterpreterImpl extends InterpreterInterface {
 
       case Primitive.BUTFIRST:
         Node arg = args[0];
-        if (arg.isWord()) {
+        if (arg.isWord) {
           var butfirst = (arg as WordNode).stringValue.substring(1);
           return new ListNode.cons(new WordNode(butfirst), nodes);
-        } else if (arg.isList()) {
+        } else if (arg.isList) {
           var butfirst = (arg as ListNode).tail;
           return new ListNode.cons(butfirst, nodes);
         }
@@ -327,10 +327,10 @@ class InterpreterImpl extends InterpreterInterface {
 
       case Primitive.FIRST:
         Node arg = args[0];
-        if (arg.isWord()) {
+        if (arg.isWord) {
           var first = (arg as WordNode).stringValue.substring(0, 1);
           return new ListNode.cons(new WordNode(first), nodes);
-        } else if (arg.isList()) {
+        } else if (arg.isList) {
           var first = (arg as ListNode).head;
           return new ListNode.cons(first, nodes);
         }
@@ -351,7 +351,7 @@ class InterpreterImpl extends InterpreterInterface {
         Node result;
         if (cond == Primitive.TRUE) {
           Node thenPart = nodes.head;
-          if (!thenPart.isList()) {
+          if (!thenPart.isList) {
             thenPart = new ListNode.cons(thenPart, ListNode.NIL);
           }
           result = evalSequenceInScope(thenPart, scope);
@@ -371,7 +371,7 @@ class InterpreterImpl extends InterpreterInterface {
         if (cond == Primitive.TRUE) {
           Node thenPart = nodes.head;
           nodes = nodes.tail;
-          if (!thenPart.isList()) {
+          if (!thenPart.isList) {
             thenPart = new ListNode.cons(thenPart, ListNode.NIL);
           }
           result = evalSequenceInScope(thenPart, scope);
@@ -380,7 +380,7 @@ class InterpreterImpl extends InterpreterInterface {
           nodes = nodes.tail;
           Node elsePart = nodes.head;
           nodes = nodes.tail;
-          if (!elsePart.isList()) {
+          if (!elsePart.isList) {
             elsePart = new ListNode.cons(elsePart, ListNode.NIL);
           }
           result = evalSequenceInScope(elsePart, scope);
@@ -392,7 +392,7 @@ class InterpreterImpl extends InterpreterInterface {
      
       case Primitive.ITEM:
         Node index = args[0];
-        if (!index.isNum() || !(index as NumberNode).isInt()) {
+        if (!index.isNum || !(index as NumberNode).isInt) {
           throw new InterpreterException("item expected int as first arg");
         }
         // ITEM uses 1-indexed addressing
@@ -401,13 +401,13 @@ class InterpreterImpl extends InterpreterInterface {
           throw new InterpreterException("item expected positive non-zero int");
         }
         Node arg = args[1];
-        if (arg.isWord()) {
+        if (arg.isWord) {
           
           var item = (arg as WordNode)
               .stringValue
               .substring(intIndex, intIndex + 1);
           return new ListNode.cons(new WordNode(item), nodes);
-        } else if (arg.isList()) {
+        } else if (arg.isList) {
           var item = (arg as ListNode).getSuffix(intIndex).head;
           return new ListNode.cons(item, nodes);
         }
@@ -444,7 +444,7 @@ class InterpreterImpl extends InterpreterInterface {
         int times = nn.getNumValue();
         Node body = nodes.head;
         // Coercing single argument into list. TODO(bqe): error prone, remove.
-        if (!body.isList()) {
+        if (!body.isList) {
           body = new ListNode.cons(body, ListNode.NIL);
         }
         nodes = nodes.tail;
@@ -509,7 +509,7 @@ class InterpreterImpl extends InterpreterInterface {
       case Primitive.TRACE:
         WordNode head = ensureWord(args[0]);
         Node n = scope[head.stringValue];
-        if (n != null && n.isDefn()) {
+        if (n != null && n.isDefn) {
           DefnNode defn = n;
           state.trace(defn.name);
         }
@@ -518,7 +518,7 @@ class InterpreterImpl extends InterpreterInterface {
       case Primitive.UNTRACE:
         WordNode head = ensureWord(args[0]);
         Node n = scope[head.stringValue];
-        if (n != null && n.isDefn()) {
+        if (n != null && n.isDefn) {
           DefnNode defn = n;
           state.untrace(defn.name);           
         }
@@ -657,31 +657,31 @@ class InterpreterImpl extends InterpreterInterface {
     Node head = nodes.head;
     ListNode tail = nodes.tail;
     
-    if (head.isList()) {
+    if (head.isList) {
       return nodes;
     }
     
-    if (head.isNum()) {
+    if (head.isNum) {
       return nodes;
     }
     
     // ?
-    if (head.isWord() && (head as WordNode).stringValue.startsWith("\"")) {
+    if (head.isWord && (head as WordNode).stringValue.startsWith("\"")) {
       return nodes;
     }
     
-    if (head.isPrim()) {
+    if (head.isPrim) {
       return evalPrimFun(head, tail, scope);
     }
 
-    if (head.isWord()) {
+    if (head.isWord) {
       WordNode word = head;
       Node lookup = scope[word.stringValue];
       if (lookup == null) {
         throw new InterpreterException(
             "I don't know how to ${word.stringValue}");
       }
-      if (lookup.isDefn()) {
+      if (lookup.isDefn) {
         DefnNode defn = lookup;
         return applyUserFun(defn, tail, scope);
       }

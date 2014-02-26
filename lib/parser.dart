@@ -306,7 +306,7 @@ class Scanner {
       token.kind = Token.TOKEN_END;
     } else {
       Node p = toplevel[word.toLowerCase()];
-      if (p == null || !p.isPrim())
+      if (p == null || !p.isPrim)
         token.setWord(new WordNode(word));
       else
         token.setPrim(p);

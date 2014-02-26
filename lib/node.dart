@@ -40,11 +40,11 @@ abstract class Node {
 
   const Node(this.tag);
    
-  bool isWord() { return (tag & KIND_MASK) == KIND_WORD; }
-  bool isList() { return (tag & KIND_MASK) == KIND_LIST; }
-  bool isNum() { return (tag & KIND_MASK) == KIND_NUMBER; }
-  bool isPrim() { return (tag & KIND_MASK) == KIND_PRIM; }
-  bool isDefn() { return (tag & KIND_MASK) == KIND_DEFN; }
+  bool get isWord => (tag & KIND_MASK) == KIND_WORD;
+  bool get isList => (tag & KIND_MASK) == KIND_LIST;
+  bool get isNum => (tag & KIND_MASK) == KIND_NUMBER;
+  bool get isPrim => (tag & KIND_MASK) == KIND_PRIM;
+  bool get isDefn => (tag & KIND_MASK) == KIND_DEFN;
 }
 
 class ListNode extends Node {
@@ -53,20 +53,20 @@ class ListNode extends Node {
   static const int LIST_CONS = 1 << Node.KIND_BITS;
   static const int LIST_MASK = 1 << Node.KIND_BITS;
 
-  bool isNil()  { return (tag & LIST_MASK) == LIST_NIL; }
-  bool isCons() { return (tag & LIST_MASK) == LIST_CONS; }
+  bool get isNil => (tag & LIST_MASK) == LIST_NIL;
+  bool get isCons => (tag & LIST_MASK) == LIST_CONS;
   
   bool operator ==(node) {
     if (!(node is ListNode)) {
       return false;
     }
     ListNode that = node;
-    return (isNil() && that.isNil())
+    return (isNil && that.isNil)
         || (head == that.head && tail == that.tail);
   }
   
   int get hashCode {
-    return isNil() ? -1 : head.hashCode * 7 + tail.hashCode;
+    return isNil ? -1 : head.hashCode * 7 + tail.hashCode;
   }
   
   Iterator<Node> get iterator => new ListNodeIterator(this);
@@ -89,10 +89,10 @@ class ListNode extends Node {
     return n;
   }
     
-  int get length => _getLengthIter(0); 
+  int get length => _getLengthIter(0);
   
   int _getLengthIter(int acc) { 
-    return isNil() ? acc : tail._getLengthIter(1 + acc); 
+    return isNil ? acc : tail._getLengthIter(1 + acc); 
   }
   
   ListNode getPrefix(int length) {
@@ -108,15 +108,15 @@ class ListNode extends Node {
   }
   
   ListNode append(ListNode rest) {
-    return isNil() ? rest : new ListNode.cons(head, tail.append(rest));
+    return isNil ? rest : new ListNode.cons(head, tail.append(rest));
   }
   
   String toString() {
-    return isNil() ? "[]" : _toStringIter("[");
+    return isNil ? "[]" : _toStringIter("[");
   }
   
   String _toStringIter(String acc) {
-    return isNil()
+    return isNil
         ? (acc + " ]")
         : tail._toStringIter(acc + " " + head.toString());
   }
@@ -131,7 +131,7 @@ class ListNodeIterator implements Iterator<Node> {
   }
   
   Node get current {
-    if (nodes.isNil()) {
+    if (nodes.isNil) {
       throw new Exception();
     }
     return nodes.head;
@@ -139,7 +139,7 @@ class ListNodeIterator implements Iterator<Node> {
   
   bool moveNext() {
     nodes = nodes.tail;
-    return !nodes.isNil();
+    return !nodes.isNil;
   }
 }
 
@@ -172,53 +172,51 @@ class NumberNode extends Node {
   static const int NUMBER_FLOAT  = 1 << Node.KIND_BITS;
   static const int NUMBER_MASK   = 1 << Node.KIND_BITS;
 
-  final int intValue;      // Int
-  final double floatValue; // Float
+  final int intValue_;      // Int
+  final double floatValue_; // Float
   
-  const NumberNode.int(this.intValue)
-      : floatValue = 0.0, super(NUMBER_INT | Node.KIND_NUMBER);
+  const NumberNode.int(this.intValue_)
+      : floatValue_ = 0.0, super(NUMBER_INT | Node.KIND_NUMBER);
 
-  const NumberNode.float(this.floatValue)
-      : intValue = 0, super(NUMBER_FLOAT | Node.KIND_NUMBER);
+  const NumberNode.float(this.floatValue_)
+      : intValue_ = 0, super(NUMBER_FLOAT | Node.KIND_NUMBER);
   
   bool operator ==(Object node) {
     if (!(node is NumberNode)) {
       return false;
     }
     NumberNode that = node;
-    if (isInt()) {
-      return that.isInt() && getIntValue() == that.getIntValue();
-    } else if (isFloat()) {
-      return that.isFloat() && getFloatValue() == that.getFloatValue();
+    if (isInt) {
+      return that.isInt && intValue == that.intValue;
+    } else if (isFloat) {
+      return that.isFloat && floatValue == that.floatValue;
     }
     throw new Exception("neither int nor float");
   }
   
   int get hashCode {
-    return isInt() ? getIntValue().hashCode : getFloatValue().hashCode;
+    return isInt ? intValue.hashCode : floatValue.hashCode;
   }
   
-  bool isInt() { return (tag & NUMBER_MASK) == NUMBER_INT; }
-  bool isFloat() { return (tag & NUMBER_MASK) == NUMBER_FLOAT; }
+  bool get isInt => (tag & NUMBER_MASK) == NUMBER_INT;
+  bool get isFloat => (tag & NUMBER_MASK) == NUMBER_FLOAT;
   
-  int getIntValue() {
-    return intValue;  // truncate float?
-  }
+  int get intValue => intValue_; // truncate float?
 
-  double getFloatValue() {
-    return isInt() ? intValue.toDouble() : floatValue;
+  double get floatValue {
+    return isInt ? intValue_.toDouble() : floatValue_;
   }
   
-  num getNumValue() {
-    if (isInt())
-      return intValue;
-    if (isFloat())
-      return floatValue;
+  num get numValue {
+    if (isInt)
+      return intValue_;
+    if (isFloat)
+      return floatValue_;
     throw new Exception("neither int nor float");
   }
 
   String toString() {
-    return isFloat() ? getFloatValue().toString() : getIntValue().toString();
+    return isFloat ? floatValue.toString() : intValue.toString();
   }
 }
 
