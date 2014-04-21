@@ -1,6 +1,7 @@
 #!/bin/sh
 DEST=deploy
 
+${DART2JS} web/arrowlogo.dart -o web/arrowlogo.dart.js
 rm -Rf ${DEST}/*
 mkdir -p ${DEST}/web
 mkdir -p ${DEST}/web/packages/browser
