@@ -95,11 +95,12 @@ class ParserTest {
   void testParseSomeAtoms() {
     expect(new NumberNode.int(1), equals(new NumberNode.int(1)));  // sanity
     expect(
-      parser.parse("fd 1 fd 1.2 \"baz"),
+      parser.parse("fd 1 fd 1.2 \"baz \"100"),
       equals(ListNode.makeList([
         Primitive.FORWARD, new NumberNode.int(1),
         Primitive.FORWARD, new NumberNode.float(1.2),
-        Primitive.QUOTE, new WordNode("baz")])
+        Primitive.QUOTE, new WordNode("baz"),
+        Primitive.QUOTE, new NumberNode.int(100)])
       ));
   }
   
