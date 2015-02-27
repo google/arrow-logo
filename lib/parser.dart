@@ -117,6 +117,7 @@ class Token {
       case TOKEN_SLASH:
       case TOKEN_STAR:
       case TOKEN_CARET:
+      case TOKEN_EQ:
       case TOKEN_EQEQ:
       case TOKEN_LT:
       case TOKEN_LE:
@@ -156,6 +157,8 @@ class Token {
         return Primitive.PRODUCT;
       case TOKEN_CARET:
         return Primitive.POWER;
+      case TOKEN_EQ:
+        return Primitive.EQUALS;
       case TOKEN_EQEQ:
         return Primitive.EQUALS;
       case TOKEN_LT:
