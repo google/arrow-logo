@@ -29,8 +29,8 @@ class Primitive extends Node {
   static const FIRST = const Primitive(1, "first");
   static const FORWARD = const Primitive(1, "fd", "forward"); 
   static const FPUT = const Primitive(2, "fput");
-  static const GREATERTHAN = const Primitive(1, ">", "greaterthan"); 
-  static const GREATEROREQUAL = const Primitive(1, ">=", "greaterorequal"); 
+  static const GREATERTHAN = const Primitive(2, ">", "greaterthan");
+  static const GREATEROREQUAL = const Primitive(2, ">=", "greaterorequal");
   static const HIDETURTLE = const Primitive(0, "ht", "hideturtle");
   static const HELP = const Primitive(0, "help");
   static const HOME = const Primitive(0, "home");
@@ -127,7 +127,7 @@ class Primitive extends Node {
     int this.arity,
     String this.name,
     [String this.altName = null]) : super(Node.KIND_PRIM);
-  
+
   bool get needsLazyEval =>
     this == Primitive.IF
     || this == Primitive.IFELSE
