@@ -194,6 +194,12 @@ class ParserTest {
           new NumberNode.int(4),
         new NumberNode.int(2)])));
     expect(
+            parser.parse("\"x + 1"),
+            equals(ListNode.makeList([
+                                      Primitive.SUM,
+                                      Primitive.QUOTE, new WordNode("x"),
+                                      new NumberNode.int(1)])));
+    expect(
         parser.parse(":x*.7"),
         equals(ListNode.makeList([ 
                                   Primitive.PRODUCT, 
@@ -215,8 +221,8 @@ class ParserTest {
             new NumberNode.int(3),
           new NumberNode.int(2)])));
   }
-  
-  void testParseParen() {    
+
+  void testParseParen() {
     expect(
       parser.parse("(:g > 2)"),
       equals(ListNode.makeList(
@@ -225,7 +231,7 @@ class ParserTest {
          new NumberNode.int(2)])
       ));
   }
-  
+
   void run() {
     group("ParserTest", () {
       test("advance while", testAdvanceWhile);

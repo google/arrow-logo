@@ -450,15 +450,20 @@ class Parser extends Scanner {
   }
   
   /**
-   *     atom ::= int | float | var | word
+   *     atom ::= int | float | word | var | quote word
    */ 
   void parseAtom(List<Node> nodeList) {
     switch (token.kind) {
       case Token.TOKEN_PRIM:
       case Token.TOKEN_NUM:
       case Token.TOKEN_WORD:
-        nodeList.add(token.node);
+        var node = token.node;
+        nodeList.add(node);
         nextToken();
+        if (node == Primitive.QUOTE) {
+          nodeList.add(token.node);
+          nextToken();
+        }
         return;
       case Token.TOKEN_VAR:
         nodeList.add(Primitive.THING);
