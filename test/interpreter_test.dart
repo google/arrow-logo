@@ -17,30 +17,43 @@ import 'package:unittest/unittest.dart';
 
 import "dart:math" as math;
 
+import "package:arrowlogo/console.dart";
+import "package:arrowlogo/debug.dart";
+import "package:arrowlogo/turtle.dart";
 import "package:arrowlogo/interpreter.dart";
 import "package:arrowlogo/nodes.dart";
 import "package:arrowlogo/parser.dart";
 import "package:arrowlogo/scope.dart";
 
-class MockConsole {
+class MockConsole extends Console {
   void receive(dynamic raw) {}
+}
+
+class MockTurtleWorker extends TurtleWorker {
+
+  @override
+  void receive(Primitive p, List<dynamic> args) {
+    // ignore
+  }
+
+  TurtleState get state => new TurtleState(0.0, 0.0, 0.0);
 }
 
 class InterpreterTest {
 
   Scope globalScope;
-  var turtle = new Object();
+  var turtle = new MockTurtleWorker();
   var console = new MockConsole();
-  var parent = new Object();
+  var parent = new SimpleDebug();
   InterpreterImpl interpreter;
 
-  InterpreterImpl makeInterpreter() {
-    globalScope = new Scope(new Map());
+  InterpreterImpl makeInterpreter([Map<String, Node> map = null]) {
+    globalScope = new Scope(map == null ? new Map() : map);
     interpreter = new InterpreterImpl.internal(
         globalScope, parent, turtle, console);
     return interpreter;
   }
-  
+
   InterpreterTest() {
   }
 
@@ -102,7 +115,56 @@ class InterpreterTest {
         ListNode.makeList([new WordNode("foo"), fortyTwo])),
         equals(twentyOne));
   }
-  
+
+  void testEvalMakeUpdate() {
+    Node fortyTwo = new NumberNode.int(42);
+    Map<String, Node> varMap = new Map();
+    varMap["x"] = fortyTwo;
+    makeInterpreter(varMap);
+    Node seq = ListNode.makeList([
+        Primitive.MAKE,
+        Primitive.QUOTE, new WordNode("x"),
+        Primitive.SUM,
+            Primitive.THING, Primitive.QUOTE, new WordNode("x"),
+            new NumberNode.int(1)]);
+      expect(interpreter.evalSequence(seq), equals(Primitive.UNIT));
+      expect(interpreter.globalScope["x"], equals(new NumberNode.int(43)));
+  }
+
+  void testEvalMakeDeref() {
+      Node fortyTwo = new NumberNode.int(42);
+      Map<String, Node> varMap = new Map();
+      varMap["x"] = fortyTwo;
+      varMap["y"] = new WordNode("x");
+      makeInterpreter(varMap);
+      Node seq = ListNode.makeList([
+          Primitive.MAKE,
+          Primitive.THING, Primitive.QUOTE, new WordNode("y"),
+          Primitive.SUM,
+              Primitive.THING, Primitive.THING, Primitive.QUOTE, new WordNode("y"),
+              new NumberNode.int(1)]);
+        expect(interpreter.evalSequence(seq), equals(Primitive.UNIT));
+        expect(interpreter.globalScope["x"], equals(new NumberNode.int(43)));
+    }
+
+  void testEvalMakeDerefVariant() {
+      Node fortyTwo = new NumberNode.int(42);
+      Map<String, Node> varMap = new Map();
+      varMap["x"] = fortyTwo;
+      makeInterpreter(varMap);
+      Node seq = ListNode.makeList([
+          Primitive.MAKE,
+          Primitive.QUOTE, new WordNode("y"),
+          Primitive.QUOTE, new WordNode("x"),
+          Primitive.MAKE,
+          Primitive.THING, Primitive.QUOTE, new WordNode("y"),
+          Primitive.SUM,
+              Primitive.THING, Primitive.THING, Primitive.QUOTE, new WordNode("y"),
+              new NumberNode.int(1)]);
+        expect(interpreter.evalSequence(seq), equals(Primitive.UNIT));
+        expect(interpreter.globalScope["x"], equals(new NumberNode.int(43)));
+    }
+
   void testEvalConcat() {
     makeInterpreter();
 
@@ -118,7 +180,7 @@ class InterpreterTest {
         ListNode.makeList([Primitive.LPUT, Primitive.QUOTE, foo, barlist])),
         equals(ListNode.makeList([bar, foo])));                               
   }
-  
+
   void testEvalOp() {
     makeInterpreter();
 
@@ -312,6 +374,9 @@ class InterpreterTest {
       test("eval values", testEvalValues);
       test("eval if", testEvalIf);
       test("eval defn", testEvalDefn);
+      test("eval make update", testEvalMakeUpdate);
+      test("eval make deref", testEvalMakeDeref);
+      test("eval make deref var", testEvalMakeDerefVariant);
       test("eval defn concat", testEvalConcat);
       test("eval op", testEvalOp);
       test("eval first butfirst", testEvalFirstButFirst);
