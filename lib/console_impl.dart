@@ -54,25 +54,7 @@ class ConsoleImpl extends Console {
     prompt();
   }
   
-  void receive(dynamic raw) {
-    if (raw is Map) {
-      Map map = raw;
-      if (map.containsKey("exception")) {
-        writeln(map["exception"]);
-      } else if (map.containsKey("defined")) {
-        String name = map["defined"];
-        writeln("You defined $name");
-      } else if (map.containsKey("trace")) {
-        String trace = map["trace"];
-        writeln(trace);
-      } 
-      return;
-    }
-    if (raw is String) {
-      writeln(raw);
-      return;
-    }
-    List msg = raw;
+  void processAction(List msg) {
     Primitive p = Primitive.lookup(msg[0]);
     switch (p) {
       case Primitive.CLEARTEXT:
@@ -93,6 +75,18 @@ class ConsoleImpl extends Console {
     }
   }
   
+  void processDefined(String defnName) {
+    writeln("You defined $defnName");
+  }
+
+  void processTrace(String traceString) {
+    writeln(traceString);
+  }
+
+  void processException(String exceptionString) {
+    writeln(exceptionString);
+  }
+
   void hideEditor() {
     editorBackground.classes.add('invisible');
     editorElem.classes.add('invisible'); 

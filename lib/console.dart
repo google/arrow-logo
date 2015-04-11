@@ -13,9 +13,17 @@
 // limitations under the License.
 library console;
 
+/// Provides textual output functionality for both the app and user code.
 abstract class Console {
 
   Console() {}
-  
-  void receive(dynamic raw);  
+
+  /// Processes a user command (e.g. "print").
+  void processAction(List action);
+  /// Prints a confirmation that the user defined [defnName].
+  void processDefined(String defnName);
+  /// Logs an exception.
+  void processException(String exceptionMessage);
+  /// Logs a trace string.
+  void processTrace(String traceString);
 }

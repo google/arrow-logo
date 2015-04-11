@@ -26,7 +26,10 @@ import "package:arrowlogo/parser.dart";
 import "package:arrowlogo/scope.dart";
 
 class MockConsole extends Console {
-  void receive(dynamic raw) {}
+  void processAction(List raw) {}
+  void processDefined(String defnName) {}
+  void processTrace(String traceString) {}
+  void processException(String exMessage) {}
 }
 
 class MockTurtleWorker extends TurtleWorker {

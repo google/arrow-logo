@@ -110,7 +110,7 @@ class InterpreterImpl extends InterpreterInterface {
     try {
       nodes = parser.parse(code);
     } on ParseException catch (ex) {
-      console.receive({"exception": ex.message});
+      console.processException(ex.message);
       return;
     }
     // debug.log("parsed code $nodes");
@@ -118,7 +118,7 @@ class InterpreterImpl extends InterpreterInterface {
     List<Node> nonDefnNodes = [];
     for (Node n in nodes) {
       if (n.isDefn) {
-        DefnNode defn = n;        
+        DefnNode defn = n;
         define(defn);
       } else {
         nonDefnNodes.add(n);
@@ -128,9 +128,9 @@ class InterpreterImpl extends InterpreterInterface {
     try {
       evalSequence(nodesToEval);      
     } on InterpreterException catch (ex) {
-      console.receive({"exception": ex.message});
+      console.processException(ex.message);
     } on Exception catch (ex) {
-      console.receive({"exception": ex.toString()});
+      console.processException(ex.toString());
     }
   }
   
@@ -298,12 +298,12 @@ class InterpreterImpl extends InterpreterInterface {
       case Primitive.CLEARTEXT:
       case Primitive.EDALL:
       case Primitive.HELP:
-        console.receive([p.name]);
+        console.processAction([p.name]);
         break;
         
       case Primitive.PRINT:
         Node n = args[0];
-        console.receive([p.name, n.toString()]);
+        console.processAction([p.name, n.toString()]);
         break;
         
         // end console commands
@@ -596,7 +596,7 @@ class InterpreterImpl extends InterpreterInterface {
     }
 
     if (traced) {
-      console.receive({"trace": trace.toString()});
+      console.processTrace(trace.toString());
     }
     scope = new Scope(env, scope);
     Node result;
@@ -624,7 +624,7 @@ class InterpreterImpl extends InterpreterInterface {
    */
   void define(DefnNode defn) {
     globalScope.bind(defn.name, defn);
-    console.receive({"defined": defn.name});
+    console.processDefined(defn.name);
   }
   
   /**
