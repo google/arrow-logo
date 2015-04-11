@@ -29,132 +29,128 @@ class ParserTest {
     parser.initialize(input);
     expect(parser.advanceWhile(func), equals(prefix.length));
   }
-  
-  void testAdvanceWhile() {
-    expectAdvanceWhileConsumes("  a", Scanner.isSpace, "  ");
-    expectAdvanceWhileConsumes("a", Scanner.isSpace, "");
-    expectAdvanceWhileConsumes("abc", Scanner.isAlpha, "abc");
-    expectAdvanceWhileConsumes("12abc", Scanner.isDigit, "12");
-    expectAdvanceWhileConsumes(".2a", Scanner.isDigitOrDot, ".2");
-  }
-  
-  void testSkipComment() {
-    parser.initialize(";123\n1");
-    parser.nextToken();
-    expect(parser.token.kind, equals(Token.TOKEN_NUM));    
-    expect(parser.token.node.isNum, true);
-  }
 
-  void testTokenizeNum() {
-    parser.initialize("1");
-    parser.tokenizeNum();
-    expect(parser.pos, equals("1".length));
-    expect(parser.token.kind, equals(Token.TOKEN_NUM));    
-    expect(parser.token.node.isNum, true);
-    Node n = parser.token.node;
-    expect(n.isNum, true);
-    NumberNode numInt = n;
-    expect(numInt.isInt, true);
-    expect(1, numInt.intValue);
+  void run() {
+    group("ParserTest", () {
+      test("advance while", () {
+        expectAdvanceWhileConsumes("  a", Scanner.isSpace, "  ");
+        expectAdvanceWhileConsumes("a", Scanner.isSpace, "");
+        expectAdvanceWhileConsumes("abc", Scanner.isAlpha, "abc");
+        expectAdvanceWhileConsumes("12abc", Scanner.isDigit, "12");
+        expectAdvanceWhileConsumes(".2a", Scanner.isDigitOrDot, ".2");
+      });
+      test("skip comment", () {
+        parser.initialize(";123\n1");
+        parser.nextToken();
 
-    parser.initialize("1.2x");
-    parser.tokenizeNum();
-    expect(parser.pos, equals("1.2".length));
-    expect(parser.token.kind, equals(Token.TOKEN_NUM));
-    expect(parser.token.node.isNum, true);
-    n = parser.token.node;
-    expect(n.isNum, true);
-    NumberNode numFloat = n;
-    expect(numFloat.isFloat, true);
-    expect(1.2, numFloat.floatValue);
-    
-    parser.initialize(".7");
-    parser.tokenizeNum();
-    n = parser.token.node;
-    expect(n.isNum, true);
-    numFloat = n;
-    expect(numFloat.isFloat, true);
-    expect(.7, numFloat.floatValue);
-  }
-  
-  void testTokenizeWordOrKeyword() {
-    parser.initialize("fd");
-    parser.tokenizeWord();
-    expect(parser.pos, equals("fd".length));
-    expect(parser.token.kind, equals(Token.TOKEN_PRIM));
-    expect(parser.token.node, equals(Primitive.FORWARD));   
+        expect(parser.token.kind, equals(Token.TOKEN_NUM));    
+        expect(parser.token.node.isNum, true);
+      });
+      test("tokenize num", () {
+        parser.initialize("1");
+        parser.tokenizeNum();
+        expect(parser.pos, equals("1".length));
+        expect(parser.token.kind, equals(Token.TOKEN_NUM));    
+        expect(parser.token.node.isNum, true);
+        Node n = parser.token.node;
+        expect(n.isNum, true);
+        NumberNode numInt = n;
+        expect(numInt.isInt, true);
+        expect(1, numInt.intValue);
 
-    parser.initialize("x");
-    parser.tokenizeWord();
-    expect(parser.pos, equals("x".length));
-    expect(Token.TOKEN_WORD, parser.token.kind);
-    WordNode wn = parser.token.node;
-    expect(wn.stringValue, equals("x"));   
-  }
-  
-  void testParseSomeAtoms() {
-    expect(new NumberNode.int(1), equals(new NumberNode.int(1)));  // sanity
-    expect(
-      parser.parse("fd 1 fd 1.2 \"baz \"100"),
-      equals(ListNode.makeList([
-        Primitive.FORWARD, new NumberNode.int(1),
-        Primitive.FORWARD, new NumberNode.float(1.2),
-        Primitive.QUOTE, new WordNode("baz"),
-        Primitive.QUOTE, new NumberNode.int(100)])
-      ));
-  }
-  
-  void testParseSomeLists() {  
-    expect(
-      parser.parse("[]"),
-      equals(ListNode.makeList([ListNode.NIL])));
-    expect(
-      parser.parse("[1]"),
-      equals(ListNode.makeList([ListNode.makeList([new NumberNode.int(1)])])));
-    expect(
-      parser.parse("pr [ 1 [ 1.2 ] [] fd 2 ]"),
-      equals(ListNode.makeList([
-        Primitive.PRINT,
-        ListNode.makeList([
-          new NumberNode.int(1), 
-          ListNode.makeList([new NumberNode.float(1.2)]), 
-          ListNode.NIL,
-          Primitive.FORWARD,
-          new NumberNode.int(2)])])
-      ));
-  }
-  
-  void testParseSomeDefs() {
-    expect(
-      parser.parse("to box1"),
-      equals(ListNode.makeList(
-        [new WordNode("INCOMPLETE_DEFINITION"),
-         new WordNode("box1")])
-      ));
-    expect(
-      parser.parse("to box end"),
-      equals(ListNode.makeList(
-        [new DefnNode("box", ListNode.NIL, ListNode.NIL)])
-      ));
-    expect(
-      parser.parse("to box fd 10 end"),
-      equals(ListNode.makeList([
-        new DefnNode("box", ListNode.NIL, ListNode.makeList([                                                             
-          Primitive.FORWARD, new NumberNode.int(10)]))])
-      ));
-    expect(
-      parser.parse("to box :size fd :size end"),
-      equals(ListNode.makeList([
-        new DefnNode("box",
-          ListNode.makeList([new WordNode("size")]),
-          ListNode.makeList([                                                             
-            Primitive.FORWARD,
-            Primitive.THING,
-            Primitive.QUOTE, new WordNode("size")]))])
-      ));
-  }
+        parser.initialize("1.2x");
+        parser.tokenizeNum();
+        expect(parser.pos, equals("1.2".length));
+        expect(parser.token.kind, equals(Token.TOKEN_NUM));
+        expect(parser.token.node.isNum, true);
+        n = parser.token.node;
+        expect(n.isNum, true);
+        NumberNode numFloat = n;
+        expect(numFloat.isFloat, true);
+        expect(1.2, numFloat.floatValue);
+        
+        parser.initialize(".7");
+        parser.tokenizeNum();
+        n = parser.token.node;
+        expect(n.isNum, true);
+        numFloat = n;
+        expect(numFloat.isFloat, true);
+        expect(.7, numFloat.floatValue);
+      });
+      test("tokenize word or keyword", () {
+        parser.initialize("fd");
+        parser.tokenizeWord();
+        expect(parser.pos, equals("fd".length));
+        expect(parser.token.kind, equals(Token.TOKEN_PRIM));
+        expect(parser.token.node, equals(Primitive.FORWARD));
 
-  void testParseInfixExpr() {
+        parser.initialize("x");
+        parser.tokenizeWord();
+        expect(parser.pos, equals("x".length));
+        expect(Token.TOKEN_WORD, parser.token.kind);
+        WordNode wn = parser.token.node;
+        expect(wn.stringValue, equals("x"));
+      });
+      test("parse some words and numbers", () {
+        expect(new NumberNode.int(1), equals(new NumberNode.int(1)));  // sanity
+        expect(
+          parser.parse("fd 1 fd 1.2 \"baz \"100"),
+          equals(ListNode.makeList([
+            Primitive.FORWARD, new NumberNode.int(1),
+            Primitive.FORWARD, new NumberNode.float(1.2),
+            Primitive.QUOTE, new WordNode("baz"),
+            Primitive.QUOTE, new NumberNode.int(100)])
+          ));
+      });
+      test("parse some lists", () {
+        expect(
+          parser.parse("[]"),
+          equals(ListNode.makeList([ListNode.NIL])));
+        expect(
+          parser.parse("[1]"),
+          equals(ListNode.makeList([ListNode.makeList([new NumberNode.int(1)])])));
+        expect(
+          parser.parse("pr [ 1 [ 1.2 ] [] fd 2 ]"),
+          equals(ListNode.makeList([
+            Primitive.PRINT,
+            ListNode.makeList([
+              new NumberNode.int(1), 
+              ListNode.makeList([new NumberNode.float(1.2)]), 
+              ListNode.NIL,
+              Primitive.FORWARD,
+              new NumberNode.int(2)])])
+          ));
+      });
+      test("parse some defns", () {
+        expect(
+          parser.parse("to box1"),
+          equals(ListNode.makeList(
+            [new WordNode("INCOMPLETE_DEFINITION"),
+             new WordNode("box1")])
+          ));
+        expect(
+          parser.parse("to box end"),
+          equals(ListNode.makeList(
+            [new DefnNode("box", ListNode.NIL, ListNode.NIL)])
+          ));
+        expect(
+          parser.parse("to box fd 10 end"),
+          equals(ListNode.makeList([
+            new DefnNode("box", ListNode.NIL, ListNode.makeList([
+              Primitive.FORWARD, new NumberNode.int(10)]))])
+          ));
+        expect(
+          parser.parse("to box :size fd :size end"),
+          equals(ListNode.makeList([
+            new DefnNode("box",
+              ListNode.makeList([new WordNode("size")]),
+              ListNode.makeList([
+                Primitive.FORWARD,
+                Primitive.THING,
+                Primitive.QUOTE, new WordNode("size")]))])
+          ));
+      });
+      test("parse infix expr", () {
 
     expect(
       parser.parse("2"),
@@ -220,29 +216,16 @@ class ParserTest {
                  new NumberNode.int(1),
             new NumberNode.int(3),
           new NumberNode.int(2)])));
-  }
-
-  void testParseParen() {
-    expect(
-      parser.parse("(:g > 2)"),
-      equals(ListNode.makeList(
-        [Primitive.GREATERTHAN,
-         Primitive.THING, Primitive.QUOTE, new WordNode("g"),
-         new NumberNode.int(2)])
-      ));
-  }
-
-  void run() {
-    group("ParserTest", () {
-      test("advance while", testAdvanceWhile);
-      test("skip comment", testSkipComment);
-      test("tokenize num", testTokenizeNum);
-      test("tokenize word or keyword", testTokenizeWordOrKeyword);
-      test("parse some words and numbers", testParseSomeAtoms);
-      test("parse some lists", testParseSomeLists);
-      test("parse some defns", testParseSomeDefs);
-      test("parse infix expr", testParseInfixExpr);
-      test("parse parenthesized expr", testParseParen);
+      });
+      test("parse parenthesized expr", () {
+        expect(
+          parser.parse("(:g > 2)"),
+          equals(ListNode.makeList(
+            [Primitive.GREATERTHAN,
+             Primitive.THING, Primitive.QUOTE, new WordNode("g"),
+             new NumberNode.int(2)])
+          ));
+      });
     });
   }
 }

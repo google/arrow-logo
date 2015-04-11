@@ -19,17 +19,15 @@ part "../lib/primitive.dart";
 part "../lib/node.dart";
 
 class NodeTest {
-  
-  void testListToString() {
-    Node foo = new WordNode("\"foo");
-    Node bar = new WordNode("\"bar");
-    Node barlist = ListNode.makeList([foo, bar]);
-    expect(barlist.toString(), equals("[ \"foo \"bar ]"));
-  }
-  
+
   void run() {
     group("NodeTest", () {
-      test("list construction and string", testListToString);
+      test("list construction and string", () {
+        Node foo = new WordNode("\"foo");
+        Node bar = new WordNode("\"bar");
+        Node barlist = ListNode.makeList([foo, bar]);
+        expect(barlist.toString(), equals("[ \"foo \"bar ]"));
+      });
     });
   }
 }
