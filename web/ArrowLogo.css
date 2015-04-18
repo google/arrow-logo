@@ -91,6 +91,18 @@ textarea#editor, div#editorBackground {
   height: 540px;
 }
 
+input#load {
+  position: absolute;
+  right: 5em;
+  bottom: 1em;
+}
+
+input#download {
+  position: absolute;
+  right: 5em;
+  bottom: 1em;
+}
+
 input#commit {
   position: absolute;
   right: 1em;
