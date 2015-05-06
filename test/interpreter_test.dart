@@ -13,7 +13,7 @@
 // limitations under the License.
 library interpreter_test;
 
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 
 import "dart:math" as math;
 
@@ -362,4 +362,9 @@ class InterpreterTest {
       });
     });
   }
+}
+
+
+void main() {
+  new InterpreterTest().run();
 }

@@ -13,7 +13,7 @@
 // limitations under the License.
 library nodes;
 
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 
 part "../lib/primitive.dart";
 part "../lib/node.dart";

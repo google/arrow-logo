@@ -13,7 +13,7 @@
 // limitations under the License.
 library parser_test;
 
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 
 import "package:arrowlogo/nodes.dart";
 import "package:arrowlogo/parser.dart";
@@ -94,11 +94,12 @@ class ParserTest {
       test("parse some words and numbers", () {
         expect(new NumberNode.int(1), equals(new NumberNode.int(1)));  // sanity
         expect(
-          parser.parse("fd 1 fd 1.2 \"baz \"100"),
+          parser.parse("fd 1 fd 1.2 \"baz :math # atan \"100"),
           equals(ListNode.makeList([
             Primitive.FORWARD, new NumberNode.int(1),
             Primitive.FORWARD, new NumberNode.float(1.2),
             Primitive.QUOTE, new WordNode("baz"),
+            Primitive.SELECT, Primitive.THING, Primitive.QUOTE, new WordNode("math"), new WordNode("atan"),
             Primitive.QUOTE, new NumberNode.int(100)])
           ));
       });
@@ -211,7 +212,7 @@ class ParserTest {
                new NumberNode.int(2),
                Primitive.POWER, 
                  new NumberNode.float(3.5),
-                 Primitive.SUM, 
+                 Primitive.SUM,
                  new NumberNode.int(7),
                  new NumberNode.int(1),
             new NumberNode.int(3),
@@ -228,4 +229,9 @@ class ParserTest {
       });
     });
   }
+}
+
+
+void main() {
+  new ParserTest().run();
 }

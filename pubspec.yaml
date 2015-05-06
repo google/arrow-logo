@@ -2,4 +2,4 @@ name: arrowlogo
 author: Burak Emir <burak.emir@gmail.com>
 dependencies:
   browser: any
-  unittest: any
+  test: any

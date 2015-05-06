@@ -22,6 +22,7 @@ class Primitive extends Node {
   static const CLEARSCREEN = const Primitive(0, "cs", "clearscreen");
   static const CLEARTEXT = const Primitive(0, "ct", "cleartext");
   static const CONS = const Primitive(2, "_cons"); 
+  static const SELECT = const Primitive(2, "#", "select");
   static const DRAWTEXT = const Primitive(1, "drawtext");
   static const EDALL = const Primitive(0, "edall"); 
   static const EQUALS = const Primitive(2, "==", "equals"); 
@@ -90,7 +91,7 @@ class Primitive extends Node {
     SHOWTURTLE, STOP, TRACE, TURTLE_GET_STATE, UNTRACE ];
 
   static const List<Primitive> operatorList = const [
-    APPLY, BUTFIRST, DIFFERENCE, FALSE, FPUT, LESSOREQUAL, LESSTHAN, FIRST,
+    APPLY, BUTFIRST, DIFFERENCE, SELECT, FALSE, FPUT, LESSOREQUAL, LESSTHAN, FIRST,
     GREATEROREQUAL,
     GREATERTHAN, ITEM, LPUT, OUTPUT, PRODUCT, QUOTE, QUOTIENT, POWER, PI,
     REMAINDER,
@@ -150,6 +151,8 @@ class Primitive extends Node {
       return 20;
     case POWER:
       return 30;
+    case SELECT:
+      return 50;
     default:
       return 0;
     }
@@ -157,6 +160,7 @@ class Primitive extends Node {
 
   bool get isLeftAssoc {
     switch (this) {
+    case SELECT:
     case SUM:
     case DIFFERENCE:
     case PRODUCT:

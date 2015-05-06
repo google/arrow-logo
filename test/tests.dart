@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Runs all unit tests. Use this command line:
-// dart --enable-checked-mode --package-root=`pwd`/packages/ tests/tests.dart
+// dart --enable-checked-mode tests/tests.dart
 library arrowlogo;
 
 import 'interpreter_test.dart';

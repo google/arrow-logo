@@ -39,6 +39,7 @@ class Token {
   static const int TOKEN_OUTPUT = 45;
   static const int TOKEN_END = 46;
 
+  static const int TOKEN_POUND = 51;
   static const int TOKEN_PLUS = 52;  
   static const int TOKEN_MINUS = 53;  
   static const int TOKEN_SLASH = 54;  
@@ -89,11 +90,12 @@ class Token {
       case TOKEN_TO: return "TO";
       case TOKEN_VAR: return "VAR";
       case TOKEN_OUTPUT: return "OUTPUT";
-      case TOKEN_END: return "END";      
+      case TOKEN_END: return "END";
 
+      case TOKEN_POUND: return "#";
       case TOKEN_PLUS: return "PLUS";  
       case TOKEN_MINUS: return "MINUS";  
-      case TOKEN_SLASH: return "SLASH";  
+      case TOKEN_SLASH: return "SLASH";
       case TOKEN_STAR: return "STAR";  
       case TOKEN_CARET: return "CARET";  
 
@@ -113,6 +115,7 @@ class Token {
     switch (kind) {
       case TOKEN_PERCENT:
       case TOKEN_PLUS:
+      case TOKEN_POUND:
       case TOKEN_MINUS:
       case TOKEN_SLASH:
       case TOKEN_STAR:
@@ -149,6 +152,8 @@ class Token {
         return Primitive.REMAINDER;
       case TOKEN_PLUS:
         return Primitive.SUM;
+      case TOKEN_POUND:
+        return Primitive.SELECT;
       case TOKEN_MINUS:
         return Primitive.DIFFERENCE;
       case TOKEN_SLASH:
@@ -318,6 +323,7 @@ class Scanner {
   
   void tokenizeSpecial() {
     switch (text[pos]) {
+      case '#': token.setKind(Token.TOKEN_POUND); break;
       case '(': token.setKind(Token.TOKEN_LPAREN); break;
       case ')': token.setKind(Token.TOKEN_RPAREN); break;
       case '{': token.setKind(Token.TOKEN_LBRACE); break;
