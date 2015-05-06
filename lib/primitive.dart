@@ -46,8 +46,8 @@ class Primitive extends Node {
   static const DIFFERENCE = const Primitive(2, "-", "difference"); 
   static const MAKE = const Primitive(2, "make");
   static const NIL = const Primitive(0, "_nil"); 
-  static const OUTPUT = const Primitive(1, "output");
-  static const PENDOWN = const Primitive(0, "pd", "pendown"); 
+  static const OUTPUT = const Primitive(1, "op", "output");
+  static const PENDOWN = const Primitive(0, "pd", "pendown");
   static const PENUP = const Primitive(0, "pu", "penup"); 
   static const PI = const Primitive(0, "pi");  
   static const POWER = const Primitive(2, "^", "power"); 
