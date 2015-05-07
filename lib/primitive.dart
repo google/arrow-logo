@@ -30,6 +30,7 @@ class Primitive extends Node {
   static const FIRST = const Primitive(1, "first");
   static const FORWARD = const Primitive(1, "fd", "forward"); 
   static const FPUT = const Primitive(2, "fput");
+  static const GPROP = const Primitive(2, "gprop");
   static const GREATERTHAN = const Primitive(2, ">", "greaterthan");
   static const GREATEROREQUAL = const Primitive(2, ">=", "greaterorequal");
   static const HIDETURTLE = const Primitive(0, "ht", "hideturtle");
@@ -45,17 +46,20 @@ class Primitive extends Node {
   static const LPUT = const Primitive(2, "lput"); 
   static const DIFFERENCE = const Primitive(2, "-", "difference"); 
   static const MAKE = const Primitive(2, "make");
-  static const NIL = const Primitive(0, "_nil"); 
+  static const NIL = const Primitive(0, "_nil");
   static const OUTPUT = const Primitive(1, "op", "output");
   static const PENDOWN = const Primitive(0, "pd", "pendown");
   static const PENUP = const Primitive(0, "pu", "penup"); 
-  static const PI = const Primitive(0, "pi");  
-  static const POWER = const Primitive(2, "^", "power"); 
+  static const PI = const Primitive(0, "pi");
+  static const PLIST = const Primitive(1, "plist");
+  static const POWER = const Primitive(2, "^", "power");
+  static const PPROP = const Primitive(3, "pprop");
   static const PRODUCT = const Primitive(2, "*", "product"); 
   static const PRINT = const Primitive(1, "pr", "print");   
   static const QUOTE = const Primitive(1, "quote");
   static const QUOTIENT = const Primitive(2, "/", "quotient"); 
   static const REMAINDER = const Primitive(2, "%", "remainder");
+  static const REMPROP = const Primitive(2, "remprop");
   static const REPEAT = const Primitive(2, "repeat"); 
   static const RIGHT = const Primitive(1, "rt", "right");
   static const RUN = const Primitive(1, "run");
@@ -85,15 +89,16 @@ class Primitive extends Node {
   static const List<Primitive> commandsList = const [ 
     BACK, CLEAN, CLEARSCREEN, CLEARTEXT, CONS, DRAWTEXT, EDALL, FORWARD, HELP,
     HIDETURTLE,
-    HOME, IF, IFELSE, LOCAL, LEFT, MAKE, NIL, PENDOWN, PENUP, PRINT, REPEAT,
+    HOME, IF, IFELSE, LOCAL, LEFT, MAKE, NIL, PENDOWN, PENUP, PPROP, PRINT,
+    REMPROP, REPEAT,
     RIGHT, SETFONT,
     SETPENCOLOR, SETTEXTALIGN, SETTEXTBASELINE,
     SHOWTURTLE, STOP, TRACE, TURTLE_GET_STATE, UNTRACE ];
 
   static const List<Primitive> operatorList = const [
     APPLY, BUTFIRST, DIFFERENCE, SELECT, FALSE, FPUT, LESSOREQUAL, LESSTHAN, FIRST,
-    GREATEROREQUAL,
-    GREATERTHAN, ITEM, LPUT, OUTPUT, PRODUCT, QUOTE, QUOTIENT, POWER, PI,
+    GPROP, GREATEROREQUAL,
+    GREATERTHAN, ITEM, LPUT, OUTPUT, PLIST, PRODUCT, QUOTE, QUOTIENT, POWER, PI,
     REMAINDER,
     SUM, THING, TRUE ];
   

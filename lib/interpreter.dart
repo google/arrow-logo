@@ -56,10 +56,41 @@ class InterpreterProxy extends InterpreterInterface {
 }
 
 class InterpreterState {
+  final Map<String, Map<String, Node>> pLists = new Map();
   final Set<String> traced;
   
   InterpreterState() : traced = new Set<String>();
-  
+
+  void putProp(String pListName, propName, value) {
+    var pList = pLists.putIfAbsent(pListName, () => new Map<String, Node>());
+    pList[propName] = value;
+  }
+
+  Node getProp(String pListName, propName) {
+    var pList = pLists[pListName];
+    return pList == null ? null : pList[propName];
+  }
+
+  void remProp(String pListName, propName) {
+    var pList = pLists[pListName];
+    if (pList == null) {
+      return;
+    }
+    pList.remove(propName);
+  }
+
+  void propList(String pListName) {
+    Map pList = pLists[pListName];
+    Node result = new ListNode.nil();
+    if (pList == null) {
+      return result;
+    }
+    for (var prop in pList.keys) {
+      result = new ListNode.cons(prop, new ListNode.cons(pList[prop], result));
+    }
+    return result;
+  }
+
   bool isTraced(String name) {
     return traced.contains(name);
   }
@@ -467,8 +498,31 @@ class InterpreterImpl extends InterpreterInterface {
       
       case Primitive.TRUE:
         return new ListNode.cons(p, nodes);
-      
-      // math
+
+      case Primitive.PPROP:
+        WordNode propListName = ensureWord(args[0]);
+        WordNode propName = ensureWord(args[1]);
+        Node value = args[2];
+        state.putProp(propListName.stringValue, propName.stringValue, value);
+        break;
+
+      case Primitive.GPROP:
+        WordNode propListName = ensureWord(args[0]);
+        WordNode propName = ensureWord(args[1]);
+        return new ListNode.cons(
+            state.getProp(propListName.stringValue, propName.stringValue), nodes);
+
+      case Primitive.REMPROP:
+        WordNode propListName = ensureWord(args[0]);
+        WordNode propName = ensureWord(args[1]);
+        state.remProp(propListName.stringValue, propName.stringValue);
+        break;
+
+      case Primitive.PLIST:
+        WordNode propListName = ensureWord(args[0]);
+        return new ListNode.cons(state.propList(propListName.stringValue), nodes);
+
+    // math
         
       case Primitive.SUM:
         return evalBinOp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primSumInt, primSumFloat);
