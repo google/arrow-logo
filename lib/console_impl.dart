@@ -15,6 +15,9 @@ library console_impl;
 
 import 'dart:html' as html;
 
+import 'package:ace/ace.dart' as ace;
+import 'package:ace/proxy.dart';
+
 import 'console.dart';
 import 'interpreter.dart';
 import 'nodes.dart';
@@ -28,16 +31,16 @@ class ConsoleImpl extends Console {
 
   final html.TextAreaElement shellElem;
   final html.TextAreaElement historyElem;
-  final html.TextAreaElement editorElem;
+  final html.Element editorElem;
   final html.Element editorBackground;
   final html.InputElement editorFileInput;
   final html.Element editorDownloadButton;
   final html.Element editorCommitButton;
-
   final Parser parser;
+  ace.Editor editor;
   InterpreterInterface interpreter;
 
-  String userText;
+  String userText = "";
 
   ConsoleImpl(this.interpreter)
       : shellElem = html.document.querySelector('#shell'),
@@ -60,10 +63,18 @@ class ConsoleImpl extends Console {
     writeln("Type 'help' for help.");
     writeln("Type 'edall' to switch to the editor.");
     prompt();
+
+    ace.implementation = ACE_PROXY_IMPLEMENTATION;
+    ace.config.setModuleUrl('ace/mode/logo','packages/arrowlogo/mode-logo.js');
+    editor = ace.edit(editorElem);
+    editor.theme = new ace.Theme.named(ace.Theme.KUROIR);
   }
 
+  String get editorContent => editor.session.document.getAllLines().join('\n');
+  set editorContent(String newContent) => editor.session.document.value = newContent;
+
   String getContentsAsUrl() {
-    return 'data:text/csv;charset=UTF-8,${Uri.encodeQueryComponent(editorElem.value)}';
+    return 'data:text/csv;charset=UTF-8,${Uri.encodeQueryComponent(editorContent)}';
   }
 
   void processAction(List msg) {
@@ -96,7 +107,7 @@ class ConsoleImpl extends Console {
     var reader = new html.FileReader();
     reader.onLoad.listen((e) {
       // TODO: ask before discarding user text.
-      editorElem.value = reader.result;
+      editorContent = reader.result;
       editorFileInput.value = "";
     });
     reader.readAsText(fileRef);
@@ -134,6 +145,7 @@ class ConsoleImpl extends Console {
     shellElem.classes.add('invisible');
     historyElem.classes.add('invisible');
     editorElem.focus();
+    editor.session = ace.createEditSession(userText, new ace.Mode.named('logo'));
   }
 
   void prompt() {
@@ -197,7 +209,7 @@ class ConsoleImpl extends Console {
   }
 
   void handleCommitClick(html.Event e) {
-    userText = editorElem.value;
+    userText = editorContent;
 
     interpreter.interpret(userText);
     hideEditor();

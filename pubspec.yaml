@@ -1,5 +1,6 @@
 name: arrowlogo
 author: Burak Emir <burak.emir@gmail.com>
 dependencies:
+  ace: '>= 0.6.2'
   browser: any
   test: any

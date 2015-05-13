@@ -70,7 +70,7 @@ canvas#turtle {
   z-index: 1;
 }
 
-textarea#history, textarea#shell, textarea#editor, div#editorBackground {
+textarea#history, textarea#shell, div#editorBackground {
   font-family: monospace;
   width: 300px;
   background: rgb(230,230,230);
@@ -84,11 +84,12 @@ textarea#shell {
   height: 20px;
 }
 
-textarea#editor, div#editorBackground {
+div#editor, div#editorBackground {
   position: absolute;
   left: 0;
   top: 0;
   height: 540px;
+  width: 300px;
 }
 
 input#load {
