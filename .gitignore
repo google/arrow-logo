@@ -1,5 +1,6 @@
 packages
 pubspec.lock
-build
-
-
+.pub
+.project
+.idea
+arrow-logo.iml
