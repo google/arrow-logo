@@ -15,8 +15,7 @@ library nodes;
 
 import 'package:test/test.dart';
 
-part "../lib/primitive.dart";
-part "../lib/node.dart";
+import "../lib/nodes.dart";
 
 class NodeTest {
 

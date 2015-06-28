@@ -13,34 +13,14 @@
 // limitations under the License.
 library arrowlogo;
 
-import 'package:arrowlogo/console.dart';
-import 'package:arrowlogo/console_impl.dart';
-import 'package:arrowlogo/debug.dart';
-import 'package:arrowlogo/interpreter.dart';
-import "package:arrowlogo/turtle.dart";
-import "package:arrowlogo/turtle_impl.dart";
-
-class ArrowLogo {
-  
-  Debug debug;
-  TurtleWorker turtle;
-  Console console;
-  InterpreterProxy interpreterProxy;
-  InterpreterInterface interpreter;
-   
-  ArrowLogo() {
-    debug = new SimpleDebug();
-    turtle = new TurtleWorkerImpl();
-    interpreterProxy = new InterpreterProxy();
-    console = new ConsoleImpl(interpreterProxy);
-    interpreter = new InterpreterImpl(debug, turtle, console);
-  }
-  
-  void run() {
-    interpreterProxy.init(interpreter);
-  }
-}
+import 'package:angular2/angular2.dart';
+import 'package:angular2/src/reflection/reflection.dart' show reflector;
+import 'package:angular2/src/reflection/reflection_capabilities.dart' show ReflectionCapabilities;
+import 'package:arrowlogo/arrow_logo_app.dart';
 
 void main() {
-  new ArrowLogo().run();
+  // this won't be needed in a later version of Angular
+  reflector.reflectionCapabilities = new ReflectionCapabilities();
+  // boostrap Angular
+  bootstrap(ArrowLogoApp);
 }
