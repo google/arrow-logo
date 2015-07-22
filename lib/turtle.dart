@@ -32,4 +32,6 @@ abstract class TurtleWorker {
   void receive(Primitive p, List<dynamic> args);
 
   TurtleState get state;
+
+  init(userCanvas, turtleCanvas);
 }

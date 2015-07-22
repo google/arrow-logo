@@ -30,11 +30,9 @@ class TurtleWorkerImpl extends TurtleWorker {
     String size = sizePx.substring(0, sizePx.length - 2);
     return int.parse(size);
   }
-  
-  TurtleWorkerImpl() {
-    var userCanvas = html.document.querySelector("#user");
+
+  init(userCanvas, turtleCanvas) {
     var userCtx = userCanvas.getContext("2d");
-    var turtleCanvas = html.document.querySelector("#turtle");
     var turtleCtx = turtleCanvas.getContext("2d");
 
     html.CssStyleDeclaration style = userCanvas.getComputedStyle() ;
@@ -249,8 +247,6 @@ class Turtle {
   
   void drawTurtle() {
     num baseHeading = getHeadingRad();
-    num origDelta = delta;
-    num localDelta = delta;
     num BODY_RADIUS = 12;
     
     drawFillCircle(turtleCtx, x, y, BODY_RADIUS, ORANGE);

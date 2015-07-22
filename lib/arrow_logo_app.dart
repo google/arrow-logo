@@ -14,21 +14,38 @@
 
 library arrow_logo_app;
 
+import 'package:angular2/angular2.dart';
+import 'package:angular2/di.dart';
+
 import 'console.dart';
 import 'console_impl.dart';
 import 'debug.dart';
+import "editor_panel.dart";
+import "graphics_panel.dart";
 import 'interpreter.dart';
 import "turtle.dart";
 import "turtle_impl.dart";
-import 'package:angular2/angular2.dart';
+
+class ArrowLogoModule {
+  List<Binding> get bindings => [
+    TurtleWorkerImpl,
+    ConsoleImpl,
+    InterpreterImpl,
+    SimpleDebug,
+    new Binding(Debug, toValue: new SimpleDebug()),
+    new Binding(TurtleWorker, toAlias: TurtleWorkerImpl),
+    new Binding(Console, toAlias: ConsoleImpl),
+    new Binding(InterpreterInterface, toAlias: InterpreterImpl)
+  ];
+}
 
 @Component(
-    selector: 'arrow-logo-app'
+  selector: 'arrow-logo-app'
 )
 @View(
-    template: '''
-  <style>
-  div#container {
+  template: '''
+<style>
+div#container {
   margin: 0 auto;
   height: 600px;
   width: 910px;
@@ -48,114 +65,22 @@ div.main {
   margin-left: 10px;
   margin-right: 10px;
 }
-
-div.left_panel {
-  position: absolute;
-  width: 600px;
-  height: 540px;
-}
-
-div.right_panel {
-  position: absolute;
-  left: 610px;
-  width: 300px;
-  height: 540px;
-  right: 0px;
-}
-
-canvas#user, canvas#turtle {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 600px;
-  height: 540px;
-}
-
-canvas#user {
-  z-index: 0;
-}
-
-canvas#turtle {
-  z-index: 1;
-}
-
-textarea#history, textarea#shell, div#editorBackground {
-  font-family: monospace;
-  width: 300px;
-  background: rgb(230,230,230);
-}
-
-textarea#history {
-  height: 502px;
-}
-
-textarea#shell {
-  height: 20px;
-}
-
-div#editor, div#editorBackground {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 540px;
-  width: 300px;
-}
-
-input#load {
-  position: absolute;
-  right: 5em;
-  bottom: 1em;
-}
-
-input#download {
-  position: absolute;
-  right: 5em;
-  bottom: 1em;
-}
-
-input#commit {
-  position: absolute;
-  right: 1em;
-  bottom: 1em;
-}
-  </style>
-  <div id="container">
-    <h1 class="title">ArrowLogo</h1>
-    <div class="main">
-
-      <div class="left_panel">
-        <canvas id="user" width="600px" height="540px"></canvas>
-        <canvas id="turtle" width="600px" height="540px"></canvas>
-      </div>
-
-      <div class="right_panel">
-        <textarea id="shell"></textarea>
-        <textarea id="history"></textarea>
-        <div class="editor">
-          <div id="editorBackground" class="invisible"></div>
-          <div id="editor" class="invisible"></div>
-          <input id="load" type="file" value="" class="invisible"></input>
-          <input id="download" type="button" value="save" class="invisible"></input>
-          <input id="commit" type="button" value="ok" class="invisible"></input>
-        </div>
-      </div>
-    </div>
+</style>
+<div id="container">
+  <h1 class="title">ArrowLogo</h1>
+  <div class="main">
+    <graphics-panel></graphics-panel>
+    <editor-panel></editor-panel>
   </div>
-    '''
+</div>
+''',
+  directives: const [EditorPanel, GraphicsPanel]
 )
 class ArrowLogoApp {
-  Debug debug;
-  TurtleWorker turtle;
   Console console;
-  InterpreterProxy interpreterProxy;
   InterpreterInterface interpreter;
 
-  ArrowLogoApp() {
-    debug = new SimpleDebug();
-    turtle = new TurtleWorkerImpl();
-    interpreterProxy = new InterpreterProxy();
-    console = new ConsoleImpl(interpreterProxy);
-    interpreter = new InterpreterImpl(debug, turtle, console);
-    interpreterProxy.init(interpreter);
+  ArrowLogoApp(this.console, this.interpreter) {
+    console.interpreter = interpreter.interpret;
   }
 }

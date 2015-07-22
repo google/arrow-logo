@@ -22,5 +22,6 @@ void main() {
   // this won't be needed in a later version of Angular
   reflector.reflectionCapabilities = new ReflectionCapabilities();
   // boostrap Angular
-  bootstrap(ArrowLogoApp);
+  bootstrap(ArrowLogoApp, new ArrowLogoModule().bindings);
 }
+

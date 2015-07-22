@@ -19,7 +19,6 @@ import 'package:ace/ace.dart' as ace;
 import 'package:ace/proxy.dart';
 
 import 'console.dart';
-import 'interpreter.dart';
 import 'nodes.dart';
 import 'parser.dart';
 
@@ -29,28 +28,28 @@ class ConsoleImpl extends Console {
   static final int LEFT = 37;
   static final String PROMPT = "?";
 
-  final html.TextAreaElement shellElem;
-  final html.TextAreaElement historyElem;
-  final html.Element editorElem;
-  final html.Element editorBackground;
-  final html.InputElement editorFileInput;
-  final html.Element editorDownloadButton;
-  final html.Element editorCommitButton;
-  final Parser parser;
+  html.TextAreaElement shellElem;
+  html.TextAreaElement historyElem;
+  html.Element editorElem;
+  html.Element editorBackground;
+  html.InputElement editorFileInput;
+  html.Element editorDownloadButton;
+  html.Element editorCommitButton;
+  Parser parser;
   ace.Editor editor;
-  InterpreterInterface interpreter;
 
   String userText = "";
 
-  ConsoleImpl(this.interpreter)
-      : shellElem = html.document.querySelector('#shell'),
-        historyElem = html.document.querySelector('#history'),
-        editorElem = html.document.querySelector('#editor'),
-        editorBackground = html.document.querySelector("#editorBackground"),
-        editorFileInput = html.document.querySelector('#load'),
-        editorCommitButton = html.document.querySelector('#commit'),
-        editorDownloadButton = html.document.querySelector('#download'),
-        parser = new Parser(Primitive.makeTopLevel()) {
+  ConsoleImpl() : parser = new Parser(Primitive.makeTopLevel());
+
+  init(nativeElement) {
+    shellElem = html.document.querySelector('#shell');
+    historyElem = html.document.querySelector('#history');
+    editorElem = html.document.querySelector('#editor');
+    editorBackground = html.document.querySelector("#editorBackground");
+    editorFileInput = html.document.querySelector('#load');
+    editorCommitButton = html.document.querySelector('#commit');
+    editorDownloadButton = html.document.querySelector('#download');
 
     editorFileInput.onChange.listen((e) => _onFileInputChange());
 
@@ -70,6 +69,10 @@ class ConsoleImpl extends Console {
     editor.theme = new ace.Theme.named(ace.Theme.KUROIR);
   }
 
+  InterpreterFn interpret;
+  set interpreter(ConsoleInterpreterFn interpret) {
+    this.interpret = interpret;
+  }
   String get editorContent => editor.session.document.getAllLines().join('\n');
   set editorContent(String newContent) => editor.session.document.value = newContent;
 
@@ -144,7 +147,7 @@ class ConsoleImpl extends Console {
     editorCommitButton.classes.remove('invisible');
     shellElem.classes.add('invisible');
     historyElem.classes.add('invisible');
-    editorElem.focus();
+    editor.focus();
     editor.session = ace.createEditSession(userText, new ace.Mode.named('logo'));
   }
 
@@ -183,7 +186,7 @@ class ConsoleImpl extends Console {
       if (!code.isEmpty) {
         writeln(text);
         // TODO: get back errors
-        interpreter.interpret(code);
+        interpret(code);
       }
       e.preventDefault();
       prompt();
@@ -211,7 +214,7 @@ class ConsoleImpl extends Console {
   void handleCommitClick(html.Event e) {
     userText = editorContent;
 
-    interpreter.interpret(userText);
+    interpret(userText);
     hideEditor();
   }
 }
