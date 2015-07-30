@@ -65,6 +65,10 @@ class ListNode extends Node {
     || (head == that.head && tail == that.tail);
   }
 
+  bool contains(node) {
+    return !isNil && ((head == node) || tail.contains(node));
+  }
+
   int get hashCode {
     return isNil ? -1 : head.hashCode * 7 + tail.hashCode;
   }
@@ -260,7 +264,6 @@ class Primitive extends Node {
   static const SELECT = const Primitive(2, "#", "select");
   static const DRAWTEXT = const Primitive(1, "drawtext");
   static const EDALL = const Primitive(0, "edall");
-  static const EQUALS = const Primitive(2, "==", "equals");
   static const FALSE = const Primitive(0, "false");
   static const FIRST = const Primitive(1, "first");
   static const FORWARD = const Primitive(1, "fd", "forward");
@@ -313,6 +316,13 @@ class Primitive extends Node {
   static const UNIT = const Primitive(0, "unit");
   static const UNTRACE = const Primitive(1, "untrace");
 
+  static const EMPTYP = const Primitive(1, "emptyp");
+  static const EQUALS = const Primitive(2, "==", "equals");
+  static const LISTP = const Primitive(1, "listp");
+  static const MEMBERP = const Primitive(2, "memberp");
+  static const NUMP = const Primitive(1, "nump");
+  static const WORDP = const Primitive(1, "wordp");
+
   static Map<String, Primitive> makeTopLevel() {
     Map<String, Primitive> map = new Map();
     for (String k in getBuiltIns().keys) {
@@ -335,7 +345,8 @@ class Primitive extends Node {
     GPROP, GREATEROREQUAL,
     GREATERTHAN, ITEM, LPUT, OUTPUT, PLIST, PRODUCT, QUOTE, QUOTIENT, POWER, PI,
     REMAINDER,
-    SUM, THING, TRUE ];
+    SUM, THING, TRUE,
+    EMPTYP, EQUALS, LISTP, MEMBERP, NUMP, WORDP ];
 
   static Map<String, Primitive> commandsMap = null;
 

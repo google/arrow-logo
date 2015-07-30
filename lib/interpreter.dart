@@ -164,7 +164,7 @@ class InterpreterImpl extends InterpreterInterface {
       console.processException(ex.toString());
     }
   }
-  
+
   Node evalBinCmp(p, NumberNode op1, NumberNode op2, ListNode nodes, cmpNum(num x, num y)) {
     Node res = cmpNum(op1.numValue, op2.numValue) ? Primitive.TRUE : Primitive.FALSE;
     return new ListNode.cons(res, nodes);
@@ -196,6 +196,11 @@ class InterpreterImpl extends InterpreterInterface {
   static bool primLessOrEqualNum(num a, num b) => a <= b;
   static bool primGreaterThanNum(num a, num b) => a > b;
   static bool primGreaterOrEqualNum(num a, num b) => a >= b;
+
+  static bool primEqualsList(ListNode a, ListNode b) => a == b;
+  static bool primMemberList(Node a, ListNode b) => b.contains(a);
+  static bool primEqualsWord(WordNode a, WordNode b) => a == b;
+  static bool primMemberWord(WordNode a, WordNode b) => b.toString().contains(a.toString());
 
   NumberNode ensureNum(Node node) {
     if (!node.isNum) {
@@ -349,10 +354,7 @@ class InterpreterImpl extends InterpreterInterface {
           return new ListNode.cons(butfirst, nodes);
         }
         throw new InterpreterException("butfirst expected word or list");
-      case Primitive.EQUALS:
-        // TODO equality for words, lists
-        return evalBinCmp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primEqualsNum);
-        
+
       case Primitive.FALSE:
         return new ListNode.cons(p, nodes);
 
@@ -371,7 +373,7 @@ class InterpreterImpl extends InterpreterInterface {
         Node first = args[0];
         ListNode ln = ensureList(args[1]);
         return new ListNode.cons(new ListNode.cons(first, ln), nodes);
-        
+
       case Primitive.IF:
         nodes = evalInScope(nodes, scope);
         if (!(nodes.head is Primitive)) {
@@ -521,6 +523,51 @@ class InterpreterImpl extends InterpreterInterface {
       case Primitive.PLIST:
         WordNode propListName = ensureWord(args[0]);
         return new ListNode.cons(state.propList(propListName.stringValue), nodes);
+
+    // predicates
+
+      case Primitive.EMPTYP:
+        Node arg = args[0];
+        return new ListNode.cons(
+            arg.isList && (arg as ListNode).isNil ? Primitive.TRUE : Primitive.FALSE,
+            nodes);
+
+      case Primitive.EQUALS:
+        Node arg0 = args[0];
+        Node arg1 = args[1];
+        if (arg0.isNum && arg1.isNum) {
+          return evalBinCmp(p, ensureNum(arg0), ensureNum(arg1), nodes, primEqualsNum);
+        }
+        if (arg0.isList && arg1.isList) {
+          return new ListNode.cons(primEqualsList(ensureList(arg0), ensureList(arg1)), nodes);
+        }
+        if (arg0.isWord && arg1.isWord) {
+          return new ListNode.cons(primEqualsWord(ensureWord(arg0), ensureWord(arg1)), nodes);
+        }
+        return new ListNode.cons(Primitive.FALSE, nodes);
+
+      case Primitive.LISTP:
+        Node arg = args[0];
+        return new ListNode.cons(arg.isList ? Primitive.TRUE : Primitive.FALSE, nodes);
+
+      case Primitive.MEMBERP:
+        Node arg0 = args[0];
+        Node arg1 = args[1];
+        if (arg1.isList) {
+          return new ListNode.cons(primMemberList(arg0, ensureList(arg1)), nodes);
+        }
+        if (arg0.isWord && arg1.isWord) {
+          return new ListNode.cons(primMemberWord(ensureWord(arg0), ensureWord(arg1)), nodes);
+        }
+        return new ListNode.cons(Primitive.FALSE, nodes);
+
+      case Primitive.NUMP:
+        Node arg = args[0];
+        return new ListNode.cons(arg.isNum ? Primitive.TRUE : Primitive.FALSE, nodes);
+
+      case Primitive.WORDP:
+        Node arg = args[0];
+        return new ListNode.cons(arg.isWord ? Primitive.TRUE : Primitive.FALSE, nodes);
 
     // math
         
