@@ -17,30 +17,13 @@ import 'package:test/test.dart';
 
 import "dart:math" as math;
 
-import "package:arrowlogo/console.dart";
 import "package:arrowlogo/debug.dart";
-import "package:arrowlogo/turtle.dart";
 import "package:arrowlogo/interpreter.dart";
 import "package:arrowlogo/nodes.dart";
 import "package:arrowlogo/parser.dart";
 import "package:arrowlogo/scope.dart";
 
-class MockConsole extends Console {
-  void processAction(List raw) {}
-  void processDefined(String defnName) {}
-  void processTrace(String traceString) {}
-  void processException(String exMessage) {}
-}
-
-class MockTurtleWorker extends TurtleWorker {
-
-  @override
-  void receive(Primitive p, List<dynamic> args) {
-    // ignore
-  }
-
-  TurtleState get state => new TurtleState(0.0, 0.0, 0.0);
-}
+import "./mocks.dart";
 
 class InterpreterTest {
 
