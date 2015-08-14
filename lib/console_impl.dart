@@ -69,8 +69,8 @@ class ConsoleImpl extends Console {
     editor.theme = new ace.Theme.named(ace.Theme.KUROIR);
   }
 
-  InterpreterFn interpret;
-  set interpreter(ConsoleInterpreterFn interpret) {
+  var interpret;
+  set interpreter(void interpret(String)) {
     this.interpret = interpret;
   }
   String get editorContent => editor.session.document.getAllLines().join('\n');
