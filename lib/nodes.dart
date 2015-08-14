@@ -261,6 +261,7 @@ class Primitive extends Node {
   static const CLEARSCREEN = const Primitive(0, "cs", "clearscreen");
   static const CLEARTEXT = const Primitive(0, "ct", "cleartext");
   static const CONS = const Primitive(2, "_cons");
+  static const CURRENT_TIME_MILLIS = const Primitive(0, "current_time_millis");
   static const SELECT = const Primitive(2, "#", "select");
   static const DRAWTEXT = const Primitive(1, "drawtext");
   static const EDALL = const Primitive(0, "edall");
@@ -278,8 +279,8 @@ class Primitive extends Node {
   static const IFELSE = const Primitive(3, "ifelse");
   static const ITEM = const Primitive(2, "item");
   static const LEFT = const Primitive(1, "lt", "left");
-  static const LESSTHAN = const Primitive(1, "<", "lessthan");
-  static const LESSOREQUAL = const Primitive(1, "<=", "lessorequal");
+  static const LESSTHAN = const Primitive(2, "<", "lessthan");
+  static const LESSOREQUAL = const Primitive(2, "<=", "lessorequal");
   static const LOCAL = const Primitive(1, "local");
   static const LPUT = const Primitive(2, "lput");
   static const DIFFERENCE = const Primitive(2, "-", "difference");
@@ -341,7 +342,8 @@ class Primitive extends Node {
     SHOWTURTLE, STOP, TRACE, TURTLE_GET_STATE, UNTRACE ];
 
   static const List<Primitive> operatorList = const [
-    APPLY, BUTFIRST, DIFFERENCE, SELECT, FALSE, FPUT, LESSOREQUAL, LESSTHAN, FIRST,
+    APPLY, BUTFIRST, CURRENT_TIME_MILLIS,
+    DIFFERENCE, SELECT, FALSE, FPUT, LESSOREQUAL, LESSTHAN, FIRST,
     GPROP, GREATEROREQUAL,
     GREATERTHAN, ITEM, LPUT, OUTPUT, PLIST, PRODUCT, QUOTE, QUOTIENT, POWER, PI,
     REMAINDER,

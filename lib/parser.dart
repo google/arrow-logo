@@ -194,14 +194,18 @@ class Scanner {
   static const int CHAR_NEWLINE = 10;
   static const int CHAR_COLON = 58; 
   static const int CHAR_SEMI = 59;
-  
+  static const int CHAR_UNDERSCORE = 95;
+
   static bool isAlpha(int charCode) =>
       (CHAR_a <= charCode && charCode <= CHAR_z)
       || (CHAR_A <= charCode && charCode <= CHAR_Z);
   
   static bool isDigit(int charCode) => 
       (CHAR_0 <= charCode && charCode <= CHAR_9);
-  
+
+  static bool isUnderscore(int charCode) =>
+      CHAR_UNDERSCORE == charCode;
+
   static bool isDigitOrDot(int charCode) => 
       CHAR_DOT == charCode || isDigit(charCode);
   
@@ -215,8 +219,8 @@ class Scanner {
       CHAR_BLANK == charCode || CHAR_TAB == charCode
       || CHAR_NEWLINE == charCode;
   
-  static bool isAlphaOrDigit(int charCode) =>
-      isAlpha(charCode) || isDigit(charCode);
+  static bool isAlphaOrDigitOrUnderscore(int charCode) =>
+      isAlpha(charCode) || isDigit(charCode) || isUnderscore(charCode);
   
   static bool notNewLine(int charCode) =>
       CHAR_NEWLINE != charCode;
@@ -281,7 +285,7 @@ class Scanner {
     if (!isAlpha(text.codeUnitAt(pos))) {
       throw new Exception("expected alphabetical");
     }
-    advanceWhile(isAlphaOrDigit);
+    advanceWhile(isAlphaOrDigitOrUnderscore);
     String word = text.substring(i, pos);
     token.setVar(new WordNode(word));
   }
@@ -306,7 +310,7 @@ class Scanner {
   /** @post token.kind \in {TOKEN_TO, TOKEN_END, TOKEN_WORD, TOKEN_PRIM} */
   void tokenizeWord() {
     int i = pos;
-    advanceWhile(isAlphaOrDigit);
+    advanceWhile(isAlphaOrDigitOrUnderscore);
     String word = text.substring(i, pos);
     if (word == "to") {
       token.kind = Token.TOKEN_TO;

@@ -260,7 +260,9 @@ class InterpreterImpl extends InterpreterInterface {
           return new ListNode.cons(result, nodes);
         }
         break;
-
+      case Primitive.CURRENT_TIME_MILLIS:
+        return new ListNode.cons(
+            new NumberNode.int(new DateTime.now().millisecondsSinceEpoch), nodes);
       case Primitive.UNIT:
         break;
         
