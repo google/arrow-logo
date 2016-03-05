@@ -497,8 +497,8 @@ class Parser extends Scanner {
             || (isLeftAssoc 
                 && prec == opstack.binop.precedence))) {
       OpInfo top = opstack;
-      List<Node> tmp = [opstack.binop];
-      tmp.addAll(opstack.operand);
+      List<Node> tmp = [top.binop];
+      tmp.addAll(top.operand);
       tmp.addAll(result);
       result = tmp;
       opstack = opstack.next;

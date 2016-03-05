@@ -79,14 +79,15 @@ class InterpreterState {
     pList.remove(propName);
   }
 
-  void propList(String pListName) {
+  Node propList(String pListName) {
     Map pList = pLists[pListName];
     Node result = new ListNode.nil();
     if (pList == null) {
       return result;
     }
     for (var prop in pList.keys) {
-      result = new ListNode.cons(prop, new ListNode.cons(pList[prop], result));
+      result = new ListNode.cons(
+          new WordNode(prop), new ListNode.cons(pList[prop], result));
     }
     return result;
   }
@@ -201,6 +202,9 @@ class InterpreterImpl extends InterpreterInterface {
   static bool primMemberList(Node a, ListNode b) => b.contains(a);
   static bool primEqualsWord(WordNode a, WordNode b) => a == b;
   static bool primMemberWord(WordNode a, WordNode b) => b.toString().contains(a.toString());
+
+  static Node boolToNode(bool value) =>
+      value ? WordNode.constantTrue : WordNode.constantFalse;
 
   NumberNode ensureNum(Node node) {
     if (!node.isNum) {
@@ -541,10 +545,12 @@ class InterpreterImpl extends InterpreterInterface {
           return evalBinCmp(p, ensureNum(arg0), ensureNum(arg1), nodes, primEqualsNum);
         }
         if (arg0.isList && arg1.isList) {
-          return new ListNode.cons(primEqualsList(ensureList(arg0), ensureList(arg1)), nodes);
+          return new ListNode.cons(
+              boolToNode(primEqualsList(ensureList(arg0), ensureList(arg1))), nodes);
         }
         if (arg0.isWord && arg1.isWord) {
-          return new ListNode.cons(primEqualsWord(ensureWord(arg0), ensureWord(arg1)), nodes);
+          return new ListNode.cons(
+              boolToNode(primEqualsWord(ensureWord(arg0), ensureWord(arg1))), nodes);
         }
         return new ListNode.cons(Primitive.FALSE, nodes);
 
@@ -556,10 +562,12 @@ class InterpreterImpl extends InterpreterInterface {
         Node arg0 = args[0];
         Node arg1 = args[1];
         if (arg1.isList) {
-          return new ListNode.cons(primMemberList(arg0, ensureList(arg1)), nodes);
+          return new ListNode.cons(
+              boolToNode(primMemberList(arg0, ensureList(arg1))), nodes);
         }
         if (arg0.isWord && arg1.isWord) {
-          return new ListNode.cons(primMemberWord(ensureWord(arg0), ensureWord(arg1)), nodes);
+          return new ListNode.cons(
+              boolToNode(primMemberWord(ensureWord(arg0), ensureWord(arg1))), nodes);
         }
         return new ListNode.cons(Primitive.FALSE, nodes);
 
