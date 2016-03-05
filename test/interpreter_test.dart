@@ -221,6 +221,14 @@ class InterpreterTest {
                     new NumberNode.float(19.0)
                 ])),
               equals(Primitive.TRUE));
+        expect(
+            interpreter.evalSequence(
+                ListNode.makeList([
+                  Primitive.EQUALS,
+                  Primitive.FALSE,
+                  Primitive.FALSE
+                ])),
+            equals(Primitive.TRUE));
       });
       test("eval first butfirst", () {
         makeInterpreter();

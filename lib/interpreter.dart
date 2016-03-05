@@ -539,6 +539,9 @@ class InterpreterImpl extends InterpreterInterface {
       case Primitive.EQUALS:
         final arg0 = args[0];
         final arg1 = args[1];
+        if (arg0.isPrim && arg1.isPrim) {  // boolean values
+          return new ListNode.cons(boolToNode(arg0 == arg1), nodes);
+        }
         if (arg0.isNum && arg1.isNum) {
           return evalBinCmp(p, ensureNum(arg0), ensureNum(arg1), nodes, primEqualsNum);
         }
