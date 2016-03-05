@@ -28,22 +28,20 @@ import "turtle_impl.dart";
 
 class ArrowLogoModule {
   List<Binding> get bindings => [
-    TurtleWorkerImpl,
-    ConsoleImpl,
-    InterpreterImpl,
-    SimpleDebug,
-    new Binding(Debug, toValue: new SimpleDebug()),
-    new Binding(TurtleWorker, toAlias: TurtleWorkerImpl),
-    new Binding(Console, toAlias: ConsoleImpl),
-    new Binding(InterpreterInterface, toAlias: InterpreterImpl)
-  ];
+        TurtleWorkerImpl,
+        ConsoleImpl,
+        InterpreterImpl,
+        SimpleDebug,
+        new Binding(Debug, toValue: new SimpleDebug()),
+        new Binding(TurtleWorker, toAlias: TurtleWorkerImpl),
+        new Binding(Console, toAlias: ConsoleImpl),
+        new Binding(InterpreterInterface, toAlias: InterpreterImpl)
+      ];
 }
 
-@Component(
-  selector: 'arrow-logo-app'
-)
+@Component(selector: 'arrow-logo-app')
 @View(
-  template: '''
+    template: '''
 <style>
 div#container {
   margin: 0 auto;
@@ -74,8 +72,7 @@ div.main {
   </div>
 </div>
 ''',
-  directives: const [EditorPanel, GraphicsPanel]
-)
+    directives: const [EditorPanel, GraphicsPanel])
 class ArrowLogoApp {
   Console console;
   InterpreterInterface interpreter;

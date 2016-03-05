@@ -21,7 +21,6 @@ class ParseException {
 }
 
 class Token {
-
   static const TOKEN_EOF = -1;
   static const TOKEN_NUM = 0;
   static const TOKEN_WORD = 1;
@@ -30,7 +29,7 @@ class Token {
   static const TOKEN_RBRACE = 125;
   static const TOKEN_LBRACKET = 91;
   static const TOKEN_RBRACKET = 93;
-  
+
   static const TOKEN_LPAREN = 40;
   static const TOKEN_RPAREN = 41;
 
@@ -56,61 +55,90 @@ class Token {
 
   int kind;
   Node node;
-  
+
   Token setKind(int kind_) {
     this.kind = kind_;
     return this;
   }
-  
+
   Token setNode(Node node_) {
     this.node = node_;
     return this;
   }
-  
-  Token setPrim(Primitive p)     => setKind(TOKEN_PRIM).setNode(p);
-  Token setWord(WordNode word)   => setKind(TOKEN_WORD).setNode(word);
-  
-  Token setVar(WordNode v)       => setKind(TOKEN_VAR).setNode(v);
-  Token setNum(NumberNode n)     => setKind(TOKEN_NUM).setNode(n);
-  Token setEof()                 => setKind(TOKEN_EOF).setNode(null);
-  
+
+  Token setPrim(Primitive p) => setKind(TOKEN_PRIM).setNode(p);
+  Token setWord(WordNode word) => setKind(TOKEN_WORD).setNode(word);
+
+  Token setVar(WordNode v) => setKind(TOKEN_VAR).setNode(v);
+  Token setNum(NumberNode n) => setKind(TOKEN_NUM).setNode(n);
+  Token setEof() => setKind(TOKEN_EOF).setNode(null);
+
   String toString() {
     switch (kind) {
-      case TOKEN_EOF: return "EOF";
-      case TOKEN_PRIM: return "PRIM";
-      case TOKEN_NUM: return "NUM";
-      case TOKEN_WORD: return "WORD";
-      case TOKEN_PRIM: return "PRIM";
-      case TOKEN_LBRACE: return "LBRACE";
-      case TOKEN_RBRACE: return "RBRACE";
-      case TOKEN_LBRACKET: return "LBRACKET";
-      case TOKEN_RBRACKET: return "RBRACKET";
-      case TOKEN_LPAREN: return "LPAREN";
-      case TOKEN_RPAREN: return "RPAREN";
-      case TOKEN_TO: return "TO";
-      case TOKEN_VAR: return "VAR";
-      case TOKEN_OUTPUT: return "OUTPUT";
-      case TOKEN_END: return "END";
+      case TOKEN_EOF:
+        return "EOF";
+      case TOKEN_PRIM:
+        return "PRIM";
+      case TOKEN_NUM:
+        return "NUM";
+      case TOKEN_WORD:
+        return "WORD";
+      case TOKEN_PRIM:
+        return "PRIM";
+      case TOKEN_LBRACE:
+        return "LBRACE";
+      case TOKEN_RBRACE:
+        return "RBRACE";
+      case TOKEN_LBRACKET:
+        return "LBRACKET";
+      case TOKEN_RBRACKET:
+        return "RBRACKET";
+      case TOKEN_LPAREN:
+        return "LPAREN";
+      case TOKEN_RPAREN:
+        return "RPAREN";
+      case TOKEN_TO:
+        return "TO";
+      case TOKEN_VAR:
+        return "VAR";
+      case TOKEN_OUTPUT:
+        return "OUTPUT";
+      case TOKEN_END:
+        return "END";
 
-      case TOKEN_POUND: return "#";
-      case TOKEN_PLUS: return "PLUS";  
-      case TOKEN_MINUS: return "MINUS";  
-      case TOKEN_SLASH: return "SLASH";
-      case TOKEN_STAR: return "STAR";  
-      case TOKEN_CARET: return "CARET";  
+      case TOKEN_POUND:
+        return "#";
+      case TOKEN_PLUS:
+        return "PLUS";
+      case TOKEN_MINUS:
+        return "MINUS";
+      case TOKEN_SLASH:
+        return "SLASH";
+      case TOKEN_STAR:
+        return "STAR";
+      case TOKEN_CARET:
+        return "CARET";
 
-      case TOKEN_LT: return "LT";  
-      case TOKEN_GT: return "GT";  
-      case TOKEN_LE: return "LE";  
-      case TOKEN_GE: return "GE";  
-      case TOKEN_EQ: return "EQ";  
-      case TOKEN_EQEQ: return "EQEQ";
-      case TOKEN_PERCENT: return "PERCENT";
+      case TOKEN_LT:
+        return "LT";
+      case TOKEN_GT:
+        return "GT";
+      case TOKEN_LE:
+        return "LE";
+      case TOKEN_GE:
+        return "GE";
+      case TOKEN_EQ:
+        return "EQ";
+      case TOKEN_EQEQ:
+        return "EQEQ";
+      case TOKEN_PERCENT:
+        return "PERCENT";
 
-      default: return "???";
+      default:
+        return "???";
     }
   }
-  
+
   bool isInfixOp() {
     switch (kind) {
       case TOKEN_PERCENT:
@@ -131,7 +159,7 @@ class Token {
         return false;
     }
   }
-  
+
   bool isExprStart() {
     switch (kind) {
       case Token.TOKEN_PRIM:
@@ -145,7 +173,7 @@ class Token {
         return false;
     }
   }
-  
+
   Primitive getInfixOp() {
     switch (kind) {
       case TOKEN_PERCENT:
@@ -181,7 +209,7 @@ class Token {
 }
 
 class Scanner {
-  static const CHAR_0 = 48;  // "0".charCodeAt(0) is not a constant
+  static const CHAR_0 = 48; // "0".charCodeAt(0) is not a constant
   static const CHAR_9 = 57;
   static const CHAR_a = 97;
   static const CHAR_z = 122;
@@ -197,34 +225,31 @@ class Scanner {
   static const CHAR_UNDERSCORE = 95;
 
   static bool isAlpha(int charCode) =>
-      (CHAR_a <= charCode && charCode <= CHAR_z)
-      || (CHAR_A <= charCode && charCode <= CHAR_Z);
-  
-  static bool isDigit(int charCode) => 
+      (CHAR_a <= charCode && charCode <= CHAR_z) ||
+      (CHAR_A <= charCode && charCode <= CHAR_Z);
+
+  static bool isDigit(int charCode) =>
       (CHAR_0 <= charCode && charCode <= CHAR_9);
 
-  static bool isUnderscore(int charCode) =>
-      CHAR_UNDERSCORE == charCode;
+  static bool isUnderscore(int charCode) => CHAR_UNDERSCORE == charCode;
 
-  static bool isDigitOrDot(int charCode) => 
+  static bool isDigitOrDot(int charCode) =>
       CHAR_DOT == charCode || isDigit(charCode);
-  
-  static bool isDot(int charCode) => 
-      CHAR_DOT == charCode;
-      
-  static bool isSpace(int charCode) => 
-      CHAR_BLANK == charCode;
-      
+
+  static bool isDot(int charCode) => CHAR_DOT == charCode;
+
+  static bool isSpace(int charCode) => CHAR_BLANK == charCode;
+
   static bool isWhiteSpace(int charCode) =>
-      CHAR_BLANK == charCode || CHAR_TAB == charCode
-      || CHAR_NEWLINE == charCode;
-  
+      CHAR_BLANK == charCode ||
+      CHAR_TAB == charCode ||
+      CHAR_NEWLINE == charCode;
+
   static bool isAlphaOrDigitOrUnderscore(int charCode) =>
       isAlpha(charCode) || isDigit(charCode) || isUnderscore(charCode);
-  
-  static bool notNewLine(int charCode) =>
-      CHAR_NEWLINE != charCode;
-     
+
+  static bool notNewLine(int charCode) => CHAR_NEWLINE != charCode;
+
   /** 
    * Advances [pos] if f(text.charCodeAt(pos)) holds.
    */
@@ -234,12 +259,12 @@ class Scanner {
       return pos;
     }
     final ch = text.codeUnitAt(pos);
-    if (f(ch)) { 
+    if (f(ch)) {
       ++pos;
     }
     return pos;
   }
-  
+
   /** 
    * Advances [pos] until the following holds:
    * 
@@ -252,7 +277,7 @@ class Scanner {
       return pos;
     }
     int ch = text.codeUnitAt(pos);
-    while (f(ch)) { 
+    while (f(ch)) {
       ++pos;
       if (pos == len) {
         return pos;
@@ -261,15 +286,15 @@ class Scanner {
     }
     return pos;
   }
-  
+
   final Map<String, Node> toplevel;
   final Token token;
   String text;
   int pos;
-  
+
   /** @param toplevel used for looking up keywords (lowercase forms) */
   Scanner(this.toplevel) : token = new Token();
-  
+
   void initialize(String text) {
     this.text = text;
     this.pos = 0;
@@ -306,7 +331,7 @@ class Scanner {
         : new NumberNode.int(int.parse(numtext));
     token.setNum(nn);
   }
-  
+
   /** @post token.kind \in {TOKEN_TO, TOKEN_END, TOKEN_WORD, TOKEN_PRIM} */
   void tokenizeWord() {
     final start = pos;
@@ -324,23 +349,49 @@ class Scanner {
         token.setPrim(p);
     }
   }
-  
+
   void tokenizeSpecial() {
     switch (text[pos]) {
-      case '#': token.setKind(Token.TOKEN_POUND); break;
-      case '(': token.setKind(Token.TOKEN_LPAREN); break;
-      case ')': token.setKind(Token.TOKEN_RPAREN); break;
-      case '{': token.setKind(Token.TOKEN_LBRACE); break;
-      case '}': token.setKind(Token.TOKEN_RBRACE); break;
-      case '[': token.setKind(Token.TOKEN_LBRACKET); break;
-      case ']': token.setKind(Token.TOKEN_RBRACKET); break;
-      case '+': token.setKind(Token.TOKEN_PLUS); break;
-      case '-': token.setKind(Token.TOKEN_MINUS); break;
-      case '*': token.setKind(Token.TOKEN_STAR); break;
-      case '/': token.setKind(Token.TOKEN_SLASH); break;
-      case '%': token.setKind(Token.TOKEN_PERCENT); break;
-      case '^': token.setKind(Token.TOKEN_CARET); break;
-      case '<': 
+      case '#':
+        token.setKind(Token.TOKEN_POUND);
+        break;
+      case '(':
+        token.setKind(Token.TOKEN_LPAREN);
+        break;
+      case ')':
+        token.setKind(Token.TOKEN_RPAREN);
+        break;
+      case '{':
+        token.setKind(Token.TOKEN_LBRACE);
+        break;
+      case '}':
+        token.setKind(Token.TOKEN_RBRACE);
+        break;
+      case '[':
+        token.setKind(Token.TOKEN_LBRACKET);
+        break;
+      case ']':
+        token.setKind(Token.TOKEN_RBRACKET);
+        break;
+      case '+':
+        token.setKind(Token.TOKEN_PLUS);
+        break;
+      case '-':
+        token.setKind(Token.TOKEN_MINUS);
+        break;
+      case '*':
+        token.setKind(Token.TOKEN_STAR);
+        break;
+      case '/':
+        token.setKind(Token.TOKEN_SLASH);
+        break;
+      case '%':
+        token.setKind(Token.TOKEN_PERCENT);
+        break;
+      case '^':
+        token.setKind(Token.TOKEN_CARET);
+        break;
+      case '<':
         if (text.length > pos + 1 && text[pos + 1] == '=') {
           token.setKind(Token.TOKEN_LE);
           pos += 2;
@@ -356,7 +407,7 @@ class Scanner {
         }
         token.setKind(Token.TOKEN_GT);
         break;
-      case '=': 
+      case '=':
         if (text.length > pos + 1 && text[pos + 1] == '=') {
           token.setKind(Token.TOKEN_EQEQ);
           pos += 2;
@@ -364,16 +415,17 @@ class Scanner {
         }
         token.setKind(Token.TOKEN_EQ);
         break;
-    
-      default: throw new Exception("unexpected char: ${text[pos]}");
+
+      default:
+        throw new Exception("unexpected char: ${text[pos]}");
     }
     ++pos;
   }
-  
+
   void skipComment() {
     advanceWhile(notNewLine);
   }
-  
+
   /**
    * Tokenizes a prefix of `text'.
    *
@@ -387,10 +439,10 @@ class Scanner {
     } else if (CHAR_QUOTE == charCode) {
       ++pos;
       if (pos == text.length) {
-        token.setWord(new WordNode(""));  // empty word
+        token.setWord(new WordNode("")); // empty word
       } else if (pos < text.length && isWhiteSpace(text.codeUnitAt(pos))) {
         ++pos;
-        token.setWord(new WordNode(""));  // empty word
+        token.setWord(new WordNode("")); // empty word
       } else {
         token.setPrim(Primitive.QUOTE);
       }
@@ -402,14 +454,14 @@ class Scanner {
       tokenizeSpecial();
     }
   }
-  
+
   /** Calls tokenize and trims whitespace */
   void nextToken() {
     if (pos == text.length) {
       token.setEof();
       return;
     }
-    
+
     advanceWhile(isWhiteSpace);
     if (CHAR_SEMI == text.codeUnitAt(pos)) {
       skipComment();
@@ -424,9 +476,9 @@ class OpInfo {
   final Primitive binop;
   final List<Node> operand;
   final OpInfo next;
-  
+
   const OpInfo(this.binop, this.operand, [this.next = null]);
-  
+
   String toString() => "$binop $operand $next";
 }
 
@@ -438,30 +490,31 @@ class OpInfo {
  * TODO adding "apply" nodes, and of course, error reporting.
  */
 class Parser extends Scanner {
-  
   OpInfo opstack;
-  
-  Parser(Map<String, Node> toplevel) : opstack = null, super(toplevel);
-  
+
+  Parser(Map<String, Node> toplevel)
+      : opstack = null,
+        super(toplevel);
+
   /**
    * @pre token.kind == TOKEN_LBRACKET
    * @post nodeList' = nodeList ++ listNode
    */
   void parseList(List<Node> nodeList) {
     final objList = <Node>[];
-    
+
     nextToken();
-    while (token.kind != Token.TOKEN_EOF
-        && token.kind != Token.TOKEN_RBRACKET) {
+    while (
+        token.kind != Token.TOKEN_EOF && token.kind != Token.TOKEN_RBRACKET) {
       parseExpr(objList);
     }
     nodeList.add(ListNode.makeList(objList));
     nextToken();
   }
-  
+
   /**
    *     atom ::= int | float | word | var | quote word
-   */ 
+   */
   void parseAtom(List<Node> nodeList) {
     switch (token.kind) {
       case Token.TOKEN_PRIM:
@@ -485,17 +538,16 @@ class Parser extends Scanner {
         throw new Exception("unexpected token");
     }
   }
-  
+
   /**
    * Operator precedence parsing.
    */
-  List<Node> reduceStack(OpInfo base, List<Node> top0, int prec,
-                         bool isLeftAssoc) {
+  List<Node> reduceStack(
+      OpInfo base, List<Node> top0, int prec, bool isLeftAssoc) {
     List<Node> result = top0;
-    while (opstack != base
-        && (prec < opstack.binop.precedence
-            || (isLeftAssoc 
-                && prec == opstack.binop.precedence))) {
+    while (opstack != base &&
+        (prec < opstack.binop.precedence ||
+            (isLeftAssoc && prec == opstack.binop.precedence))) {
       OpInfo top = opstack;
       List<Node> tmp = [top.binop];
       tmp.addAll(top.operand);
@@ -505,7 +557,7 @@ class Parser extends Scanner {
     }
     return result;
   }
-  
+
   /**
    *     part ::= atom | list | '(' expr ')'
    */
@@ -537,13 +589,11 @@ class Parser extends Scanner {
   void parseOp(List<Node> nodeList) {
     List<Node> operand = <Node>[];
     OpInfo base = opstack;
-    
+
     parsePart(operand);
     while (token.isInfixOp()) {
       Primitive binop = token.getInfixOp();
-      operand = reduceStack(
-          base, operand, binop.precedence,
-          binop.isLeftAssoc);
+      operand = reduceStack(base, operand, binop.precedence, binop.isLeftAssoc);
       opstack = new OpInfo(binop, operand, opstack);
       nextToken();
       operand = [];
@@ -562,12 +612,11 @@ class Parser extends Scanner {
    */
   void parseExpr(List<Node> nodeList) {
     parseOp(nodeList);
-    while (token.kind != Token.TOKEN_EOF
-        && token.isExprStart()) {
+    while (token.kind != Token.TOKEN_EOF && token.isExprStart()) {
       parseOp(nodeList);
     }
   }
-  
+
   /**
    *     defn ::= 'to' word var* expr* 'end' 
    */
@@ -583,10 +632,9 @@ class Parser extends Scanner {
     while (token.kind == Token.TOKEN_VAR) {
       varList.add(token.node);
       nextToken();
-    }    
+    }
     final objList = <Node>[];
-    while (token.kind != Token.TOKEN_END
-        && token.kind != Token.TOKEN_EOF) {
+    while (token.kind != Token.TOKEN_END && token.kind != Token.TOKEN_EOF) {
       parseExpr(objList);
     }
     if (token.kind == Token.TOKEN_EOF) {
@@ -597,11 +645,10 @@ class Parser extends Scanner {
       return;
     }
     nextToken();
-    nodeList.add(
-      new DefnNode(name,
-        ListNode.makeList(varList), ListNode.makeList(objList)));
+    nodeList.add(new DefnNode(
+        name, ListNode.makeList(varList), ListNode.makeList(objList)));
   }
-     
+
   /**
    * Parses [input] to list of nodes.
    */
@@ -629,7 +676,7 @@ class Parser extends Scanner {
           throw new Exception("unexpected token: $token");
       }
     }
-    
+
     return ListNode.makeList(nodeList);
   }
 }

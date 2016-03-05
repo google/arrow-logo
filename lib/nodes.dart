@@ -26,7 +26,6 @@ library nodes;
  *     Defn(name, arity, body)
  */
 abstract class Node {
-
   static const int KIND_WORD = 0;
   static const int KIND_LIST = 1;
   static const int KIND_NUMBER = 2;
@@ -48,7 +47,6 @@ abstract class Node {
 }
 
 class ListNode extends Node {
-
   static const int LIST_NIL = 0 << Node.KIND_BITS;
   static const int LIST_CONS = 1 << Node.KIND_BITS;
   static const int LIST_MASK = 1 << Node.KIND_BITS;
@@ -61,8 +59,7 @@ class ListNode extends Node {
       return false;
     }
     ListNode that = node;
-    return (isNil && that.isNil)
-    || (head == that.head && tail == that.tail);
+    return (isNil && that.isNil) || (head == that.head && tail == that.tail);
   }
 
   bool contains(node) {
@@ -79,9 +76,10 @@ class ListNode extends Node {
   final ListNode tail;
 
   const ListNode.nil()
-  : head = null, tail = null, super(LIST_NIL | Node.KIND_LIST);
-  const ListNode.cons(this.head, this.tail)
-  : super(LIST_CONS | Node.KIND_LIST);
+      : head = null,
+        tail = null,
+        super(LIST_NIL | Node.KIND_LIST);
+  const ListNode.cons(this.head, this.tail) : super(LIST_CONS | Node.KIND_LIST);
 
   static const Node NIL = const ListNode.nil();
 
@@ -101,14 +99,12 @@ class ListNode extends Node {
 
   ListNode getPrefix(int length) {
     return (length <= 0)
-    ? this
-    : new ListNode.cons(head, tail.getPrefix(length - 1));
+        ? this
+        : new ListNode.cons(head, tail.getPrefix(length - 1));
   }
 
   ListNode getSuffix(int length) {
-    return (length <= 0)
-    ? this
-    : tail.getSuffix(length - 1);
+    return (length <= 0) ? this : tail.getSuffix(length - 1);
   }
 
   ListNode append(ListNode rest) {
@@ -121,13 +117,12 @@ class ListNode extends Node {
 
   String _toStringIter(String acc) {
     return isNil
-    ? (acc + " ]")
-    : tail._toStringIter(acc + " " + head.toString());
+        ? (acc + " ]")
+        : tail._toStringIter(acc + " " + head.toString());
   }
 }
 
 class ListNodeIterator implements Iterator<Node> {
-
   ListNode nodes;
   ListNodeIterator(ListNode nodes) {
     print(nodes);
@@ -148,11 +143,9 @@ class ListNodeIterator implements Iterator<Node> {
 }
 
 class WordNode extends Node {
-
   final String stringValue;
 
   const WordNode(this.stringValue) : super(Node.KIND_WORD);
-
 
   bool operator ==(Object node) {
     if (!(node is WordNode)) {
@@ -172,19 +165,20 @@ class WordNode extends Node {
 }
 
 class NumberNode extends Node {
+  static const int NUMBER_INT = 0 << Node.KIND_BITS;
+  static const int NUMBER_FLOAT = 1 << Node.KIND_BITS;
+  static const int NUMBER_MASK = 1 << Node.KIND_BITS;
 
-  static const int NUMBER_INT    = 0 << Node.KIND_BITS;
-  static const int NUMBER_FLOAT  = 1 << Node.KIND_BITS;
-  static const int NUMBER_MASK   = 1 << Node.KIND_BITS;
-
-  final int intValue_;      // Int
+  final int intValue_; // Int
   final double floatValue_; // Float
 
   const NumberNode.int(this.intValue_)
-  : floatValue_ = 0.0, super(NUMBER_INT | Node.KIND_NUMBER);
+      : floatValue_ = 0.0,
+        super(NUMBER_INT | Node.KIND_NUMBER);
 
   const NumberNode.float(this.floatValue_)
-  : intValue_ = 0, super(NUMBER_FLOAT | Node.KIND_NUMBER);
+      : intValue_ = 0,
+        super(NUMBER_FLOAT | Node.KIND_NUMBER);
 
   bool operator ==(Object node) {
     if (!(node is NumberNode)) {
@@ -213,10 +207,8 @@ class NumberNode extends Node {
   }
 
   num get numValue {
-    if (isInt)
-      return intValue_;
-    if (isFloat)
-      return floatValue_;
+    if (isInt) return intValue_;
+    if (isFloat) return floatValue_;
     throw new Exception("neither int nor float");
   }
 
@@ -226,15 +218,13 @@ class NumberNode extends Node {
 }
 
 class DefnNode extends Node {
-
   final String name;
   final ListNode vars;
   final ListNode body;
 
   int get arity => vars.length;
 
-  DefnNode(this.name, this.vars, this.body)
-  : super(Node.KIND_DEFN);
+  DefnNode(this.name, this.vars, this.body) : super(Node.KIND_DEFN);
 
   bool operator ==(node) {
     if (!(node is DefnNode)) {
@@ -254,7 +244,6 @@ class DefnNode extends Node {
 }
 
 class Primitive extends Node {
-
   static const APPLY = const Primitive(2, "apply");
   static const BACK = const Primitive(1, "bk", "back");
   static const BUTFIRST = const Primitive(1, "butfirst");
@@ -334,22 +323,75 @@ class Primitive extends Node {
   }
 
   static const List<Primitive> commandsList = const [
-    BACK, CLEAN, CLEARSCREEN, CLEARTEXT, CONS, DRAWTEXT, EDALL, FORWARD, HELP,
+    BACK,
+    CLEAN,
+    CLEARSCREEN,
+    CLEARTEXT,
+    CONS,
+    DRAWTEXT,
+    EDALL,
+    FORWARD,
+    HELP,
     HIDETURTLE,
-    HOME, IF, IFELSE, LOCAL, LEFT, MAKE, NIL, PENDOWN, PENUP, PPROP, PRINT,
-    REMPROP, REPEAT,
-    RIGHT, SETFONT,
-    SETPENCOLOR, SETTEXTALIGN, SETTEXTBASELINE,
-    SHOWTURTLE, STOP, TRACE, TURTLE_GET_STATE, UNTRACE ];
+    HOME,
+    IF,
+    IFELSE,
+    LOCAL,
+    LEFT,
+    MAKE,
+    NIL,
+    PENDOWN,
+    PENUP,
+    PPROP,
+    PRINT,
+    REMPROP,
+    REPEAT,
+    RIGHT,
+    SETFONT,
+    SETPENCOLOR,
+    SETTEXTALIGN,
+    SETTEXTBASELINE,
+    SHOWTURTLE,
+    STOP,
+    TRACE,
+    TURTLE_GET_STATE,
+    UNTRACE
+  ];
 
   static const List<Primitive> operatorList = const [
-    APPLY, BUTFIRST, CURRENT_TIME_MILLIS,
-    DIFFERENCE, SELECT, FALSE, FPUT, LESSOREQUAL, LESSTHAN, FIRST,
-    GPROP, GREATEROREQUAL,
-    GREATERTHAN, ITEM, LPUT, OUTPUT, PLIST, PRODUCT, QUOTE, QUOTIENT, POWER, PI,
+    APPLY,
+    BUTFIRST,
+    CURRENT_TIME_MILLIS,
+    DIFFERENCE,
+    SELECT,
+    FALSE,
+    FPUT,
+    LESSOREQUAL,
+    LESSTHAN,
+    FIRST,
+    GPROP,
+    GREATEROREQUAL,
+    GREATERTHAN,
+    ITEM,
+    LPUT,
+    OUTPUT,
+    PLIST,
+    PRODUCT,
+    QUOTE,
+    QUOTIENT,
+    POWER,
+    PI,
     REMAINDER,
-    SUM, THING, TRUE,
-    EMPTYP, EQUALS, LISTP, MEMBERP, NUMP, WORDP ];
+    SUM,
+    THING,
+    TRUE,
+    EMPTYP,
+    EQUALS,
+    LISTP,
+    MEMBERP,
+    NUMP,
+    WORDP
+  ];
 
   static Map<String, Primitive> commandsMap = null;
 
@@ -378,15 +420,14 @@ class Primitive extends Node {
   final String name;
   final String altName;
 
-  const Primitive(
-      int this.arity,
-      String this.name,
-      [String this.altName = null]) : super(Node.KIND_PRIM);
+  const Primitive(int this.arity, String this.name,
+      [String this.altName = null])
+      : super(Node.KIND_PRIM);
 
   bool get needsLazyEval =>
-  this == Primitive.IF
-  || this == Primitive.IFELSE
-  || this == Primitive.REPEAT;
+      this == Primitive.IF ||
+      this == Primitive.IFELSE ||
+      this == Primitive.REPEAT;
 
   int get precedence {
     switch (this) {

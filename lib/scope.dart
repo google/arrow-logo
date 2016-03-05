@@ -21,9 +21,9 @@ import 'nodes.dart';
 class Scope {
   final Map<String, Node> symtab;
   final Scope parent;
-  
+
   const Scope(Map<String, Node> this.symtab, [Scope this.parent = null]);
-  
+
   String toString() {
     final sb = new StringBuffer();
     Scope scope = this;
@@ -33,7 +33,7 @@ class Scope {
     }
     return sb.toString();
   }
-  
+
   operator [](String name) {
     final t = symtab[name.toLowerCase()];
     if (t != null || parent == null) {
@@ -41,11 +41,11 @@ class Scope {
     }
     return parent[name];
   }
-  
+
   void defineLocal(String name) {
     symtab[name.toLowerCase()] = Primitive.UNIT;
   }
-  
+
   void assign(String name, Node value) {
     final t = symtab[name.toLowerCase()];
     if (t != null || parent == null) {

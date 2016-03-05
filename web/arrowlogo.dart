@@ -15,7 +15,8 @@ library arrowlogo;
 
 import 'package:angular2/bootstrap.dart';
 import 'package:angular2/src/reflection/reflection.dart' show reflector;
-import 'package:angular2/src/reflection/reflection_capabilities.dart' show ReflectionCapabilities;
+import 'package:angular2/src/reflection/reflection_capabilities.dart'
+    show ReflectionCapabilities;
 import 'package:arrowlogo/arrow_logo_app.dart';
 
 void main() {
@@ -24,4 +25,3 @@ void main() {
   // boostrap Angular
   bootstrap(ArrowLogoApp, new ArrowLogoModule().bindings);
 }
-

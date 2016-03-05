@@ -43,22 +43,23 @@ abstract class InterpreterInterface {
 }
 
 class InterpreterProxy extends InterpreterInterface {
-
   InterpreterInterface delegate;
 
   InterpreterProxy();
-  
+
   void init(InterpreterInterface delegate) {
     this.delegate = delegate;
   }
-  
-  void interpret(String code) { delegate.interpret(code); }
+
+  void interpret(String code) {
+    delegate.interpret(code);
+  }
 }
 
 class InterpreterState {
   final Map<String, Map<String, Node>> pLists = new Map();
   final Set<String> traced;
-  
+
   InterpreterState() : traced = new Set<String>();
 
   void putProp(String pListName, propName, value) {
@@ -95,39 +96,37 @@ class InterpreterState {
   bool isTraced(String name) {
     return traced.contains(name);
   }
-  
+
   void trace(String name) {
     traced.add(name);
   }
-  
+
   void untrace(String name) {
     traced.remove(name);
   }
 }
 
 class InterpreterImpl extends InterpreterInterface {
-  
   final Scope globalScope;
   final Parser parser;
   final Debug debug;
   final TurtleWorker turtle;
   final Console console;
   InterpreterState state;
-  
+
   factory InterpreterImpl(Debug debug, TurtleWorker turtle, Console console) {
     InterpreterImpl impl = new InterpreterImpl.internal(
         new Scope(Primitive.makeTopLevel()), debug, turtle, console);
     debug.log("constructed Interpreter");
     return impl;
   }
-  
+
   InterpreterImpl.internal(
       Scope globalScope, this.debug, this.turtle, this.console)
       : this.globalScope = globalScope,
         state = new InterpreterState(),
-        parser = new Parser(globalScope.symtab) {
-  }
-    
+        parser = new Parser(globalScope.symtab) {}
+
   static WordNode deref(WordNode word, Scope scope) {
     if (scope == null) {
       return word;
@@ -135,10 +134,10 @@ class InterpreterImpl extends InterpreterInterface {
     WordNode lookup = scope[word.stringValue];
     return deref(lookup, scope);
   }
-  
+
   // Entry point.
   void interpret(String code) {
-    ListNode nodes;   
+    ListNode nodes;
     try {
       nodes = parser.parse(code);
     } on ParseException catch (ex) {
@@ -146,7 +145,7 @@ class InterpreterImpl extends InterpreterInterface {
       return;
     }
     // debug.log("parsed code $nodes");
-    // no parse error, 
+    // no parse error,
     List<Node> nonDefnNodes = [];
     for (Node n in nodes) {
       if (n.isDefn) {
@@ -158,7 +157,7 @@ class InterpreterImpl extends InterpreterInterface {
     }
     ListNode nodesToEval = ListNode.makeList(nonDefnNodes);
     try {
-      evalSequence(nodesToEval);      
+      evalSequence(nodesToEval);
     } on InterpreterException catch (ex) {
       console.processException(ex.message);
     } on Exception catch (ex) {
@@ -166,21 +165,23 @@ class InterpreterImpl extends InterpreterInterface {
     }
   }
 
-  Node evalBinCmp(p, NumberNode op1, NumberNode op2, ListNode nodes, cmpNum(num x, num y)) {
+  Node evalBinCmp(
+      p, NumberNode op1, NumberNode op2, ListNode nodes, cmpNum(num x, num y)) {
     final res = boolToNode(cmpNum(op1.numValue, op2.numValue));
     return new ListNode.cons(res, nodes);
   }
-    
-  Node evalBinOp(p, NumberNode op1, NumberNode op2, ListNode nodes, opInt(int x, int y), opFloat(double x, double y)) {   
+
+  Node evalBinOp(p, NumberNode op1, NumberNode op2, ListNode nodes,
+      opInt(int x, int y), opFloat(double x, double y)) {
     Node res;
     if (op1.isInt && op2.isInt) {
-       res = new NumberNode.int(opInt(op1.intValue, op2.intValue));
+      res = new NumberNode.int(opInt(op1.intValue, op2.intValue));
     } else {
       res = new NumberNode.float(opFloat(op1.floatValue, op2.floatValue));
-    }  
+    }
     return new ListNode.cons(res, nodes);
   }
-  
+
   static int primSumInt(int a, int b) => a + b;
   static double primSumFloat(double a, double b) => a + b;
   static int primDifferenceInt(int a, int b) => a - b;
@@ -201,9 +202,11 @@ class InterpreterImpl extends InterpreterInterface {
   static bool primEqualsList(ListNode a, ListNode b) => a == b;
   static bool primMemberList(Node a, ListNode b) => b.contains(a);
   static bool primEqualsWord(WordNode a, WordNode b) => a == b;
-  static bool primMemberWord(WordNode a, WordNode b) => b.toString().contains(a.toString());
+  static bool primMemberWord(WordNode a, WordNode b) =>
+      b.toString().contains(a.toString());
 
-  static Node boolToNode(bool value) => value ? Primitive.TRUE : Primitive.FALSE;
+  static Node boolToNode(bool value) =>
+      value ? Primitive.TRUE : Primitive.FALSE;
 
   NumberNode ensureNum(Node node) {
     if (!node.isNum) {
@@ -211,18 +214,18 @@ class InterpreterImpl extends InterpreterInterface {
     }
     return node;
   }
-  
+
   WordNode ensureWord(Node node) {
     if (!node.isWord) {
-      throw new InterpreterException("expected word"); 
+      throw new InterpreterException("expected word");
     }
     return node;
   }
-  
+
   ListNode ensureList(Node node) {
     if (!node.isList) {
       throw new InterpreterException("expected list");
-    }  
+    }
     return node;
   }
 
@@ -265,11 +268,12 @@ class InterpreterImpl extends InterpreterInterface {
         break;
       case Primitive.CURRENT_TIME_MILLIS:
         return new ListNode.cons(
-            new NumberNode.int(new DateTime.now().millisecondsSinceEpoch), nodes);
+            new NumberNode.int(new DateTime.now().millisecondsSinceEpoch),
+            nodes);
       case Primitive.UNIT:
         break;
-        
-        // turtle 0-arg
+
+      // turtle 0-arg
 
       case Primitive.DRAWTEXT:
         final wn = ensureWord(args[0]);
@@ -280,8 +284,8 @@ class InterpreterImpl extends InterpreterInterface {
       case Primitive.CLEARSCREEN:
       case Primitive.HIDETURTLE:
       case Primitive.HOME:
-      case Primitive.PENDOWN:  
-      case Primitive.PENUP:  
+      case Primitive.PENDOWN:
+      case Primitive.PENUP:
       case Primitive.SHOWTURTLE:
         turtle.receive(p, []);
         break;
@@ -289,18 +293,21 @@ class InterpreterImpl extends InterpreterInterface {
       case Primitive.TURTLE_GET_STATE:
         final turtleState = turtle.state;
         final stateObject = ListNode.makeList([
-            new WordNode('"x'), new NumberNode.float(trunc(turtleState.x)),
-            new WordNode('"y'), new NumberNode.float(trunc(turtleState.y)),
-            new WordNode('"heading'), new NumberNode.float(
-                trunc(turtleState.heading))]);
+          new WordNode('"x'),
+          new NumberNode.float(trunc(turtleState.x)),
+          new WordNode('"y'),
+          new NumberNode.float(trunc(turtleState.y)),
+          new WordNode('"heading'),
+          new NumberNode.float(trunc(turtleState.heading))
+        ]);
         return new ListNode.cons(stateObject, nodes);
-        // turtle 1-arg
+      // turtle 1-arg
 
       case Primitive.BACK:
         final wn = ensureNum(args[0]);
         turtle.receive(p, [wn.numValue]);
-        break;  
-        
+        break;
+
       case Primitive.RIGHT:
         final nn = ensureNum(args[0]);
         turtle.receive(p, [nn.numValue]);
@@ -313,7 +320,7 @@ class InterpreterImpl extends InterpreterInterface {
         final wn = ensureWord(args[0]);
         turtle.receive(p, [wn.stringValue]);
         break;
-        
+
       case Primitive.SETPENCOLOR:
         final nn = ensureNum(args[0]);
         if (!nn.isInt) {
@@ -321,7 +328,7 @@ class InterpreterImpl extends InterpreterInterface {
         }
         turtle.receive(p, [nn.intValue]);
         break;
-        
+
       case Primitive.FORWARD:
         final nn = ensureNum(args[0]);
         turtle.receive(p, [nn.numValue]);
@@ -331,23 +338,23 @@ class InterpreterImpl extends InterpreterInterface {
         final nn = ensureNum(args[0]);
         turtle.receive(p, [nn.numValue]);
         break;
-        
-        // end turtle commands
-        
-        // begin console commands
-        
+
+      // end turtle commands
+
+      // begin console commands
+
       case Primitive.CLEARTEXT:
       case Primitive.EDALL:
       case Primitive.HELP:
         console.processAction([p.name]);
         break;
-        
+
       case Primitive.PRINT:
         final n = args[0];
         console.processAction([p.name, n.toString()]);
         break;
-        
-        // end console commands
+
+      // end console commands
 
       case Primitive.BUTFIRST:
         Node arg = args[0];
@@ -382,7 +389,8 @@ class InterpreterImpl extends InterpreterInterface {
       case Primitive.IF:
         nodes = evalInScope(nodes, scope);
         if (!(nodes.head is Primitive)) {
-          throw new InterpreterException("expected boolean value, found ${nodes.head}");
+          throw new InterpreterException(
+              "expected boolean value, found ${nodes.head}");
         }
         final cond = nodes.head;
         nodes = nodes.tail;
@@ -395,12 +403,12 @@ class InterpreterImpl extends InterpreterInterface {
           result = evalSequenceInScope(thenPart, scope);
         } else if (cond == Primitive.FALSE) {
           result = Primitive.UNIT;
-        } else { 
+        } else {
           throw new InterpreterException("expected boolean");
         }
         nodes = nodes.tail;
         return new ListNode.cons(result, nodes);
-        
+
       case Primitive.IFELSE:
         nodes = evalInScope(nodes, scope);
         Primitive cond = nodes.head;
@@ -422,12 +430,12 @@ class InterpreterImpl extends InterpreterInterface {
             elsePart = new ListNode.cons(elsePart, ListNode.NIL);
           }
           result = evalSequenceInScope(elsePart, scope);
-        } else { 
+        } else {
           throw new InterpreterException("expected boolean");
         }
-        
+
         return new ListNode.cons(result, nodes);
-     
+
       case Primitive.ITEM:
         final index = args[0];
         if (!index.isNum || !(index as NumberNode).isInt) {
@@ -440,10 +448,8 @@ class InterpreterImpl extends InterpreterInterface {
         }
         final arg = args[1];
         if (arg.isWord) {
-          
-          final item = (arg as WordNode)
-              .stringValue
-              .substring(intIndex, intIndex + 1);
+          final item =
+              (arg as WordNode).stringValue.substring(intIndex, intIndex + 1);
           return new ListNode.cons(new WordNode(item), nodes);
         } else if (arg.isList) {
           final item = (arg as ListNode).getSuffix(intIndex).head;
@@ -456,7 +462,7 @@ class InterpreterImpl extends InterpreterInterface {
         final ln = ensureList(args[1]);
         final result = ln.append(ListNode.makeList([last]));
         return new ListNode.cons(result, nodes);
-           
+
       case Primitive.LOCAL:
         final word = ensureWord(args[0]);
         scope.defineLocal(word.stringValue);
@@ -467,13 +473,13 @@ class InterpreterImpl extends InterpreterInterface {
         final value = args[1];
         scope.assign(varRefWord.stringValue, value);
         return new ListNode.cons(Primitive.UNIT, nodes);
-        
+
       case Primitive.QUOTE:
         return nodes;
 
       case Primitive.PI:
         return new ListNode.cons(new NumberNode.float(math.PI), nodes);
-        
+
       case Primitive.REPEAT:
         nodes = evalInScope(nodes, scope);
         final nn = ensureNum(nodes.head);
@@ -486,22 +492,23 @@ class InterpreterImpl extends InterpreterInterface {
         }
         nodes = nodes.tail;
         for (int i = 0; i < times; ++i) {
-          evalSequenceInScope(body, scope);  // ignore result
+          evalSequenceInScope(body, scope); // ignore result
         }
         break;
-        
+
       case Primitive.THING:
         final wordNode = ensureWord(args[0]);
         final lookup = scope[wordNode.stringValue];
         if (lookup == null) {
-          throw new InterpreterException("no value for: ${wordNode.stringValue}");
+          throw new InterpreterException(
+              "no value for: ${wordNode.stringValue}");
         }
         return new ListNode.cons(lookup, nodes);
-        
+
       case Primitive.RUN:
         final list = ensureList(args[0]);
         return new ListNode.cons(evalSequenceInScope(list, scope), nodes.tail);
-      
+
       case Primitive.TRUE:
         return new ListNode.cons(p, nodes);
 
@@ -516,7 +523,8 @@ class InterpreterImpl extends InterpreterInterface {
         final propListName = ensureWord(args[0]);
         final propName = ensureWord(args[1]);
         return new ListNode.cons(
-            state.getProp(propListName.stringValue, propName.stringValue), nodes);
+            state.getProp(propListName.stringValue, propName.stringValue),
+            nodes);
 
       case Primitive.REMPROP:
         final propListName = ensureWord(args[0]);
@@ -526,32 +534,36 @@ class InterpreterImpl extends InterpreterInterface {
 
       case Primitive.PLIST:
         final propListName = ensureWord(args[0]);
-        return new ListNode.cons(state.propList(propListName.stringValue), nodes);
+        return new ListNode.cons(
+            state.propList(propListName.stringValue), nodes);
 
-    // predicates
+      // predicates
 
       case Primitive.EMPTYP:
         final arg = args[0];
         return new ListNode.cons(
-            boolToNode(arg.isList && (arg as ListNode).isNil),
-            nodes);
+            boolToNode(arg.isList && (arg as ListNode).isNil), nodes);
 
       case Primitive.EQUALS:
         final arg0 = args[0];
         final arg1 = args[1];
-        if (arg0.isPrim && arg1.isPrim) {  // boolean values
+        if (arg0.isPrim && arg1.isPrim) {
+          // boolean values
           return new ListNode.cons(boolToNode(arg0 == arg1), nodes);
         }
         if (arg0.isNum && arg1.isNum) {
-          return evalBinCmp(p, ensureNum(arg0), ensureNum(arg1), nodes, primEqualsNum);
+          return evalBinCmp(
+              p, ensureNum(arg0), ensureNum(arg1), nodes, primEqualsNum);
         }
         if (arg0.isList && arg1.isList) {
           return new ListNode.cons(
-              boolToNode(primEqualsList(ensureList(arg0), ensureList(arg1))), nodes);
+              boolToNode(primEqualsList(ensureList(arg0), ensureList(arg1))),
+              nodes);
         }
         if (arg0.isWord && arg1.isWord) {
           return new ListNode.cons(
-              boolToNode(primEqualsWord(ensureWord(arg0), ensureWord(arg1))), nodes);
+              boolToNode(primEqualsWord(ensureWord(arg0), ensureWord(arg1))),
+              nodes);
         }
         return new ListNode.cons(Primitive.FALSE, nodes);
 
@@ -568,7 +580,8 @@ class InterpreterImpl extends InterpreterInterface {
         }
         if (arg0.isWord && arg1.isWord) {
           return new ListNode.cons(
-              boolToNode(primMemberWord(ensureWord(arg0), ensureWord(arg1))), nodes);
+              boolToNode(primMemberWord(ensureWord(arg0), ensureWord(arg1))),
+              nodes);
         }
         return new ListNode.cons(Primitive.FALSE, nodes);
 
@@ -580,40 +593,49 @@ class InterpreterImpl extends InterpreterInterface {
         final arg = args[0];
         return new ListNode.cons(boolToNode(arg.isWord), nodes);
 
-    // math
-        
+      // math
+
       case Primitive.SUM:
-        return evalBinOp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primSumInt, primSumFloat);
- 
+        return evalBinOp(p, ensureNum(args[0]), ensureNum(args[1]), nodes,
+            primSumInt, primSumFloat);
+
       case Primitive.DIFFERENCE:
-        return evalBinOp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primDifferenceInt, primDifferenceFloat);
-      
+        return evalBinOp(p, ensureNum(args[0]), ensureNum(args[1]), nodes,
+            primDifferenceInt, primDifferenceFloat);
+
       case Primitive.PRODUCT:
-        return evalBinOp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primProductInt, primProductFloat);
+        return evalBinOp(p, ensureNum(args[0]), ensureNum(args[1]), nodes,
+            primProductInt, primProductFloat);
 
       case Primitive.REMAINDER:
-        return evalBinOp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primRemainderInt, primRemainderFloat);
+        return evalBinOp(p, ensureNum(args[0]), ensureNum(args[1]), nodes,
+            primRemainderInt, primRemainderFloat);
 
       case Primitive.QUOTIENT:
-        return evalBinOp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primQuotientInt, primQuotientFloat);
+        return evalBinOp(p, ensureNum(args[0]), ensureNum(args[1]), nodes,
+            primQuotientInt, primQuotientFloat);
 
       case Primitive.GREATERTHAN:
-        return evalBinCmp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primGreaterThanNum);
+        return evalBinCmp(p, ensureNum(args[0]), ensureNum(args[1]), nodes,
+            primGreaterThanNum);
 
       case Primitive.GREATEROREQUAL:
-        return evalBinCmp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primGreaterOrEqualNum);
+        return evalBinCmp(p, ensureNum(args[0]), ensureNum(args[1]), nodes,
+            primGreaterOrEqualNum);
 
       case Primitive.LESSTHAN:
-        return evalBinCmp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primLessThanNum);
-      
+        return evalBinCmp(
+            p, ensureNum(args[0]), ensureNum(args[1]), nodes, primLessThanNum);
+
       case Primitive.LESSOREQUAL:
-        return evalBinCmp(p, ensureNum(args[0]), ensureNum(args[1]), nodes, primLessOrEqualNum);
+        return evalBinCmp(p, ensureNum(args[0]), ensureNum(args[1]), nodes,
+            primLessOrEqualNum);
 
       // control
-        
+
       case Primitive.STOP:
         throw new InterpreterOutputException(Primitive.UNIT);
-     
+
       case Primitive.OUTPUT:
         final head = args[0];
         throw new InterpreterOutputException(head);
@@ -626,36 +648,35 @@ class InterpreterImpl extends InterpreterInterface {
           state.trace(defn.name);
         }
         break;
-        
+
       case Primitive.UNTRACE:
         final head = ensureWord(args[0]);
         final n = scope[head.stringValue];
         if (n != null && n.isDefn) {
           DefnNode defn = n;
-          state.untrace(defn.name);           
+          state.untrace(defn.name);
         }
         break;
 
       default:
         throw new InterpreterException("not implemented: $p");
-    }  
+    }
     return new ListNode.cons(Primitive.UNIT, nodes);
   }
-  
+
   /**
    * Interprets template in lambda form 
    *
    * @param defn definition
-   */ 
+   */
   Node applyTemplate(ListNode fn, ListNode args, Scope scope) {
     ListNode formalParams = fn.head;
     Node body = fn.tail;
     int numFormals = formalParams.length;
     final env = <String, Node>{};
     if (args.length != numFormals) {
-      throw new InterpreterException(
-          "expected arguments ${numFormals}"
-          + "actual arguments: ${args.length}");
+      throw new InterpreterException("expected arguments ${numFormals}" +
+          "actual arguments: ${args.length}");
     }
     while (numFormals != 0) {
       WordNode formalParam = formalParams.head;
@@ -675,12 +696,12 @@ class InterpreterImpl extends InterpreterInterface {
     }
     return result;
   }
-  
+
   /**
    * Interprets user-defined function (aka command/operator).
    *
    * @param defn definition
-   */ 
+   */
   ListNode applyUserFun(DefnNode defn, ListNode tail, Scope scope) {
     ListNode formalParams = defn.vars;
     final body = defn.body;
@@ -694,7 +715,7 @@ class InterpreterImpl extends InterpreterInterface {
     while (!formalParams.isNil) {
       final formalParam = formalParams.head as WordNode;
       formalParams = formalParams.tail;
-      
+
       // Evaluate next arg, consuming a prefix.
       tail = evalInScope(tail, scope);
       final actualParam = tail.head;
@@ -719,7 +740,7 @@ class InterpreterImpl extends InterpreterInterface {
     }
     return new ListNode.cons(result, tail);
   }
-  
+
   /**
    * Entry point, evaluates [nodes] and returns result if any.
    * 
@@ -728,7 +749,7 @@ class InterpreterImpl extends InterpreterInterface {
   Node evalSequence(ListNode nodes) {
     return evalSequenceInScope(nodes, globalScope);
   }
-  
+
   /**
    * Entry point, defines [node], which must be a DefnNode.
    * 
@@ -738,7 +759,7 @@ class InterpreterImpl extends InterpreterInterface {
     globalScope.bind(defn.name, defn);
     console.processDefined(defn.name);
   }
-  
+
   /**
    * Evaluates all commands in [nodes].
    *
@@ -751,12 +772,13 @@ class InterpreterImpl extends InterpreterInterface {
       result = nodes.head;
       nodes = nodes.tail;
     }
-    if (result == null) {  // empty input nodes
+    if (result == null) {
+      // empty input nodes
       result = Primitive.UNIT;
     }
     return result;
   }
-  
+
   /**
    * Evaluates [nodes] in scope [scope].
    * 
@@ -768,20 +790,20 @@ class InterpreterImpl extends InterpreterInterface {
     }
     final head = nodes.head;
     final tail = nodes.tail;
-    
+
     if (head.isList) {
       return nodes;
     }
-    
+
     if (head.isNum) {
       return nodes;
     }
-    
+
     // ?
     if (head.isWord && (head as WordNode).stringValue.startsWith("\"")) {
       return nodes;
     }
-    
+
     if (head.isPrim) {
       return evalPrimFun(head, tail, scope);
     }
@@ -798,7 +820,7 @@ class InterpreterImpl extends InterpreterInterface {
       }
       return new ListNode.cons(lookup, tail);
     }
-    
-    throw new InterpreterException("I don't know how to ${head}");  
+
+    throw new InterpreterException("I don't know how to ${head}");
   }
 }

@@ -19,7 +19,6 @@ abstract class Debug {
 
 class SimpleDebug extends Debug {
   void log(String msg) {
-    print(msg);    
+    print(msg);
   }
 }
-

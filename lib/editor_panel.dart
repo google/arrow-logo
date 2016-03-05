@@ -18,11 +18,9 @@ import 'package:angular2/angular2.dart';
 
 import 'console.dart';
 
-@Component(
-  selector: 'editor-panel'
-)
+@Component(selector: 'editor-panel')
 @View(
-  template: '''
+    template: '''
 <style>
 div.panel {
   position: absolute;

@@ -18,11 +18,9 @@ import 'package:angular2/angular2.dart';
 
 import "turtle.dart";
 
-@Component(
-  selector: 'graphics-panel'
-)
+@Component(selector: 'graphics-panel')
 @View(
-  template: '''
+    template: '''
 <style>
 div.graphics_panel {
   position: absolute;
@@ -50,8 +48,7 @@ canvas#turtle {
   <canvas id="user"  width="600" height="540"></canvas>
   <canvas id="turtle" width="600" height="540"></canvas>
 </div>
-'''
-)
+''')
 class GraphicsPanel {
   TurtleWorker turtleWorker;
 

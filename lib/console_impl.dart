@@ -23,7 +23,6 @@ import 'nodes.dart';
 import 'parser.dart';
 
 class ConsoleImpl extends Console {
-
   static final int NEWLINE = 0xD;
   static final int LEFT = 37;
   static final String PROMPT = "?";
@@ -64,7 +63,7 @@ class ConsoleImpl extends Console {
     prompt();
 
     ace.implementation = ACE_PROXY_IMPLEMENTATION;
-    ace.config.setModuleUrl('ace/mode/logo','packages/arrowlogo/mode-logo.js');
+    ace.config.setModuleUrl('ace/mode/logo', 'packages/arrowlogo/mode-logo.js');
     editor = ace.edit(editorElem);
     editor.theme = new ace.Theme.named(ace.Theme.KUROIR);
   }
@@ -73,8 +72,10 @@ class ConsoleImpl extends Console {
   set interpreter(void interpret(String)) {
     this.interpret = interpret;
   }
+
   String get editorContent => editor.session.document.getAllLines().join('\n');
-  set editorContent(String newContent) => editor.session.document.value = newContent;
+  set editorContent(String newContent) =>
+      editor.session.document.value = newContent;
 
   String getContentsAsUrl() {
     return 'data:text/csv;charset=UTF-8,${Uri.encodeQueryComponent(editorContent)}';
@@ -148,7 +149,8 @@ class ConsoleImpl extends Console {
     shellElem.classes.add('invisible');
     historyElem.classes.add('invisible');
     editor.focus();
-    editor.session = ace.createEditSession(userText, new ace.Mode.named('logo'));
+    editor.session =
+        ace.createEditSession(userText, new ace.Mode.named('logo'));
   }
 
   void prompt() {
@@ -197,9 +199,9 @@ class ConsoleImpl extends Console {
    *  Ensure the cursor does not move into the prompt.
    */
   void handleKeyDown(html.KeyboardEvent e) {
-    if (LEFT == e.keyCode
-        && shellElem.selectionStart == PROMPT.length
-        && shellElem.selectionEnd == PROMPT.length) {
+    if (LEFT == e.keyCode &&
+        shellElem.selectionStart == PROMPT.length &&
+        shellElem.selectionEnd == PROMPT.length) {
       e.preventDefault();
     }
   }

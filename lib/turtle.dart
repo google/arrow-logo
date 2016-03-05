@@ -26,9 +26,8 @@ class TurtleState {
 }
 
 abstract class TurtleWorker {
-    
   TurtleWorker() {}
-  
+
   void receive(Primitive p, List<dynamic> args);
 
   TurtleState get state;
