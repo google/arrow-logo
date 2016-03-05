@@ -22,17 +22,13 @@ import 'parser.dart';
 import 'scope.dart';
 import 'turtle.dart';
 
-/**
- * Something went wrong. TODO: useful messaging
- */
+/// Something went wrong. TODO: useful messaging
 class InterpreterException {
   final String message;
   const InterpreterException(this.message);
 }
 
-/**
- * Used for OUTPUT and STOP.
- */
+/// Used for OUTPUT and STOP.
 class InterpreterOutputException {
   final Node result;
   const InterpreterOutputException(this.result);
@@ -234,12 +230,10 @@ class InterpreterImpl extends InterpreterInterface {
     return (100 * src).round() / 100;
   }
 
-  /**
-   * Evaluates a primitive function (aka command/operator).
-   * 
-   * Evaluates the primitive function [p] with (yet unevaluated) arguments
-   * available in [nodes]. Returns the (uninterpreted) tail.
-   */
+  /// Evaluates a primitive function (aka command/operator).
+  ///
+  /// Evaluates the primitive function [p] with (yet unevaluated) arguments
+  /// available in [nodes]. Returns the (uninterpreted) tail.
   ListNode evalPrimFun(Primitive p, ListNode nodes, Scope scope) {
     if (p == Primitive.QUOTE) {
       return nodes;
@@ -664,11 +658,11 @@ class InterpreterImpl extends InterpreterInterface {
     return new ListNode.cons(Primitive.UNIT, nodes);
   }
 
-  /**
-   * Interprets template in lambda form 
-   *
-   * @param defn definition
-   */
+  /// Interprets a template.
+  ///
+  /// A template corresponds to a lambda (anonymous function). Example:
+  ///     make "x [[x y] x + y]
+  ///     apply :x [2 3]
   Node applyTemplate(ListNode fn, ListNode args, Scope scope) {
     ListNode formalParams = fn.head;
     Node body = fn.tail;
@@ -697,11 +691,9 @@ class InterpreterImpl extends InterpreterInterface {
     return result;
   }
 
-  /**
-   * Interprets user-defined function (aka command/operator).
-   *
-   * @param defn definition
-   */
+  /// Interprets user-defined function (aka command/operator).
+  ///
+  /// Takes a definition node [defn] and [scope].
   ListNode applyUserFun(DefnNode defn, ListNode tail, Scope scope) {
     ListNode formalParams = defn.vars;
     final body = defn.body;
@@ -741,30 +733,24 @@ class InterpreterImpl extends InterpreterInterface {
     return new ListNode.cons(result, tail);
   }
 
-  /**
-   * Entry point, evaluates [nodes] and returns result if any.
-   * 
-   * @return result of operator, or UNIT for command
-   */
+  /// Entry point, evaluates [nodes] and returns result if any.
+  ///
+  /// Returns result of operator, or UNIT.
   Node evalSequence(ListNode nodes) {
     return evalSequenceInScope(nodes, globalScope);
   }
 
-  /**
-   * Entry point, defines [node], which must be a DefnNode.
-   * 
-   * @return result of operator, or UNIT for command
-   */
+  /// Entry point, defines [node], which must be a [DefnNode].
+  ///
+  /// Returns result of operator, or UNIT.
   void define(DefnNode defn) {
     globalScope.bind(defn.name, defn);
     console.processDefined(defn.name);
   }
 
-  /**
-   * Evaluates all commands in [nodes].
-   *
-   * @return result of last command, or UNIT if `nodes' was empty
-   */
+  /// Evaluates all commands in [nodes].
+  ///
+  /// Returns result of last command, or UNIT if `nodes' was empty.
   Node evalSequenceInScope(ListNode nodes, Scope scope) {
     Node result;
     while (!nodes.isNil) {
@@ -779,11 +765,9 @@ class InterpreterImpl extends InterpreterInterface {
     return result;
   }
 
-  /**
-   * Evaluates [nodes] in scope [scope].
-   * 
-   * @return [result] ++ suffix of unused nodes
-   */
+  /// Evaluates [nodes] in scope [scope].
+  ///
+  /// Returns a list containing result and a suffix of unused nodes.
   ListNode evalInScope(ListNode nodes, Scope scope) {
     if (nodes.isNil) {
       return nodes;
