@@ -22,9 +22,9 @@ class NodeTest {
   void run() {
     group("NodeTest", () {
       test("list construction and string", () {
-        Node foo = new WordNode("\"foo");
-        Node bar = new WordNode("\"bar");
-        Node barlist = ListNode.makeList([foo, bar]);
+        final foo = new WordNode("\"foo");
+        final bar = new WordNode("\"bar");
+        final barlist = ListNode.makeList([foo, bar]);
         expect(barlist.toString(), equals("[ \"foo \"bar ]"));
       });
     });

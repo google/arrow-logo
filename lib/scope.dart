@@ -25,7 +25,7 @@ class Scope {
   const Scope(Map<String, Node> this.symtab, [Scope this.parent = null]);
   
   String toString() {
-    StringBuffer sb = new StringBuffer();
+    final sb = new StringBuffer();
     Scope scope = this;
     while (scope != null) {
       sb.write(scope.symtab);
@@ -35,7 +35,7 @@ class Scope {
   }
   
   operator [](String name) {
-    var t = symtab[name.toLowerCase()];
+    final t = symtab[name.toLowerCase()];
     if (t != null || parent == null) {
       return t;
     }
@@ -47,7 +47,7 @@ class Scope {
   }
   
   void assign(String name, Node value) {
-    var t = symtab[name.toLowerCase()];
+    final t = symtab[name.toLowerCase()];
     if (t != null || parent == null) {
       symtab[name.toLowerCase()] = value;
       return;

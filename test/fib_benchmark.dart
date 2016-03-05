@@ -9,14 +9,14 @@ import "./mocks.dart";
 
 void main() {
   Scope globalScope;
-  var turtle = new MockTurtleWorker();
-  var console = new MockConsole();
-  var parent = new SimpleDebug();
+  final turtle = new MockTurtleWorker();
+  final console = new MockConsole();
+  final parent = new SimpleDebug();
 
   globalScope = new Scope(Primitive.getBuiltIns());
   InterpreterImpl interpreter = new InterpreterImpl.internal(
       globalScope, parent, turtle, console);
-  var program = '''
+  final program = '''
 to fib :n
 if :n <= 1
 [output 1]
@@ -25,7 +25,7 @@ end
 
 fib 25
 ''';
-  var tick = new DateTime.now().millisecondsSinceEpoch;
+  final tick = new DateTime.now().millisecondsSinceEpoch;
   interpreter.interpret(program);
   print(new DateTime.now().millisecondsSinceEpoch - tick);
 }

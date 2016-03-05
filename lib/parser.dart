@@ -22,37 +22,37 @@ class ParseException {
 
 class Token {
 
-  static const int TOKEN_EOF = -1;
-  static const int TOKEN_NUM = 0;
-  static const int TOKEN_WORD = 1;
-  static const int TOKEN_PRIM = 2;
-  static const int TOKEN_LBRACE = 123;
-  static const int TOKEN_RBRACE = 125;
-  static const int TOKEN_LBRACKET = 91;
-  static const int TOKEN_RBRACKET = 93;
+  static const TOKEN_EOF = -1;
+  static const TOKEN_NUM = 0;
+  static const TOKEN_WORD = 1;
+  static const TOKEN_PRIM = 2;
+  static const TOKEN_LBRACE = 123;
+  static const TOKEN_RBRACE = 125;
+  static const TOKEN_LBRACKET = 91;
+  static const TOKEN_RBRACKET = 93;
   
-  static const int TOKEN_LPAREN = 40;
-  static const int TOKEN_RPAREN = 41;  
+  static const TOKEN_LPAREN = 40;
+  static const TOKEN_RPAREN = 41;
 
-  static const int TOKEN_TO = 42;
-  static const int TOKEN_VAR = 44;
-  static const int TOKEN_OUTPUT = 45;
-  static const int TOKEN_END = 46;
+  static const TOKEN_TO = 42;
+  static const TOKEN_VAR = 44;
+  static const TOKEN_OUTPUT = 45;
+  static const TOKEN_END = 46;
 
-  static const int TOKEN_POUND = 51;
-  static const int TOKEN_PLUS = 52;  
-  static const int TOKEN_MINUS = 53;  
-  static const int TOKEN_SLASH = 54;  
-  static const int TOKEN_STAR = 55;  
-  static const int TOKEN_CARET = 56; 
+  static const TOKEN_POUND = 51;
+  static const TOKEN_PLUS = 52;
+  static const TOKEN_MINUS = 53;
+  static const TOKEN_SLASH = 54;
+  static const TOKEN_STAR = 55;
+  static const TOKEN_CARET = 56;
 
-  static const int TOKEN_LT = 57;  
-  static const int TOKEN_GT = 58;  
-  static const int TOKEN_LE = 59;  
-  static const int TOKEN_GE = 60;  
-  static const int TOKEN_EQ = 61;  
-  static const int TOKEN_EQEQ = 62;
-  static const int TOKEN_PERCENT = 63;
+  static const TOKEN_LT = 57;
+  static const TOKEN_GT = 58;
+  static const TOKEN_LE = 59;
+  static const TOKEN_GE = 60;
+  static const TOKEN_EQ = 61;
+  static const TOKEN_EQEQ = 62;
+  static const TOKEN_PERCENT = 63;
 
   int kind;
   Node node;
@@ -181,20 +181,20 @@ class Token {
 }
 
 class Scanner {
-  static const int CHAR_0 = 48;  // "0".charCodeAt(0) is not a constant
-  static const int CHAR_9 = 57; 
-  static const int CHAR_a = 97; 
-  static const int CHAR_z = 122;  
-  static const int CHAR_A = 65;  
-  static const int CHAR_Z = 90;  
-  static const int CHAR_BLANK = 32; 
-  static const int CHAR_QUOTE = 34; 
-  static const int CHAR_DOT = 46; 
-  static const int CHAR_TAB = 9; 
-  static const int CHAR_NEWLINE = 10;
-  static const int CHAR_COLON = 58; 
-  static const int CHAR_SEMI = 59;
-  static const int CHAR_UNDERSCORE = 95;
+  static const CHAR_0 = 48;  // "0".charCodeAt(0) is not a constant
+  static const CHAR_9 = 57;
+  static const CHAR_a = 97;
+  static const CHAR_z = 122;
+  static const CHAR_A = 65;
+  static const CHAR_Z = 90;
+  static const CHAR_BLANK = 32;
+  static const CHAR_QUOTE = 34;
+  static const CHAR_DOT = 46;
+  static const CHAR_TAB = 9;
+  static const CHAR_NEWLINE = 10;
+  static const CHAR_COLON = 58;
+  static const CHAR_SEMI = 59;
+  static const CHAR_UNDERSCORE = 95;
 
   static bool isAlpha(int charCode) =>
       (CHAR_a <= charCode && charCode <= CHAR_z)
@@ -229,11 +229,11 @@ class Scanner {
    * Advances [pos] if f(text.charCodeAt(pos)) holds.
    */
   int advanceIf(bool f(int)) {
-    int len = text.length;
+    final len = text.length;
     if (pos == len) {
       return pos;
     }
-    int ch = text.codeUnitAt(pos);
+    final ch = text.codeUnitAt(pos);
     if (f(ch)) { 
       ++pos;
     }
@@ -247,7 +247,7 @@ class Scanner {
    * 
    * */
   int advanceWhile(bool f(int)) {
-    int len = text.length;
+    final len = text.length;
     if (pos == len) {
       return pos;
     }
@@ -262,13 +262,13 @@ class Scanner {
     return pos;
   }
   
-  final Map<String, Primitive> toplevel;
+  final Map<String, Node> toplevel;
   final Token token;
   String text;
   int pos;
   
   /** @param toplevel used for looking up keywords (lowercase forms) */
-  Scanner(Map<String, Primitive> this.toplevel) : token = new Token();
+  Scanner(this.toplevel) : token = new Token();
   
   void initialize(String text) {
     this.text = text;
@@ -281,12 +281,12 @@ class Scanner {
    * @post token.node.isWord()
    */
   void tokenizeVar() {
-    int i = ++pos;
+    final start = ++pos;
     if (!isAlpha(text.codeUnitAt(pos))) {
       throw new Exception("expected alphabetical");
     }
     advanceWhile(isAlphaOrDigitOrUnderscore);
-    String word = text.substring(i, pos);
+    String word = text.substring(start, pos);
     token.setVar(new WordNode(word));
   }
 
@@ -295,13 +295,13 @@ class Scanner {
    * @post token.node.isNum()
    */
   void tokenizeNum() {
-    int i = pos;
+    final start = pos;
     advanceWhile(isDigit);
     advanceIf(isDot);
     advanceWhile(isDigit);
 
-    String numtext = text.substring(i, pos);
-    NumberNode nn = numtext.contains(".")
+    final numtext = text.substring(start, pos);
+    final nn = numtext.contains(".")
         ? new NumberNode.float(double.parse(numtext))
         : new NumberNode.int(int.parse(numtext));
     token.setNum(nn);
@@ -309,9 +309,9 @@ class Scanner {
   
   /** @post token.kind \in {TOKEN_TO, TOKEN_END, TOKEN_WORD, TOKEN_PRIM} */
   void tokenizeWord() {
-    int i = pos;
+    final start = pos;
     advanceWhile(isAlphaOrDigitOrUnderscore);
-    String word = text.substring(i, pos);
+    final word = text.substring(start, pos);
     if (word == "to") {
       token.kind = Token.TOKEN_TO;
     } else if (word == "end") {
@@ -381,7 +381,7 @@ class Scanner {
    * @post this.token is set to appropriate value
    */
   void tokenize() {
-    final int charCode = text.codeUnitAt(pos);
+    final charCode = text.codeUnitAt(pos);
     if (CHAR_COLON == charCode) {
       tokenizeVar();
     } else if (CHAR_QUOTE == charCode) {
@@ -441,14 +441,14 @@ class Parser extends Scanner {
   
   OpInfo opstack;
   
-  Parser(Map<String, Primitive> toplevel) : opstack = null, super(toplevel);
+  Parser(Map<String, Node> toplevel) : opstack = null, super(toplevel);
   
   /**
    * @pre token.kind == TOKEN_LBRACKET
    * @post nodeList' = nodeList ++ listNode
    */
   void parseList(List<Node> nodeList) {
-    var objList = new List<Node>();
+    final objList = <Node>[];
     
     nextToken();
     while (token.kind != Token.TOKEN_EOF
@@ -535,7 +535,7 @@ class Parser extends Scanner {
    *      op ::= part (infix part)*
    */
   void parseOp(List<Node> nodeList) {
-    List operand = [];
+    List<Node> operand = <Node>[];
     OpInfo base = opstack;
     
     parsePart(operand);
@@ -576,15 +576,15 @@ class Parser extends Scanner {
     if (token.kind != Token.TOKEN_WORD) {
       throw new ParseException("expected word");
     }
-    WordNode wn = token.node;
-    String name = wn.stringValue;
+    final wn = token.node as WordNode;
+    final name = wn.stringValue;
     nextToken();
-    var varList = new List<Node>();
+    final varList = <Node>[];
     while (token.kind == Token.TOKEN_VAR) {
       varList.add(token.node);
       nextToken();
     }    
-    var objList = new List<Node>();
+    final objList = <Node>[];
     while (token.kind != Token.TOKEN_END
         && token.kind != Token.TOKEN_EOF) {
       parseExpr(objList);
@@ -608,7 +608,7 @@ class Parser extends Scanner {
   ListNode parse(String input) {
     input = input.trim();
     initialize(input);
-    var nodeList = new List<Node>();
+    final nodeList = <Node>[];
     nextToken();
     while (token.kind != Token.TOKEN_EOF) {
       switch (token.kind) {

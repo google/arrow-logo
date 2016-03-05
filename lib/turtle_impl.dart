@@ -27,7 +27,7 @@ class TurtleWorkerImpl extends TurtleWorker {
   Turtle turtle;
   
   static num getNum(String sizePx) {
-    String size = sizePx.substring(0, sizePx.length - 2);
+    final size = sizePx.substring(0, sizePx.length - 2);
     return int.parse(size);
   }
 
@@ -36,8 +36,8 @@ class TurtleWorkerImpl extends TurtleWorker {
     var turtleCtx = turtleCanvas.getContext("2d");
 
     html.CssStyleDeclaration style = userCanvas.getComputedStyle() ;
-    num width = getNum(style.width);
-    num height = getNum(style.height);
+    final width = getNum(style.width);
+    final height = getNum(style.height);
     turtle = new Turtle(turtleCtx, userCtx, width, height);
     turtle.draw();
   }
@@ -125,10 +125,10 @@ class TurtleWorkerImpl extends TurtleWorker {
  * Keeps state of the turtle and updates canvas when drawing.
  */
 class Turtle {
-  static final String ORANGE = "orange";
-  static final String GREEN = "green";
-  static final String BLACK = "black";
-  static final double TAU = math.PI * 2;
+  static final ORANGE = "orange";
+  static final GREEN = "green";
+  static final BLACK = "black";
+  static final TAU = math.PI * 2;
   
   static final List<String> colorTable = [
     "black", "red", "green", "yellow", 
@@ -136,10 +136,10 @@ class Turtle {
     "darkgray", "lightgray", "darkred", "forestgreen",
     "darkblue", "gold", "lightpink", "darkviolet",
     "darkgoldenrod"];
-  static final int SHOW = 0;
-  static final int HIDE = 1;
-  static final int PENUP = 0;
-  static final int PENDOWN = 1;
+  static final SHOW = 0;
+  static final HIDE = 1;
+  static final PENUP = 0;
+  static final PENDOWN = 1;
 
   final html.CanvasRenderingContext2D turtleCtx;
   final html.CanvasRenderingContext2D userCtx;
@@ -246,14 +246,14 @@ class Turtle {
   }
   
   void drawTurtle() {
-    num baseHeading = getHeadingRad();
-    num BODY_RADIUS = 12;
+    final baseHeading = getHeadingRad();
+    const BODY_RADIUS = 12;
     
     drawFillCircle(turtleCtx, x, y, BODY_RADIUS, ORANGE);
-    num headX = x + BODY_RADIUS * math.cos(baseHeading);
-    num headY = y + BODY_RADIUS * math.sin(baseHeading);
+    final headX = x + BODY_RADIUS * math.cos(baseHeading);
+    final headY = y + BODY_RADIUS * math.sin(baseHeading);
     drawFillCircle(turtleCtx, headX, headY, 2, GREEN);
-    
+
     num footX = x + BODY_RADIUS * math.cos(baseHeading + TAU/8);
     num footY = y + BODY_RADIUS * math.sin(baseHeading + TAU/8);
     drawFillCircle(turtleCtx, footX, footY, 1, BLACK);
@@ -272,11 +272,11 @@ class Turtle {
   }
   
   void draw() {
-    num baseHeading = getHeadingRad();
-    num deltaX = math.cos(baseHeading);
-    num deltaY = math.sin(baseHeading);
-    num newX = x + delta * deltaX;
-    num newY = y + delta * deltaY;
+    final baseHeading = getHeadingRad();
+    final deltaX = math.cos(baseHeading);
+    final deltaY = math.sin(baseHeading);
+    final newX = x + delta * deltaX;
+    final newY = y + delta * deltaY;
     cleanCtx(turtleCtx);
     if (delta != 0 && penUpDown == PENDOWN) {
       userCtx.beginPath();
@@ -309,4 +309,3 @@ class Turtle {
     penUpDown = PENDOWN;
   }
 }
-

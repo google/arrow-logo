@@ -231,7 +231,6 @@ class ParserTest {
   }
 }
 
-
 void main() {
   new ParserTest().run();
 }

@@ -28,9 +28,9 @@ import "./mocks.dart";
 class InterpreterTest {
 
   Scope globalScope;
-  var turtle = new MockTurtleWorker();
-  var console = new MockConsole();
-  var parent = new SimpleDebug();
+  final turtle = new MockTurtleWorker();
+  final console = new MockConsole();
+  final parent = new SimpleDebug();
   InterpreterImpl interpreter;
 
   InterpreterImpl makeInterpreter([Map<String, Node> map = null]) {
@@ -88,9 +88,9 @@ class InterpreterTest {
       });
       test("eval defn", () {
         makeInterpreter();
-        Node fortyTwo = new NumberNode.int(42);
-        Node twentyOne = new NumberNode.int(21);
-        Node defn = new DefnNode("foo",
+        final fortyTwo = new NumberNode.int(42);
+        final twentyOne = new NumberNode.int(21);
+        final defn = new DefnNode("foo",
           ListNode.makeList([ new WordNode("x") ]),
           ListNode.makeList([
             Primitive.QUOTIENT,
@@ -102,11 +102,11 @@ class InterpreterTest {
             equals(twentyOne));
       });
       test("eval make update", () {
-        Node fortyTwo = new NumberNode.int(42);
-        Map<String, Node> varMap = new Map();
+        final fortyTwo = new NumberNode.int(42);
+        final varMap = <String, Node>{};
         varMap["x"] = fortyTwo;
         makeInterpreter(varMap);
-        Node seq = ListNode.makeList([
+        final seq = ListNode.makeList([
             Primitive.MAKE,
             Primitive.QUOTE, new WordNode("x"),
             Primitive.SUM,
@@ -116,12 +116,12 @@ class InterpreterTest {
           expect(interpreter.globalScope["x"], equals(new NumberNode.int(43)));
       });
       test("eval make deref", () {
-        Node fortyTwo = new NumberNode.int(42);
-        Map<String, Node> varMap = new Map();
+        final fortyTwo = new NumberNode.int(42);
+        final varMap = <String, Node>{};
         varMap["x"] = fortyTwo;
         varMap["y"] = new WordNode("x");
         makeInterpreter(varMap);
-        Node seq = ListNode.makeList([
+        final seq = ListNode.makeList([
             Primitive.MAKE,
             Primitive.THING, Primitive.QUOTE, new WordNode("y"),
             Primitive.SUM,
@@ -131,11 +131,11 @@ class InterpreterTest {
           expect(interpreter.globalScope["x"], equals(new NumberNode.int(43)));
       });
       test("eval make deref var", () {
-        Node fortyTwo = new NumberNode.int(42);
-        Map<String, Node> varMap = new Map();
+        final fortyTwo = new NumberNode.int(42);
+        final varMap = <String, Node>{};
         varMap["x"] = fortyTwo;
         makeInterpreter(varMap);
-        Node seq = ListNode.makeList([
+        final seq = ListNode.makeList([
             Primitive.MAKE,
             Primitive.QUOTE, new WordNode("y"),
             Primitive.QUOTE, new WordNode("x"),
@@ -150,9 +150,9 @@ class InterpreterTest {
       test("eval defn concat", () {
         makeInterpreter();
 
-        Node foo = new WordNode("foo");
-        Node bar = new WordNode("bar");
-        Node barlist = ListNode.makeList([bar]);
+        final foo = new WordNode("foo");
+        final bar = new WordNode("bar");
+        final barlist = ListNode.makeList([bar]);
 
         expect(interpreter.evalSequence(
             ListNode.makeList([Primitive.FPUT, Primitive.QUOTE, foo, barlist])),
@@ -263,7 +263,7 @@ class InterpreterTest {
       test("apply template", () {
         makeInterpreter();
 
-        ListNode nodes = 
+        final nodes =
             ListNode.makeList([
                 Primitive.APPLY,
                 ListNode.makeList([
@@ -285,7 +285,7 @@ class InterpreterTest {
       test("item", () {
         makeInterpreter();
 
-        ListNode nodes = 
+        ListNode nodes =
             ListNode.makeList([
                 Primitive.ITEM,
                 new NumberNode.int(3),
@@ -311,7 +311,7 @@ class InterpreterTest {
       test("make simple", () {
         makeInterpreter();
 
-        ListNode nodes =
+        final nodes =
             ListNode.makeList([
                 Primitive.MAKE,
                 Primitive.QUOTE,
@@ -325,7 +325,7 @@ class InterpreterTest {
       test("make local", () {
         makeInterpreter();
 
-        ListNode nodes = new Parser(Primitive.makeTopLevel()).parse("""
+        final nodes = new Parser(Primitive.makeTopLevel()).parse("""
         to setx make \"x :x + 1 end
         to callx 
           local \"x
@@ -333,8 +333,7 @@ class InterpreterTest {
           setx
           make \"y :x
         end""");
-        for (Node defn in nodes) {
-          print("define ${defn}");
+        for (final defn in nodes) {
           interpreter.define(defn);
         }
         expect(interpreter.evalSequence(
@@ -346,7 +345,6 @@ class InterpreterTest {
     });
   }
 }
-
 
 void main() {
   new InterpreterTest().run();

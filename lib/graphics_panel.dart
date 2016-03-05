@@ -56,8 +56,8 @@ class GraphicsPanel {
   TurtleWorker turtleWorker;
 
   GraphicsPanel(this.turtleWorker, ElementRef elementRef) {
-    var userCanvas = elementRef.nativeElement.querySelector("#user");
-    var turtleCanvas = elementRef.nativeElement.querySelector("#turtle");
+    final userCanvas = elementRef.nativeElement.querySelector("#user");
+    final turtleCanvas = elementRef.nativeElement.querySelector("#turtle");
 
     turtleWorker.init(userCanvas, turtleCanvas);
   }

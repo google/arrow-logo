@@ -149,9 +149,6 @@ class ListNodeIterator implements Iterator<Node> {
 
 class WordNode extends Node {
 
-  static const constantTrue = const WordNode("true");
-  static const constantFalse = const WordNode("false");
-
   final String stringValue;
 
   const WordNode(this.stringValue) : super(Node.KIND_WORD);

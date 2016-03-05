@@ -81,7 +81,7 @@ class ConsoleImpl extends Console {
   }
 
   void processAction(List msg) {
-    Primitive p = Primitive.lookup(msg[0]);
+    final p = Primitive.lookup(msg[0]);
     switch (p) {
       case Primitive.CLEARTEXT:
         clearText();
@@ -102,12 +102,12 @@ class ConsoleImpl extends Console {
   }
 
   void _onFileInputChange() {
-    var fileRef = editorFileInput.files[0];
+    final fileRef = editorFileInput.files[0];
     print(fileRef.name);
     if (fileRef.name.isEmpty) {
       return;
     }
-    var reader = new html.FileReader();
+    final reader = new html.FileReader();
     reader.onLoad.listen((e) {
       // TODO: ask before discarding user text.
       editorContent = reader.result;
@@ -166,11 +166,11 @@ class ConsoleImpl extends Console {
 
   void showHelp() {
     writeln("  supported commands:");
-    for (Primitive p in Primitive.commandsList) {
+    for (final p in Primitive.commandsList) {
       writeln(p.name + (p.altName != null ? "  ${p.altName}" : ""));
     }
     writeln("  supported operators:");
-    for (Primitive p in Primitive.operatorList) {
+    for (final p in Primitive.operatorList) {
       writeln(p.name + (p.altName != null ? "  ${p.altName}" : ""));
     }
   }
@@ -181,8 +181,8 @@ class ConsoleImpl extends Console {
 
   void handleKeyPress(/* html.KeyboardEvent */ e) {
     if (NEWLINE == e.keyCode) {
-      String text = shellElem.value;
-      String code = text.substring(PROMPT.length);
+      final text = shellElem.value;
+      final code = text.substring(PROMPT.length);
       if (!code.isEmpty) {
         writeln(text);
         // TODO: get back errors
@@ -205,7 +205,7 @@ class ConsoleImpl extends Console {
   }
 
   void handleDownloadClick(html.Event e) {
-    var downloadLink = html.document.createElement("a");
+    final downloadLink = html.document.createElement("a");
     downloadLink.setAttribute("href", getContentsAsUrl());
     downloadLink.setAttribute("download", "program.logo");
     downloadLink.click();
