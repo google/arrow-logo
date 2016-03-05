@@ -53,7 +53,7 @@ div#editor, div#editorBackground {
 }
 
 input#load {
-  position: absolute;
+  display: none;  /* TODO */
   right: 5em;
   bottom: 1em;
 }
@@ -76,16 +76,19 @@ input#commit {
   <div class="editor">
     <div id="editorBackground" class="invisible"></div>
     <div id="editor" class="invisible"></div>
-      <input id="load" type="file" value="" class="invisible"></input>
-      <input id="download" type="button" value="save" class="invisible"></input>
-      <input id="commit" type="button" value="ok" class="invisible"></input>
-    </div>
+    <input id="load" type="file" value="" class="invisible">
+    <input id="download" type="button" value="save" class="invisible">
+    <input id="commit" type="button" value="ok" class="invisible">
   </div>
 </div>
 ''')
-class EditorPanel {
+class EditorPanel implements OnInit {
+  ElementRef elementRef;
   Console console;
-  EditorPanel(this.console, ElementRef elementRef) {
+  EditorPanel(this.console, this.elementRef);
+
+  @override
+  ngOnInit() {
     console.init(elementRef.nativeElement);
   }
 }

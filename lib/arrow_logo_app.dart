@@ -15,7 +15,6 @@
 library arrow_logo_app;
 
 import 'package:angular2/angular2.dart';
-import 'package:angular2/di.dart';
 
 import 'console.dart';
 import 'console_impl.dart';

@@ -18,8 +18,8 @@ import 'package:angular2/angular2.dart';
 
 import "turtle.dart";
 
-@Component(selector: 'graphics-panel')
-@View(
+@Component(
+    selector: 'graphics-panel',
     template: '''
 <style>
 div.graphics_panel {
@@ -49,10 +49,14 @@ canvas#turtle {
   <canvas id="turtle" width="600" height="540"></canvas>
 </div>
 ''')
-class GraphicsPanel {
+class GraphicsPanel implements OnInit {
+  ElementRef elementRef;
   TurtleWorker turtleWorker;
 
-  GraphicsPanel(this.turtleWorker, ElementRef elementRef) {
+  GraphicsPanel(this.turtleWorker, this.elementRef);
+
+  @override
+  ngOnInit() {
     final userCanvas = elementRef.nativeElement.querySelector("#user");
     final turtleCanvas = elementRef.nativeElement.querySelector("#turtle");
 

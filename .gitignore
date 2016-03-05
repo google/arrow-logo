@@ -1,6 +1,9 @@
 packages
-pubspec.lock
+build
+.packages
 .pub
 .project
 .idea
 arrow-logo.iml
+*.swp
+*.swo
