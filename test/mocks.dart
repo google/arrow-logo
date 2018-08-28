@@ -1,10 +1,8 @@
-library mocks;
-
 import "package:arrowlogo/console.dart";
 import "package:arrowlogo/nodes.dart";
 import "package:arrowlogo/turtle.dart";
 
-class MockConsole extends Console {
+class MockConsole extends ArrowConsole {
   init(dynamic nativeElement) {}
   set interpreter(ConsoleInterpreterFn) {}
   void processAction(List raw) {}

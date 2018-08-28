@@ -11,11 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-library arrowlogo;
-
-import 'package:angular2/bootstrap.dart';
-import 'package:arrowlogo/arrow_logo_app.dart';
+import 'package:angular/angular.dart';
+import 'package:arrowlogo/arrow_logo_app.template.dart' as ng;
 
 void main() {
-  bootstrap(ArrowLogoApp, new ArrowLogoModule().bindings);
+  runApp(ng.ArrowLogoAppNgFactory);
 }

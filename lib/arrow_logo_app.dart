@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-library arrow_logo_app;
-
-import 'package:angular2/angular2.dart';
+import 'package:angular/angular.dart';
 
 import 'console.dart';
 import 'console_impl.dart';
@@ -26,43 +24,10 @@ import "turtle.dart";
 import "turtle_impl.dart";
 
 class ArrowLogoModule {
-  List<Binding> get bindings => [
-        TurtleWorkerImpl,
-        ConsoleImpl,
-        InterpreterImpl,
-        SimpleDebug,
-        new Binding(Debug, toValue: new SimpleDebug()),
-        new Binding(TurtleWorker, toAlias: TurtleWorkerImpl),
-        new Binding(Console, toAlias: ConsoleImpl),
-        new Binding(InterpreterInterface, toAlias: InterpreterImpl)
-      ];
+  List get;
 }
 
-@Component(selector: 'arrow-logo-app')
-@View(
-    template: '''
-<style>
-div#container {
-  margin: 0 auto;
-  height: 600px;
-  width: 910px;
-}
-
-h1.title {
-  font-family: 'Averia Libre', cursive;
-  text-align: right;
-  margin-right: 1em;
-  margin-top: 1em;
-}
-
-div.main {
-  position: relative;
-  width: 600px;
-  height: 600px;
-  margin-left: 10px;
-  margin-right: 10px;
-}
-</style>
+@Component(selector: 'arrow-logo-app', template: '''
 <div id="container">
   <h1 class="title">ArrowLogo</h1>
   <div class="main">
@@ -70,13 +35,20 @@ div.main {
     <editor-panel></editor-panel>
   </div>
 </div>
-''',
-    directives: const [EditorPanel, GraphicsPanel])
+''', directives: const [
+  EditorPanel,
+  GraphicsPanel
+], providers: const [
+  const ValueProvider(Debug, const SimpleDebug()),
+  const ClassProvider(TurtleWorker, useClass: TurtleWorkerImpl),
+  const ClassProvider(ArrowConsole, useClass: ConsoleImpl),
+  const ClassProvider(InterpreterInterface, useClass: InterpreterImpl)
+])
 class ArrowLogoApp {
-  Console console;
+  ArrowConsole console;
   InterpreterInterface interpreter;
 
   ArrowLogoApp(this.console, this.interpreter) {
-    console.interpreter = interpreter.interpret;
+    console.interpreter = (text) => interpreter.interpret(text);
   }
 }

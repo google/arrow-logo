@@ -11,17 +11,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-library console;
 
 typedef void ConsoleInterpreterFn(String);
 
 /// Provides textual output functionality for both the app and user code.
-abstract class Console {
-  Console() {}
+abstract class ArrowConsole {
+  ArrowConsole() {}
 
-  init(dynamic nativeElement);
+  init(dynamic element);
 
-  set interpreter(ConsoleInterpreterFn);
+  set interpreter(ConsoleInterpreterFn doInterpret);
 
   /// Processes a user command (e.g. "print").
   void processAction(List action);

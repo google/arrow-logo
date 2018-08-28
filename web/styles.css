@@ -1,0 +1,94 @@
+div#container {
+  margin: 0 auto;
+  height: 600px;
+  width: 910px;
+}
+
+h1.title {
+  font-family: 'Averia Libre', cursive;
+  text-align: right;
+  margin-right: 1em;
+  margin-top: 1em;
+}
+
+div.main {
+  position: relative;
+  width: 600px;
+  height: 600px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+div.graphics_panel {
+  position: absolute;
+  width: 600px;
+  height: 540px;
+}
+
+canvas#user, canvas#turtle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 600px;
+  height: 540px;
+}
+
+canvas#user {
+  z-index: 0;
+}
+
+canvas#turtle {
+  z-index: 1;
+}
+
+div.panel {
+  position: absolute;
+  left: 610px;
+  width: 300px;
+  height: 540px;
+  right: 0px;
+}
+
+textarea#history, textarea#shell, div#editor {
+  font-family: monospace;
+  background: rgb(230,230,230);
+}
+
+textarea#history, textarea#shell{
+  width: 300px;
+}
+
+textarea#history {
+  height: 502px;
+}
+
+textarea#shell {
+  height: 20px;
+}
+
+div#editor {
+  font-family: monospace;
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 540px;
+  width: 300px;
+}
+
+input#load {
+  display: none;  /* TODO */
+  right: 5em;
+  bottom: 1em;
+}
+
+input#download {
+  position: absolute;
+  right: 5em;
+  bottom: 1em;
+}
+
+input#commit {
+  position: absolute;
+  right: 1em;
+  bottom: 1em;
+}

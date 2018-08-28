@@ -12,83 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-library editor_panel;
+import 'dart:html';
 
-import 'package:angular2/angular2.dart';
+import 'package:angular/angular.dart';
 
 import 'console.dart';
 
-@Component(selector: 'editor-panel')
-@View(
+@Component(
+    selector: 'editor-panel',
     template: '''
-<style>
-div.panel {
-  position: absolute;
-  left: 610px;
-  width: 300px;
-  height: 540px;
-  right: 0px;
-}
-
-textarea#history, textarea#shell, div#editorBackground {
-  font-family: monospace;
-  width: 300px;
-  background: rgb(230,230,230);
-}
-
-textarea#history {
-  height: 502px;
-}
-
-textarea#shell {
-  height: 20px;
-}
-
-div#editor, div#editorBackground {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 540px;
-  width: 300px;
-}
-
-input#load {
-  display: none;  /* TODO */
-  right: 5em;
-  bottom: 1em;
-}
-
-input#download {
-  position: absolute;
-  right: 5em;
-  bottom: 1em;
-}
-
-input#commit {
-  position: absolute;
-  right: 1em;
-  bottom: 1em;
-}
-</style>
 <div class="panel">
   <textarea id="shell"></textarea>
   <textarea id="history"></textarea>
-  <div class="editor">
-    <div id="editorBackground" class="invisible"></div>
-    <div id="editor" class="invisible"></div>
+  <div class="editorBox">
+    <div id="editor"
+         class="invisible" contenteditable="true" spellcheck="false"></div>
     <input id="load" type="file" value="" class="invisible">
-    <input id="download" type="button" value="save" class="invisible">
-    <input id="commit" type="button" value="ok" class="invisible">
+    <input id="download" type="button" value="download" class="invisible">
+    <input id="commit" type="button" value="run" class="invisible">
   </div>
 </div>
 ''')
 class EditorPanel implements OnInit {
-  ElementRef elementRef;
-  Console console;
-  EditorPanel(this.console, this.elementRef);
+  Element element;
+  ArrowConsole console;
+  EditorPanel(this.console, this.element);
 
   @override
   ngOnInit() {
-    console.init(elementRef.nativeElement);
+    console.init(element);
   }
 }

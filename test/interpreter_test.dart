@@ -11,8 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-library interpreter_test;
-
 import 'package:test/test.dart';
 
 import "dart:math" as math;
@@ -25,8 +23,7 @@ import "package:arrowlogo/scope.dart";
 
 import "./mocks.dart";
 
-class InterpreterTest {
-
+void main() {
   Scope globalScope;
   final turtle = new MockTurtleWorker();
   final console = new MockConsole();
@@ -40,10 +37,6 @@ class InterpreterTest {
     return interpreter;
   }
 
-  InterpreterTest() {
-  }
-  
-  void run() {
     group("InterpreterTest", () {
       test("eval values", () {
         makeInterpreter();
@@ -84,7 +77,7 @@ class InterpreterTest {
           interpreter.evalSequence(
             ListNode.makeList([
               Primitive.IFELSE, Primitive.FALSE, fortyTwo, Primitive.PI])),
-          equals(new NumberNode.float(math.PI)));
+          equals(new NumberNode.float(math.pi)));
       });
       test("eval defn", () {
         makeInterpreter();
@@ -351,9 +344,5 @@ class InterpreterTest {
         expect(globalScope["y"], equals(new NumberNode.int(3)));
       });
     });
-  }
 }
 
-void main() {
-  new InterpreterTest().run();
-}

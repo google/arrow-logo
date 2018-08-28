@@ -11,8 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-library parser_test;
-
 import 'package:test/test.dart';
 
 import "package:arrowlogo/nodes.dart";
@@ -25,7 +23,7 @@ class ParserTest {
   ParserTest() 
       : parser = new Parser(Primitive.getBuiltIns());
   
-  void expectAdvanceWhileConsumes(input, func, prefix) {
+  void expectAdvanceWhileConsumes(input, bool func(dynamic), prefix) {
     parser.initialize(input);
     expect(parser.advanceWhile(func), equals(prefix.length));
   }

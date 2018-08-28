@@ -11,7 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-library nodes;
+import 'dart:collection';
+
 
 /** Represents an ArrowLogo object, primitive or definition.
  *
@@ -46,7 +47,7 @@ abstract class Node {
   bool get isDefn => (tag & KIND_MASK) == KIND_DEFN;
 }
 
-class ListNode extends Node {
+class ListNode extends Node with IterableMixin<Node> {
   static const int LIST_NIL = 0 << Node.KIND_BITS;
   static const int LIST_CONS = 1 << Node.KIND_BITS;
   static const int LIST_MASK = 1 << Node.KIND_BITS;
@@ -75,13 +76,13 @@ class ListNode extends Node {
   final Node head;
   final ListNode tail;
 
-  const ListNode.nil()
+  ListNode.nil()
       : head = null,
         tail = null,
         super(LIST_NIL | Node.KIND_LIST);
-  const ListNode.cons(this.head, this.tail) : super(LIST_CONS | Node.KIND_LIST);
+  ListNode.cons(this.head, this.tail) : super(LIST_CONS | Node.KIND_LIST);
 
-  static const Node NIL = const ListNode.nil();
+  static final Node NIL = ListNode.nil();
 
   static Node makeList(List list) {
     var n = NIL;

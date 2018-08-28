@@ -11,8 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-library turtle_impl;
-
 import 'dart:html' as html;
 import 'dart:math' as math;
 
@@ -126,7 +124,7 @@ class Turtle {
   static final ORANGE = "orange";
   static final GREEN = "green";
   static final BLACK = "black";
-  static final TAU = math.PI * 2;
+  static final TAU = math.pi * 2;
 
   static final List<String> colorTable = [
     "black",

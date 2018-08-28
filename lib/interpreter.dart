@@ -11,8 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-library interpreter;
-
 import 'dart:math' as math;
 
 import 'console.dart';
@@ -107,10 +105,10 @@ class InterpreterImpl extends InterpreterInterface {
   final Parser parser;
   final Debug debug;
   final TurtleWorker turtle;
-  final Console console;
+  final ArrowConsole console;
   InterpreterState state;
 
-  factory InterpreterImpl(Debug debug, TurtleWorker turtle, Console console) {
+  factory InterpreterImpl(Debug debug, TurtleWorker turtle, ArrowConsole console) {
     InterpreterImpl impl = new InterpreterImpl.internal(
         new Scope(Primitive.makeTopLevel()), debug, turtle, console);
     debug.log("constructed Interpreter");
@@ -472,7 +470,7 @@ class InterpreterImpl extends InterpreterInterface {
         return nodes;
 
       case Primitive.PI:
-        return new ListNode.cons(new NumberNode.float(math.PI), nodes);
+        return new ListNode.cons(new NumberNode.float(math.pi), nodes);
 
       case Primitive.REPEAT:
         nodes = evalInScope(nodes, scope);

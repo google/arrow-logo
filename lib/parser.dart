@@ -11,14 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-library parser;
-
 import 'nodes.dart';
 
 class ParseException {
   final String message;
   const ParseException(this.message);
 }
+
+typedef bool CharPredicate(int);
 
 class Token {
   static const TOKEN_EOF = -1;
@@ -224,31 +224,31 @@ class Scanner {
   static const CHAR_SEMI = 59;
   static const CHAR_UNDERSCORE = 95;
 
-  static bool isAlpha(int charCode) =>
+  static bool isAlpha(dynamic charCode) =>
       (CHAR_a <= charCode && charCode <= CHAR_z) ||
       (CHAR_A <= charCode && charCode <= CHAR_Z);
 
-  static bool isDigit(int charCode) =>
+  static bool isDigit(dynamic charCode) =>
       (CHAR_0 <= charCode && charCode <= CHAR_9);
 
-  static bool isUnderscore(int charCode) => CHAR_UNDERSCORE == charCode;
+  static bool isUnderscore(dynamic charCode) => CHAR_UNDERSCORE == charCode;
 
-  static bool isDigitOrDot(int charCode) =>
+  static bool isDigitOrDot(dynamic charCode) =>
       CHAR_DOT == charCode || isDigit(charCode);
 
-  static bool isDot(int charCode) => CHAR_DOT == charCode;
+  static bool isDot(dynamic charCode) => CHAR_DOT == charCode;
 
-  static bool isSpace(int charCode) => CHAR_BLANK == charCode;
+  static bool isSpace(dynamic charCode) => CHAR_BLANK == charCode;
 
-  static bool isWhiteSpace(int charCode) =>
+  static bool isWhiteSpace(dynamic charCode) =>
       CHAR_BLANK == charCode ||
       CHAR_TAB == charCode ||
       CHAR_NEWLINE == charCode;
 
-  static bool isAlphaOrDigitOrUnderscore(int charCode) =>
+  bool isAlphaOrDigitOrUnderscore(dynamic charCode) =>
       isAlpha(charCode) || isDigit(charCode) || isUnderscore(charCode);
 
-  static bool notNewLine(int charCode) => CHAR_NEWLINE != charCode;
+  bool notNewLine(dynamic charCode) => CHAR_NEWLINE != charCode;
 
   /** 
    * Advances [pos] if f(text.charCodeAt(pos)) holds.
@@ -271,7 +271,7 @@ class Scanner {
    * !f(text.charCodeAt(pos)) || pos == text.length
    * 
    * */
-  int advanceWhile(bool f(int)) {
+  int advanceWhile(CharPredicate f) {
     final len = text.length;
     if (pos == len) {
       return pos;
