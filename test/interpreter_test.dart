@@ -12,16 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import 'package:test/test.dart';
+import 'package:mockito/mockito.dart';
 
 import "dart:math" as math;
 
+import "package:arrowlogo/console.dart";
 import "package:arrowlogo/debug.dart";
 import "package:arrowlogo/interpreter.dart";
 import "package:arrowlogo/nodes.dart";
 import "package:arrowlogo/parser.dart";
 import "package:arrowlogo/scope.dart";
+import "package:arrowlogo/turtle.dart";
 
-import "./mocks.dart";
+class MockConsole extends Mock implements ArrowConsole {}
+class MockTurtleWorker extends Mock implements TurtleWorker {}
 
 void main() {
   Scope globalScope;

@@ -1,3 +1,4 @@
+#Makefile.parameters
 arrow-logo.iml
 .dart_tool
 packages
@@ -9,3 +10,4 @@ build
 arrow-logo.iml
 *.swp
 *.swo
+*.swn

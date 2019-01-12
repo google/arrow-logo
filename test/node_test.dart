@@ -13,7 +13,7 @@
 // limitations under the License.
 import 'package:test/test.dart';
 
-import "../lib/nodes.dart";
+import 'package:arrowlogo/nodes.dart';
 
 class NodeTest {
 

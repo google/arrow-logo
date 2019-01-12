@@ -37,7 +37,8 @@ class ConsoleImpl extends ArrowConsole {
 
   ConsoleImpl() : parser = new Parser(Primitive.makeTopLevel());
 
-  init(Element element) {
+  init(dynamic dynElement) {
+    Element element = dynElement;
     shellElem = element.querySelector('#shell');
     historyElem = element.querySelector('#history');
     editorElem = element.querySelector('#editor');
