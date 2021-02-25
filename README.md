@@ -16,15 +16,15 @@ Running
 Assuming you have dart installed and webdev activated globally.
 
 ```
-pub get
-webdev serve
+make get
+make serve
 ```
 
 Deploying
 ---------
 
 ```
-webdev build --output web:build
+make
 ```
 
 
