@@ -315,8 +315,8 @@ class Primitive extends Node {
   static const NUMP = const Primitive(1, "nump");
   static const WORDP = const Primitive(1, "wordp");
 
-  static Map<String, Primitive> makeTopLevel() {
-    Map<String, Primitive> map = new Map();
+  static Map<String, Node> makeTopLevel() {
+    Map<String, Node> map = new Map();
     for (String k in getBuiltIns().keys) {
       map[k] = getBuiltIns()[k];
     }
