@@ -223,6 +223,7 @@ class Scanner {
   static const CHAR_COLON = 58;
   static const CHAR_SEMI = 59;
   static const CHAR_UNDERSCORE = 95;
+  static const CHAR_NBSP = 160;
 
   static bool isAlpha(dynamic charCode) =>
       (CHAR_a <= charCode && charCode <= CHAR_z) ||
@@ -243,7 +244,8 @@ class Scanner {
   static bool isWhiteSpace(dynamic charCode) =>
       CHAR_BLANK == charCode ||
       CHAR_TAB == charCode ||
-      CHAR_NEWLINE == charCode;
+      CHAR_NEWLINE == charCode ||
+      CHAR_NBSP == charCode;
 
   bool isAlphaOrDigitOrUnderscore(dynamic charCode) =>
       isAlpha(charCode) || isDigit(charCode) || isUnderscore(charCode);
@@ -417,7 +419,8 @@ class Scanner {
         break;
 
       default:
-        throw new Exception("unexpected char: ${text[pos]}");
+        throw new Exception(
+          "unexpected char: '${text[pos]} (${text.codeUnitAt(pos)})'");
     }
     ++pos;
   }
@@ -462,11 +465,20 @@ class Scanner {
       return;
     }
 
-    advanceWhile(isWhiteSpace);
-    if (CHAR_SEMI == text.codeUnitAt(pos)) {
-      skipComment();
-      nextToken();
-      return;
+    while (isWhiteSpace(text.codeUnitAt(pos))
+          || CHAR_SEMI == text.codeUnitAt(pos)) {
+      advanceWhile(isWhiteSpace);
+      if (pos == text.length) {
+        token.setEof();
+        return;
+      }
+      if (CHAR_SEMI == text.codeUnitAt(pos)) {
+        skipComment();
+      }
+      if (pos == text.length) {
+        token.setEof();
+        return;
+      }
     }
     tokenize();
   }

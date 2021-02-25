@@ -92,7 +92,7 @@ class ParserTest {
       test("parse some words and numbers", () {
         expect(new NumberNode.int(1), equals(new NumberNode.int(1)));  // sanity
         expect(
-          parser.parse("fd 1 fd 1.2 \"baz :math # atan \"100"),
+          parser.parse("fd 1 fd 1.2 \"baz :math # atan \"100 ; comment\n"),
           equals(ListNode.makeList([
             Primitive.FORWARD, new NumberNode.int(1),
             Primitive.FORWARD, new NumberNode.float(1.2),
@@ -106,10 +106,10 @@ class ParserTest {
           parser.parse("[]"),
           equals(ListNode.makeList([ListNode.NIL])));
         expect(
-          parser.parse("[1]"),
+          parser.parse("[1 \n ]"),
           equals(ListNode.makeList([ListNode.makeList([new NumberNode.int(1)])])));
         expect(
-          parser.parse("pr [ 1 [ 1.2 ] [] fd 2 ]"),
+          parser.parse("pr [ ; comment \n 1 [ 1.2 ] [] fd 2 ]"),
           equals(ListNode.makeList([
             Primitive.PRINT,
             ListNode.makeList([
