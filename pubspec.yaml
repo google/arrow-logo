@@ -11,3 +11,6 @@ dev_dependencies:
   angular_test: '^2.0.0-beta'
   test: '^1.5.1+1'
   mockito: '^4.0.0'
+
+environment:
+  sdk: '>=2.10.0 <3.0.0'
