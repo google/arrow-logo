@@ -23,7 +23,7 @@ serve:
 	$(SERVE_COMMAND)
 
 test:
-	dart run test/*.dart
+	dart test
 
 get:
 	$(UPDATE_PACKAGES_COMMAND)
