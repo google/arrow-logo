@@ -29,7 +29,8 @@ import 'console.dart';
          class="invisible" contenteditable="true" spellcheck="false"></div>
     <input id="load" type="file" value="" class="invisible">
     <input id="download" type="button" value="download" class="invisible">
-    <input id="commit" type="button" value="run" class="invisible">
+    <input id="run" type="button" value="run" class="invisible">
+    <input id="close" type="button" value="close" class="invisible">
   </div>
 </div>
 ''')

@@ -14,7 +14,7 @@
 
 typedef void ConsoleInterpreterFn(String);
 
-/// Provides textual output functionality for both the app and user code.
+// Provides textual output functionality for both the app and user code.
 abstract class ArrowConsole {
   ArrowConsole() {}
 

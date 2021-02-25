@@ -68,11 +68,13 @@ textarea#shell {
 
 div#editor {
   font-family: monospace;
+  font-size: 16px;
   position: absolute;
   left: 0;
   top: 0;
-  height: 540px;
+  height: 520px;
   width: 300px;
+  padding: 10px;
 }
 
 input#load {
@@ -81,14 +83,21 @@ input#load {
   bottom: 1em;
 }
 
-input#download {
+input#run {
   position: absolute;
-  right: 5em;
-  bottom: 1em;
+  left: 310px;
+  top: 1em;
 }
 
-input#commit {
+input#download {
   position: absolute;
-  right: 1em;
-  bottom: 1em;
+  left: 310px;
+  top: 3em;
+}
+
+
+input#close {
+  position: absolute;
+  left: 310px;
+  top: 5em;
 }

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'dart:html' as html;
-import 'dart:html';
 
 import 'console.dart';
 import 'nodes.dart';
@@ -30,7 +29,8 @@ class ConsoleImpl extends ArrowConsole {
   html.Element editorBackground;
   html.InputElement editorFileInput;
   html.Element editorDownloadButton;
-  html.Element editorCommitButton;
+  html.Element editorRunButton;
+  html.Element editorCloseButton;
   Parser parser;
 
   String userText = "";
@@ -38,21 +38,23 @@ class ConsoleImpl extends ArrowConsole {
   ConsoleImpl() : parser = new Parser(Primitive.makeTopLevel());
 
   init(dynamic dynElement) {
-    Element element = dynElement;
+    html.Element element = dynElement;
     shellElem = element.querySelector('#shell');
     historyElem = element.querySelector('#history');
     editorElem = element.querySelector('#editor');
     editorFileInput = element.querySelector('#load');
-    editorCommitButton = element.querySelector('#commit');
+    editorRunButton = element.querySelector('#run');
+    editorCloseButton = element.querySelector('#close');
     editorDownloadButton = element.querySelector('#download');
 
     editorFileInput.onChange.listen((e) => _onFileInputChange());
 
     shellElem.focus();
-    shellElem.onKeyPress.listen(handleKeyPress);
-    shellElem.onKeyDown.listen(handleKeyDown);
-    editorDownloadButton.onClick.listen(handleDownloadClick);
-    editorCommitButton.onClick.listen(handleCommitClick);
+    shellElem.onKeyPress.listen(shellHandleKeyPress);
+    shellElem.onKeyDown.listen(shellHandleKeyDown);
+    editorDownloadButton.onClick.listen(editorHandleDownload);
+    editorRunButton.onClick.listen(editorHandleRun);
+    editorCloseButton.onClick.listen(editorHandleClose);
     writeln("Welcome to ArrowLogo.");
     writeln("Type 'help' for help.");
     writeln("Type 'edall' to switch to the editor.");
@@ -64,9 +66,9 @@ class ConsoleImpl extends ArrowConsole {
     _interpret = doInterpret;
   }
 
-  String get editorContent => editorElem.text;
-  set editorContent(String newContent) =>
-      editorElem.setInnerHtml(newContent);
+  String get editorContent => extractTextPreserveWhitespace(editorElem);
+
+  set editorContent(String newContent) => editorElem.setInnerHtml(newContent);
 
   String getContentsAsUrl() {
     return 'data:text/csv;charset=UTF-8,${Uri.encodeQueryComponent(editorContent)}';
@@ -93,6 +95,7 @@ class ConsoleImpl extends ArrowConsole {
     }
   }
 
+  // TODO: revive load functionality.
   void _onFileInputChange() {
     final fileRef = editorFileInput.files[0];
     print(fileRef.name);
@@ -124,7 +127,8 @@ class ConsoleImpl extends ArrowConsole {
     editorElem.classes.add('invisible');
     editorFileInput.classes.add('invisible');
     editorDownloadButton.classes.add('invisible');
-    editorCommitButton.classes.add('invisible');
+    editorRunButton.classes.add('invisible');
+    editorCloseButton.classes.add('invisible');
     shellElem.classes.remove('invisible');
     historyElem.classes.remove('invisible');
     shellElem.focus();
@@ -134,7 +138,8 @@ class ConsoleImpl extends ArrowConsole {
     editorElem.classes.remove('invisible');
     editorFileInput.classes.remove('invisible');
     editorDownloadButton.classes.remove('invisible');
-    editorCommitButton.classes.remove('invisible');
+    editorRunButton.classes.remove('invisible');
+    editorCloseButton.classes.remove('invisible');
     shellElem.classes.add('invisible');
     historyElem.classes.add('invisible');
     editorElem.focus();
@@ -168,7 +173,7 @@ class ConsoleImpl extends ArrowConsole {
     historyElem.value = "";
   }
 
-  void handleKeyPress(/* html.KeyboardEvent */ e) {
+  void shellHandleKeyPress(html.KeyboardEvent e) {
     if (NEWLINE == e.keyCode) {
       final text = shellElem.value;
       final code = text.substring(PROMPT.length);
@@ -185,7 +190,7 @@ class ConsoleImpl extends ArrowConsole {
   /**
    *  Ensure the cursor does not move into the prompt.
    */
-  void handleKeyDown(html.KeyboardEvent e) {
+  void shellHandleKeyDown(html.KeyboardEvent e) {
     if (LEFT == e.keyCode &&
         shellElem.selectionStart == PROMPT.length &&
         shellElem.selectionEnd == PROMPT.length) {
@@ -193,17 +198,37 @@ class ConsoleImpl extends ArrowConsole {
     }
   }
 
-  void handleDownloadClick(html.Event e) {
+  void editorHandleDownload(html.Event e) {
     final downloadLink = html.document.createElement("a");
     downloadLink.setAttribute("href", getContentsAsUrl());
     downloadLink.setAttribute("download", "program.logo");
     downloadLink.click();
   }
 
-  void handleCommitClick(html.Event e) {
-    userText = editorContent;
-
-    _interpret(userText);
+  void editorHandleClose(html.Event e) {
     hideEditor();
+  }
+
+  void editorHandleRun(html.Event e) {
+    userText = editorContent;
+    _interpret(userText);
+  }
+
+  static String extractTextPreserveWhitespace(html.Node node) {
+    switch (node.nodeType) {
+      case html.Node.ELEMENT_NODE:
+        var res = " ";
+        // This assumes that ;-comments are wrapped in a single node.
+        for (var child in node.childNodes) {
+          res += extractTextPreserveWhitespace(child) + "\n";
+        }
+        return res;
+      case html.Node.TEXT_NODE:
+        return (node as html.Text).wholeText;
+      default:
+        throw new Exception(
+          "not implemented: ${node.nodeType}",
+        );
+    }
   }
 }
