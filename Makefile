@@ -1,4 +1,4 @@
-.PHONY: get
+.PHONY: get test
 
 # This should contain a variable 'analytics_id'
 include Makefile.parameters
@@ -15,6 +15,9 @@ all:
 		| sed -e 's/___ANALYTICS_ID/$(analytics_id)/g' -\
 		> /tmp/ArrowLogo.html -
 	cp /tmp/ArrowLogo.html build/ArrowLogo.html
+
+test:
+	dart run test/*.dart
 
 get:
 	$(UPDATE_PACKAGES_COMMAND)
